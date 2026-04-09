@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TFM OTT Client (Shaka Player)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.14.6/shaka-player.compiled.min.js"></script>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 2rem; background: #0f172a; color: #e2e8f0; }
+      .card { max-width: 900px; margin: 0 auto; padding: 1rem 1.25rem; border: 1px solid #334155; border-radius: 12px; }
+      video { width: 100%; background: #000; border-radius: 8px; margin-top: 1rem; }
+      code { color: #93c5fd; }
+      button { margin-right: .5rem; padding: .6rem 1rem; cursor: pointer; }
+      .ok { color: #86efac; }
+      .warn { color: #fcd34d; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Cliente OTT (base) · Shaka Player</h1>
+      <p>CDN (Varnish): <code>http://localhost:8080</code></p>
+      <p id="status" class="warn">Inicializando...</p>
+
+      <div>
+        <button id="btnLicense">Probar /license</button>
+        <button id="btnDemo">Cargar DASH local</button>
+      </div>
+
+      <video id="video" controls autoplay muted></video>
+      <p><small>Nota: para contenido local cifrado debes añadir manifiestos/segmentos en <code>origin-content/</code>.</small></p>
+    </div>
+
+    <script>
+      const statusEl = document.getElementById('status');
+      const video = document.getElementById('video');
+      const player = new shaka.Player(video);
+
+      async function checkLicense() {
+        const res = await fetch('http://localhost:8080/license', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId: 'tfm-demo', drmSystem: 'com.widevine.alpha' })
+        });
+        const data = await res.json();
+        statusEl.textContent = `License mock OK: ${data.message}`;
+        statusEl.className = 'ok';
+      }
+
+      async function loadDemo() {
+        // Stream público de demostración (clear) para verificar integración de Shaka.
+        const manifestUri = 'http://localhost:8080/content/dash/minimal.mpd';
+        await player.load(manifestUri);
+        statusEl.textContent = 'Reproduciendo DASH local desde origin vía Varnish.';
+        statusEl.className = 'ok';
+      }
+
+      document.getElementById('btnLicense').addEventListener('click', () => {
+        checkLicense().catch((e) => {
+          statusEl.textContent = `Error license: ${e.message}`;
+          statusEl.className = 'warn';
+        });
+      });
+
+      document.getElementById('btnDemo').addEventListener('click', () => {
+        loadDemo().catch((e) => {
+          statusEl.textContent = `Error player: ${e.message}`;
+          statusEl.className = 'warn';
+        });
+      });
+
+      statusEl.textContent = 'Cliente listo. Pulsa “Probar /license” o “Cargar DASH local”.';
+      statusEl.className = 'ok';
+    </script>
+  </body>
+</html>
