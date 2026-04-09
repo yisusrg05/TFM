@@ -1,0 +1,12 @@
+{
+  "name": "tfm-license-server",
+  "version": "0.1.0",
+  "description": "Mock de servidor de licencias para laboratorio OTT/Widevine",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MPD xmlns="urn:mpeg:dash:schema:mpd:2011"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="urn:mpeg:dash:schema:mpd:2011 DASH-MPD.xsd"
+     profiles="urn:mpeg:dash:profile:isoff-on-demand:2011"
+     type="static"
+     minBufferTime="PT2S"
+     mediaPresentationDuration="PT60S">
+  <Period id="0" start="PT0S">
+    <AdaptationSet id="0" contentType="video" subsegmentAlignment="true" frameRate="25" par="1:1">
+      <Representation id="video-144p"
+                      bandwidth="162364"
+                      codecs="avc1.4d400c"
+                      mimeType="video/mp4"
+                      width="180"
+                      height="144"
+                      sar="1:1">
+        <BaseURL>https://storage.googleapis.com/shaka-demo-assets/angel-one/video_144p_108k_h264.mp4</BaseURL>
+        <SegmentBase indexRange="860-1071" timescale="12800">
+          <Initialization range="0-859"/>
+        </SegmentBase>
+      </Representation>
+    </AdaptationSet>
+  </Period>
+</MPD>
