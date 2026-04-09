@@ -27,7 +27,7 @@
       </div>
 
       <video id="video" controls autoplay muted></video>
-      <p><small>Nota: para contenido local cifrado debes añadir manifiestos/segmentos en <code>origin-content/</code>.</small></p>
+      <p><small>Nota: esta demo DASH usa un MPD local y un MP4 local servidos desde <code>origin-content/</code> a traves de Varnish.</small></p>
     </div>
 
     <script>
@@ -47,10 +47,10 @@
       }
 
       async function loadDemo() {
-        // Stream público de demostración (clear) para verificar integración de Shaka.
+        // Demo local (clear) servida por origin y cacheada por Varnish.
         const manifestUri = 'http://localhost:8080/content/dash/minimal.mpd';
         await player.load(manifestUri);
-        statusEl.textContent = 'Reproduciendo DASH local desde origin vía Varnish.';
+        statusEl.textContent = 'Reproduciendo DASH local desde origin via Varnish.';
         statusEl.className = 'ok';
       }
 
@@ -68,7 +68,7 @@
         });
       });
 
-      statusEl.textContent = 'Cliente listo. Pulsa “Probar /license” o “Cargar DASH local”.';
+      statusEl.textContent = 'Cliente listo. Pulsa "Probar /license" o "Cargar DASH local".';
       statusEl.className = 'ok';
     </script>
   </body>

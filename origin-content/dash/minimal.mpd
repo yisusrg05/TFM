@@ -15,7 +15,7 @@
                       width="180"
                       height="144"
                       sar="1:1">
-        <BaseURL>https://storage.googleapis.com/shaka-demo-assets/angel-one/video_144p_108k_h264.mp4</BaseURL>
+        <BaseURL>../mp4/video_144p_108k_h264.mp4</BaseURL>
         <SegmentBase indexRange="860-1071" timescale="12800">
           <Initialization range="0-859"/>
         </SegmentBase>
