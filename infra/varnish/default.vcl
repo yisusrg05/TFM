@@ -11,6 +11,10 @@ backend license {
 }
 
 sub vcl_recv {
+    if (req.method == "OPTIONS") {
+        return (synth(204));
+    }
+
     if (req.url ~ "^/license") {
         set req.backend_hint = license;
         return (pass);
@@ -32,7 +36,22 @@ sub vcl_backend_response {
     }
 }
 
+sub vcl_synth {
+    set resp.http.Access-Control-Allow-Origin = "*";
+    set resp.http.Access-Control-Allow-Methods = "GET, HEAD, OPTIONS, POST";
+    set resp.http.Access-Control-Allow-Headers = "Content-Type, Range";
+    set resp.http.Access-Control-Expose-Headers = "Content-Length, Content-Range, Accept-Ranges, X-Cache";
+    set resp.http.Access-Control-Max-Age = "86400";
+
+    return (deliver);
+}
+
 sub vcl_deliver {
+    set resp.http.Access-Control-Allow-Origin = "*";
+    set resp.http.Access-Control-Allow-Methods = "GET, HEAD, OPTIONS, POST";
+    set resp.http.Access-Control-Allow-Headers = "Content-Type, Range";
+    set resp.http.Access-Control-Expose-Headers = "Content-Length, Content-Range, Accept-Ranges, X-Cache";
+
     if (obj.hits > 0) {
         set resp.http.X-Cache = "HIT";
     } else {
