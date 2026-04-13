@@ -1,0 +1,12 @@
+{
+  "name": "tfm-phase1-license-server",
+  "version": "0.1.0",
+  "description": "Mock endurecido de servidor de licencias para la fase 1",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}

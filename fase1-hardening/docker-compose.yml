@@ -1,0 +1,69 @@
+services:
+  cdn:
+    image: varnish:7.5
+    container_name: tfm-fase1-cdn
+    depends_on:
+      - control-plane
+    ports:
+      - "9080:80"
+    volumes:
+      - ./varnish/default.vcl:/etc/varnish/default.vcl:ro
+    command: ["varnishd", "-F", "-f", "/etc/varnish/default.vcl", "-a", ":80", "-s", "malloc,256m"]
+    networks:
+      - ott-fase1-net
+    restart: unless-stopped
+
+  control-plane:
+    build:
+      context: ./control-plane
+    container_name: tfm-fase1-control-plane
+    environment:
+      - PORT=8080
+      - NODE_ENV=production
+      - APP_ORIGIN=http://localhost:9300
+      - ACCESS_TOKEN_SECRET=phase1-access-secret
+      - PLAYBACK_TOKEN_SECRET=phase1-playback-secret
+      - ORIGIN_BASE_URL=http://origin
+      - LICENSE_SERVER_URL=http://license-server:8080
+      - MAX_CONCURRENT_STREAMS=1
+      - ACCESS_TOKEN_TTL_SECONDS=3600
+      - PLAYBACK_TOKEN_TTL_SECONDS=90
+      - HEARTBEAT_GRACE_SECONDS=45
+    networks:
+      - ott-fase1-net
+    restart: unless-stopped
+
+  origin:
+    image: nginx:1.27-alpine
+    container_name: tfm-fase1-origin
+    volumes:
+      - ../origin-content:/usr/share/nginx/html:ro
+    networks:
+      - ott-fase1-net
+    restart: unless-stopped
+
+  license-server:
+    build:
+      context: ./license-server
+    container_name: tfm-fase1-license-server
+    environment:
+      - PORT=8080
+      - NODE_ENV=production
+    networks:
+      - ott-fase1-net
+    restart: unless-stopped
+
+  ott-client:
+    image: nginx:1.27-alpine
+    container_name: tfm-fase1-client
+    ports:
+      - "9300:80"
+    volumes:
+      - ./client:/usr/share/nginx/html:ro
+    networks:
+      - ott-fase1-net
+    restart: unless-stopped
+
+networks:
+  ott-fase1-net:
+    name: tfm-fase1-net

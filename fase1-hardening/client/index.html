@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TFM OTT Fase 1</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.14.6/shaka-player.compiled.min.js"></script>
+    <style>
+      :root {
+        --bg: #0b1320;
+        --panel: rgba(11, 27, 44, 0.88);
+        --line: rgba(138, 180, 248, 0.25);
+        --text: #e6edf7;
+        --muted: #95a7bf;
+        --good: #7ce2a1;
+        --warn: #ffd166;
+        --bad: #ff7b72;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Segoe UI", sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top left, rgba(124, 198, 254, 0.18), transparent 30%),
+          radial-gradient(circle at top right, rgba(124, 226, 161, 0.12), transparent 25%),
+          linear-gradient(180deg, #09111c 0%, #0d1a29 100%);
+      }
+      .shell {
+        width: min(1180px, calc(100% - 32px));
+        margin: 24px auto;
+        display: grid;
+        gap: 18px;
+      }
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        backdrop-filter: blur(12px);
+        box-shadow: 0 18px 60px rgba(0, 0, 0, 0.28);
+      }
+      .hero, .controls, .player-wrap { padding: 20px 24px; }
+      .hero h1 { margin: 0 0 10px; font-size: clamp(1.8rem, 3vw, 2.8rem); }
+      .hero p, .notes { margin: 0; color: var(--muted); line-height: 1.5; }
+      .grid { display: grid; grid-template-columns: 360px 1fr; gap: 18px; }
+      label { display: block; margin-bottom: 6px; color: var(--muted); font-size: 0.9rem; }
+      input {
+        width: 100%;
+        margin-bottom: 14px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid rgba(138, 180, 248, 0.18);
+        background: rgba(7, 16, 27, 0.8);
+        color: var(--text);
+      }
+      button {
+        width: 100%;
+        margin-bottom: 10px;
+        padding: 12px 16px;
+        border: 0;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 600;
+        color: #08111d;
+        background: linear-gradient(135deg, #7cc6fe, #7ce2a1);
+      }
+      button.secondary {
+        color: var(--text);
+        background: rgba(124, 198, 254, 0.12);
+        border: 1px solid rgba(124, 198, 254, 0.22);
+      }
+      button.danger {
+        color: var(--text);
+        background: rgba(255, 123, 114, 0.12);
+        border: 1px solid rgba(255, 123, 114, 0.22);
+      }
+      button:disabled { opacity: 0.5; cursor: not-allowed; }
+      .status {
+        margin-top: 10px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        background: rgba(124, 198, 254, 0.08);
+      }
+      .status.ok { color: var(--good); }
+      .status.warn { color: var(--warn); }
+      .status.bad { color: var(--bad); }
+      .meta { display: grid; gap: 10px; margin-top: 16px; }
+      .meta div {
+        padding: 10px 12px;
+        border-radius: 12px;
+        background: rgba(7, 16, 27, 0.8);
+      }
+      .meta strong { display: block; margin-bottom: 4px; color: var(--muted); }
+      .video-shell { position: relative; }
+      video {
+        width: 100%;
+        min-height: 260px;
+        border-radius: 16px;
+        background: #000;
+      }
+      .watermark {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        z-index: 2;
+        padding: 10px 14px;
+        border-radius: 12px;
+        background: rgba(4, 10, 18, 0.72);
+        border: 1px solid rgba(255, 209, 102, 0.24);
+        color: #ffe39b;
+        font-size: 0.88rem;
+        letter-spacing: 0.03em;
+      }
+      .notes { margin-top: 14px; }
+      @media (max-width: 960px) { .grid { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="panel hero">
+        <h1>OTT hardening Fase 1</h1>
+        <p>Login, playback session, token efimero, control de concurrencia y acceso a contenido/licencia solo a traves de la CDN y el control-plane.</p>
+      </section>
+
+      <section class="grid">
+        <aside class="panel controls">
+          <label for="email">Email</label>
+          <input id="email" value="demo@tfm.local" autocomplete="username" />
+
+          <label for="password">Password</label>
+          <input id="password" type="password" value="demo123" autocomplete="current-password" />
+
+          <button id="btnLogin">1. Iniciar sesion</button>
+          <button id="btnSession" class="secondary" disabled>2. Crear playback session</button>
+          <button id="btnLicense" class="secondary" disabled>3. Probar licencia protegida</button>
+          <button id="btnPlay" class="secondary" disabled>4. Reproducir DASH protegido</button>
+          <button id="btnStop" class="danger" disabled>Detener sesion</button>
+
+          <div id="status" class="status warn">Esperando login.</div>
+
+          <div class="meta">
+            <div><strong>CDN</strong><span>http://localhost:9080</span></div>
+            <div><strong>Device ID</strong><span id="deviceId">-</span></div>
+            <div><strong>Sesion</strong><span id="sessionId">-</span></div>
+            <div><strong>Estado</strong><span id="sessionState">sin sesion</span></div>
+          </div>
+        </aside>
+
+        <section class="panel player-wrap">
+          <div class="video-shell">
+            <div id="watermark" class="watermark">Sin sesion activa</div>
+            <video id="video" controls autoplay muted></video>
+          </div>
+          <p class="notes">
+            El MPD y la licencia ya no son consumibles solo con la URL. La reproduccion requiere `playbackToken`
+            efimero y `playback session` activa. El banner visible ayuda a atribuir la senal durante la demo.
+          </p>
+        </section>
+      </section>
+    </main>
+
+    <script>
+      const API_BASE = 'http://localhost:9080';
+      const statusEl = document.getElementById('status');
+      const deviceIdEl = document.getElementById('deviceId');
+      const sessionIdEl = document.getElementById('sessionId');
+      const sessionStateEl = document.getElementById('sessionState');
+      const watermarkEl = document.getElementById('watermark');
+      const video = document.getElementById('video');
+      const player = new shaka.Player(video);
+
+      const state = {
+        accessToken: null,
+        playbackToken: null,
+        sessionId: null,
+        manifestUrl: null,
+        heartbeatTimer: null,
+        user: null,
+        deviceId: localStorage.getItem('tfm-phase1-device-id') || `web-${crypto.randomUUID()}`
+      };
+
+      localStorage.setItem('tfm-phase1-device-id', state.deviceId);
+      deviceIdEl.textContent = state.deviceId;
+
+      player.getNetworkingEngine().registerRequestFilter((type, request) => {
+        if (!state.playbackToken) return;
+
+        const engine = shaka.net.NetworkingEngine.RequestType;
+        if (![engine.MANIFEST, engine.SEGMENT, engine.LICENSE].includes(type)) return;
+
+        request.headers.Authorization = `Bearer ${state.playbackToken}`;
+        request.headers['X-Playback-Session-Id'] = state.sessionId;
+        request.headers['X-Device-Id'] = state.deviceId;
+      });
+
+      function setStatus(message, tone = 'warn') {
+        statusEl.textContent = message;
+        statusEl.className = `status ${tone}`;
+      }
+
+      function setButtons() {
+        document.getElementById('btnSession').disabled = !state.accessToken;
+        document.getElementById('btnLicense').disabled = !state.playbackToken;
+        document.getElementById('btnPlay').disabled = !state.playbackToken;
+        document.getElementById('btnStop').disabled = !state.sessionId;
+      }
+
+      function updateSessionUi(label) {
+        sessionIdEl.textContent = state.sessionId || '-';
+        sessionStateEl.textContent = label;
+
+        if (state.user && state.sessionId) {
+          const masked = state.user.email.replace(/(^.).+(@.*$)/, '$1***$2');
+          watermarkEl.textContent = `${masked} | ${state.sessionId.slice(0, 8)} | ${new Date().toLocaleTimeString()}`;
+        } else {
+          watermarkEl.textContent = 'Sin sesion activa';
+        }
+      }
+
+      async function login() {
+        const res = await fetch(`${API_BASE}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: document.getElementById('email').value.trim(),
+            password: document.getElementById('password').value,
+            deviceId: state.deviceId
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.details || data.error || 'Login failed');
+
+        state.accessToken = data.accessToken;
+        state.user = data.user;
+        state.deviceId = data.deviceId;
+        localStorage.setItem('tfm-phase1-device-id', state.deviceId);
+        deviceIdEl.textContent = state.deviceId;
+        setButtons();
+        updateSessionUi('autenticado');
+        setStatus(`Sesion iniciada para ${data.user.email}.`, 'ok');
+      }
+
+      async function createPlaybackSession() {
+        const res = await fetch(`${API_BASE}/playback/session`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${state.accessToken}`
+          },
+          body: JSON.stringify({ assetId: 'minimal' })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.details || data.error || 'Playback session failed');
+
+        state.playbackToken = data.playbackToken;
+        state.sessionId = data.session.sessionId;
+        state.manifestUrl = data.manifestUrl;
+        setButtons();
+        updateSessionUi('sesion activa');
+        startHeartbeat();
+        setStatus('Playback session creada. El MPD ahora requiere token efimero.', 'ok');
+      }
+
+      async function heartbeat() {
+        if (!state.playbackToken || !state.sessionId) return;
+
+        const res = await fetch(`${API_BASE}/playback/heartbeat`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${state.playbackToken}`,
+            'X-Playback-Session-Id': state.sessionId
+          }
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.details || data.error || 'Heartbeat failed');
+
+        state.playbackToken = data.playbackToken;
+        updateSessionUi('sesion activa');
+      }
+
+      function startHeartbeat() {
+        if (state.heartbeatTimer) clearInterval(state.heartbeatTimer);
+
+        state.heartbeatTimer = setInterval(() => {
+          heartbeat().catch((error) => setStatus(`Heartbeat rechazado: ${error.message}`, 'bad'));
+        }, 20000);
+      }
+
+      async function testLicense() {
+        const res = await fetch(`${API_BASE}/license`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${state.playbackToken}`,
+            'Content-Type': 'application/json',
+            'X-Playback-Session-Id': state.sessionId
+          },
+          body: JSON.stringify({
+            drmSystem: 'com.widevine.alpha',
+            challenge: 'PHASE1_DEMO_CHALLENGE'
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.details || data.error || 'License failed');
+
+        setStatus(`Licencia protegida OK para ${data.session.accountId}.`, 'ok');
+      }
+
+      async function play() {
+        await player.load(state.manifestUrl);
+        updateSessionUi('reproduciendo');
+        setStatus('Reproduccion iniciada a traves de la CDN protegida.', 'ok');
+      }
+
+      async function stopSession() {
+        if (!state.playbackToken || !state.sessionId) return;
+
+        const res = await fetch(`${API_BASE}/playback/stop`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${state.playbackToken}`,
+            'X-Playback-Session-Id': state.sessionId
+          }
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.details || data.error || 'Stop failed');
+
+        if (state.heartbeatTimer) {
+          clearInterval(state.heartbeatTimer);
+          state.heartbeatTimer = null;
+        }
+
+        await player.unload();
+        state.playbackToken = null;
+        state.sessionId = null;
+        state.manifestUrl = null;
+        setButtons();
+        updateSessionUi(data.status);
+        setStatus('Sesion detenida y revocada en cliente.', 'warn');
+      }
+
+      document.getElementById('btnLogin').addEventListener('click', () => {
+        login().catch((error) => setStatus(error.message, 'bad'));
+      });
+      document.getElementById('btnSession').addEventListener('click', () => {
+        createPlaybackSession().catch((error) => setStatus(error.message, 'bad'));
+      });
+      document.getElementById('btnLicense').addEventListener('click', () => {
+        testLicense().catch((error) => setStatus(error.message, 'bad'));
+      });
+      document.getElementById('btnPlay').addEventListener('click', () => {
+        play().catch((error) => setStatus(error.message, 'bad'));
+      });
+      document.getElementById('btnStop').addEventListener('click', () => {
+        stopSession().catch((error) => setStatus(error.message, 'bad'));
+      });
+
+      window.addEventListener('beforeunload', () => {
+        if (state.heartbeatTimer) clearInterval(state.heartbeatTimer);
+      });
+
+      setButtons();
+      updateSessionUi('sin sesion');
+    </script>
+  </body>
+</html>

@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TFM OTT Fase 2</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.14.6/shaka-player.compiled.min.js"></script>
+    <style>
+      :root { --bg:#08121e; --panel:rgba(8,23,38,.9); --line:rgba(126,210,246,.16); --text:#e5eef8; --muted:#9cb0c8; --good:#78e3a4; --warn:#ffd36e; --bad:#ff857d; }
+      * { box-sizing:border-box; }
+      body { margin:0; min-height:100vh; font-family:"Segoe UI",sans-serif; color:var(--text); background:radial-gradient(circle at top left, rgba(120,227,164,.12), transparent 28%), radial-gradient(circle at top right, rgba(126,210,246,.14), transparent 28%), linear-gradient(180deg,#07111b 0%,#102134 100%); }
+      .shell { width:min(1260px,calc(100% - 32px)); margin:24px auto; display:grid; gap:18px; }
+      .panel { background:var(--panel); border:1px solid var(--line); border-radius:18px; box-shadow:0 18px 60px rgba(0,0,0,.26); }
+      .hero,.controls,.player-wrap,.admin { padding:20px 24px; }
+      .hero h1 { margin:0 0 10px; font-size:clamp(1.9rem,3vw,2.9rem); }
+      .hero p,.hint { margin:0; color:var(--muted); line-height:1.5; }
+      .layout { display:grid; grid-template-columns:340px 1fr; gap:18px; }
+      label { display:block; font-size:.9rem; color:var(--muted); margin-bottom:6px; }
+      input { width:100%; margin-bottom:14px; padding:12px 14px; border-radius:12px; border:1px solid rgba(126,210,246,.18); background:rgba(4,14,24,.82); color:var(--text); }
+      button { width:100%; margin-bottom:10px; padding:12px 16px; border:0; border-radius:12px; font-weight:600; cursor:pointer; color:#08111d; background:linear-gradient(135deg,#7ed2f6,#78e3a4); }
+      button.secondary { color:var(--text); background:rgba(126,210,246,.1); border:1px solid rgba(126,210,246,.18); }
+      button.warning { color:var(--text); background:rgba(255,211,110,.12); border:1px solid rgba(255,211,110,.22); }
+      button:disabled { opacity:.55; cursor:not-allowed; }
+      .status { padding:12px 14px; border-radius:12px; margin-top:12px; background:rgba(126,210,246,.08); }
+      .status.ok { color:var(--good); } .status.warn { color:var(--warn); } .status.bad { color:var(--bad); }
+      .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+      .video-shell { position:relative; }
+      video { width:100%; min-height:280px; border-radius:16px; background:#000; }
+      .watermark { position:absolute; top:18px; right:18px; z-index:2; padding:10px 14px; border-radius:12px; background:rgba(4,10,18,.72); border:1px solid rgba(255,211,110,.22); color:#ffe39b; font-size:.88rem; }
+      .metrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin-top:14px; }
+      .metric,.box { padding:12px; border-radius:12px; background:rgba(4,14,24,.82); }
+      .metric strong,.box strong { display:block; color:var(--muted); margin-bottom:6px; }
+      .events { max-height:360px; overflow:auto; display:grid; gap:10px; }
+      .event { padding:10px 12px; border-radius:12px; background:rgba(4,14,24,.82); font-size:.92rem; }
+      .event small { display:block; color:var(--muted); margin-top:4px; }
+      @media (max-width:1024px) { .layout,.grid2 { grid-template-columns:1fr; } .metrics { grid-template-columns:1fr 1fr; } }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="panel hero">
+        <h1>OTT hardening Fase 2</h1>
+        <p>Redis, eventos, score de riesgo, baneos y observabilidad para demostrar antifraude y defensa en profundidad.</p>
+      </section>
+      <section class="layout">
+        <aside class="panel controls">
+          <label for="email">Email</label>
+          <input id="email" value="demo@tfm.local" autocomplete="username" />
+          <label for="password">Password</label>
+          <input id="password" type="password" value="demo123" autocomplete="current-password" />
+          <button id="btnLogin">1. Iniciar sesion</button>
+          <button id="btnSession" class="secondary" disabled>2. Crear playback session</button>
+          <button id="btnLicense" class="secondary" disabled>3. Probar licencia</button>
+          <button id="btnPlay" class="secondary" disabled>4. Reproducir</button>
+          <button id="btnRefresh" class="secondary" disabled>Actualizar observabilidad</button>
+          <button id="btnBanDevice" class="warning" disabled>Banear este device 15 min</button>
+          <button id="btnClearDeviceBan" class="warning" disabled>Quitar ban del device</button>
+          <button id="btnStop" class="warning" disabled>Detener sesion</button>
+          <div id="status" class="status warn">Esperando login.</div>
+          <p class="hint" style="margin-top:12px;">CDN: http://localhost:9180 | Cliente: http://localhost:9400</p>
+        </aside>
+        <section class="panel player-wrap">
+          <div class="video-shell">
+            <div id="watermark" class="watermark">Sin sesion activa</div>
+            <video id="video" controls autoplay muted></video>
+          </div>
+          <div class="metrics">
+            <div class="metric"><strong>Device</strong><span id="deviceId">-</span></div>
+            <div class="metric"><strong>Sesion</strong><span id="sessionId">-</span></div>
+            <div class="metric"><strong>Riesgo</strong><span id="riskScore">0</span></div>
+            <div class="metric"><strong>Activo</strong><span id="activeSessions">0</span></div>
+          </div>
+        </section>
+      </section>
+      <section class="grid2">
+        <section class="panel admin">
+          <h2 style="margin-top:0;">Observabilidad</h2>
+          <div class="box" style="margin-bottom:12px;"><strong>Resumen</strong><div id="summary">Sin datos.</div></div>
+          <div class="box"><strong>Eventos recientes</strong><div id="events" class="events"></div></div>
+        </section>
+        <section class="panel admin">
+          <h2 style="margin-top:0;">Bans y riesgo</h2>
+          <div class="box" style="margin-bottom:12px;"><strong>Razones de riesgo</strong><div id="riskReasons">Sin score.</div></div>
+          <div class="box"><strong>Bans activos</strong><div id="bans">Sin bans activos.</div></div>
+        </section>
+      </section>
+    </main>
+    <script>
+      const API_BASE = 'http://localhost:9180';
+      const state = { accessToken:null, playbackToken:null, sessionId:null, manifestUrl:null, heartbeatTimer:null, user:null, risk:{ score:0, reasons:[] }, deviceId:localStorage.getItem('tfm-phase2-device-id') || `web-${crypto.randomUUID()}` };
+      const statusEl = document.getElementById('status');
+      const deviceIdEl = document.getElementById('deviceId');
+      const sessionIdEl = document.getElementById('sessionId');
+      const riskScoreEl = document.getElementById('riskScore');
+      const activeSessionsEl = document.getElementById('activeSessions');
+      const watermarkEl = document.getElementById('watermark');
+      const summaryEl = document.getElementById('summary');
+      const eventsEl = document.getElementById('events');
+      const bansEl = document.getElementById('bans');
+      const riskReasonsEl = document.getElementById('riskReasons');
+      const player = new shaka.Player(document.getElementById('video'));
+      localStorage.setItem('tfm-phase2-device-id', state.deviceId);
+      deviceIdEl.textContent = state.deviceId;
+
+      player.getNetworkingEngine().registerRequestFilter((type, request) => {
+        if (!state.playbackToken) return;
+        const engine = shaka.net.NetworkingEngine.RequestType;
+        if (![engine.MANIFEST, engine.SEGMENT, engine.LICENSE].includes(type)) return;
+        request.headers.Authorization = `Bearer ${state.playbackToken}`;
+        request.headers['X-Playback-Session-Id'] = state.sessionId;
+        request.headers['X-Device-Id'] = state.deviceId;
+      });
+
+      function setStatus(message, tone = 'warn') { statusEl.textContent = message; statusEl.className = `status ${tone}`; }
+      function setButtons() {
+        document.getElementById('btnSession').disabled = !state.accessToken;
+        document.getElementById('btnLicense').disabled = !state.playbackToken;
+        document.getElementById('btnPlay').disabled = !state.playbackToken;
+        document.getElementById('btnRefresh').disabled = !state.accessToken;
+        document.getElementById('btnBanDevice').disabled = !state.accessToken;
+        document.getElementById('btnClearDeviceBan').disabled = !state.accessToken;
+        document.getElementById('btnStop').disabled = !state.sessionId;
+      }
+      function updateWatermark() {
+        if (state.user && state.sessionId) {
+          const masked = state.user.email.replace(/(^.).+(@.*$)/, '$1***$2');
+          watermarkEl.textContent = `${masked} | ${state.sessionId.slice(0,8)} | risk:${state.risk.score}`;
+        } else {
+          watermarkEl.textContent = 'Sin sesion activa';
+        }
+      }
+      async function api(path, options = {}) {
+        const headers = new Headers(options.headers || {});
+        const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.details || data.error || 'Request failed');
+        return data;
+      }
+      async function login() {
+        const data = await api('/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: document.getElementById('email').value.trim(), password: document.getElementById('password').value, deviceId: state.deviceId })
+        });
+        state.accessToken = data.accessToken;
+        state.user = data.user;
+        state.deviceId = data.deviceId;
+        state.risk = data.risk;
+        deviceIdEl.textContent = state.deviceId;
+        riskScoreEl.textContent = state.risk.score;
+        setButtons();
+        updateWatermark();
+        setStatus(`Sesion iniciada. Riesgo actual: ${state.risk.score}.`, 'ok');
+        await refreshOverview();
+      }
+      async function createSession() {
+        const data = await api('/playback/session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${state.accessToken}` },
+          body: JSON.stringify({ assetId: 'minimal' })
+        });
+        state.playbackToken = data.playbackToken;
+        state.sessionId = data.session.sessionId;
+        state.manifestUrl = data.manifestUrl;
+        state.risk = data.risk;
+        sessionIdEl.textContent = state.sessionId;
+        riskScoreEl.textContent = state.risk.score;
+        updateWatermark();
+        setButtons();
+        setStatus('Playback session creada.', 'ok');
+        startHeartbeat();
+        await refreshOverview();
+      }
+      async function heartbeat() {
+        const data = await api('/playback/heartbeat', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${state.playbackToken}`, 'X-Playback-Session-Id': state.sessionId }
+        });
+        state.playbackToken = data.playbackToken;
+        state.risk = data.risk;
+        riskScoreEl.textContent = state.risk.score;
+        updateWatermark();
+      }
+      function startHeartbeat() {
+        if (state.heartbeatTimer) clearInterval(state.heartbeatTimer);
+        state.heartbeatTimer = setInterval(() => {
+          heartbeat().catch((error) => setStatus(`Heartbeat rechazado: ${error.message}`, 'bad'));
+        }, 20000);
+      }
+      async function testLicense() {
+        await api('/license', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${state.playbackToken}`, 'Content-Type': 'application/json', 'X-Playback-Session-Id': state.sessionId },
+          body: JSON.stringify({ drmSystem: 'com.widevine.alpha', challenge: 'PHASE2_DEMO_CHALLENGE' })
+        });
+        setStatus('Licencia protegida emitida con contexto antifraude.', 'ok');
+        await refreshOverview();
+      }
+      async function play() {
+        await player.load(state.manifestUrl);
+        setStatus('Reproduccion iniciada.', 'ok');
+        await refreshOverview();
+      }
+      async function stopSession() {
+        await api('/playback/stop', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${state.playbackToken}`, 'X-Playback-Session-Id': state.sessionId }
+        });
+        if (state.heartbeatTimer) clearInterval(state.heartbeatTimer);
+        await player.unload();
+        state.playbackToken = null;
+        state.sessionId = null;
+        sessionIdEl.textContent = '-';
+        updateWatermark();
+        setButtons();
+        setStatus('Sesion detenida.', 'warn');
+        await refreshOverview();
+      }
+      async function refreshOverview() {
+        const data = await api('/admin/overview', { headers: { Authorization: `Bearer ${state.accessToken}` } });
+        const { overview } = data;
+        state.risk = overview.risk;
+        riskScoreEl.textContent = overview.risk.score;
+        activeSessionsEl.textContent = overview.activeSessions;
+        summaryEl.textContent = `Cuenta ${overview.accountId} | sesiones registradas: ${overview.sessions.length} | score: ${overview.risk.score}`;
+        riskReasonsEl.textContent = overview.risk.reasons.length ? overview.risk.reasons.join(', ') : 'Sin razones activas.';
+        bansEl.textContent = overview.bans.length ? overview.bans.map((ban) => `${ban.type}:${ban.subjectId} hasta ${ban.expiresAt} (${ban.reason})`).join(' | ') : 'Sin bans activos.';
+        eventsEl.innerHTML = overview.recentEvents.map((event) => `<div class="event"><strong>${event.type}</strong><small>${event.timestamp}</small><div>${JSON.stringify(event)}</div></div>`).join('');
+        updateWatermark();
+      }
+      async function banDevice() {
+        await api('/admin/bans', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${state.accessToken}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'device', subjectId: state.deviceId, reason: 'MANUAL_DEMO_DEVICE_BAN', ttlSeconds: 900 })
+        });
+        setStatus('Ban manual aplicado al device.', 'warn');
+        await refreshOverview();
+      }
+      async function clearDeviceBan() {
+        await api('/admin/bans/clear', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${state.accessToken}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'device', subjectId: state.deviceId })
+        });
+        setStatus('Ban del device eliminado.', 'ok');
+        await refreshOverview();
+      }
+      document.getElementById('btnLogin').addEventListener('click', () => login().catch((error) => setStatus(error.message, 'bad')));
+      document.getElementById('btnSession').addEventListener('click', () => createSession().catch((error) => setStatus(error.message, 'bad')));
+      document.getElementById('btnLicense').addEventListener('click', () => testLicense().catch((error) => setStatus(error.message, 'bad')));
+      document.getElementById('btnPlay').addEventListener('click', () => play().catch((error) => setStatus(error.message, 'bad')));
+      document.getElementById('btnRefresh').addEventListener('click', () => refreshOverview().catch((error) => setStatus(error.message, 'bad')));
+      document.getElementById('btnBanDevice').addEventListener('click', () => banDevice().catch((error) => setStatus(error.message, 'bad')));
+      document.getElementById('btnClearDeviceBan').addEventListener('click', () => clearDeviceBan().catch((error) => setStatus(error.message, 'bad')));
+      document.getElementById('btnStop').addEventListener('click', () => stopSession().catch((error) => setStatus(error.message, 'bad')));
+      setButtons();
+      updateWatermark();
+    </script>
+  </body>
+</html>

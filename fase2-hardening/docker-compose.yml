@@ -1,0 +1,82 @@
+services:
+  cdn:
+    image: varnish:7.5
+    container_name: tfm-fase2-cdn
+    depends_on:
+      - control-plane
+    ports:
+      - "9180:80"
+    volumes:
+      - ./varnish/default.vcl:/etc/varnish/default.vcl:ro
+    command: ["varnishd", "-F", "-f", "/etc/varnish/default.vcl", "-a", ":80", "-s", "malloc,256m"]
+    networks:
+      - ott-fase2-net
+    restart: unless-stopped
+
+  control-plane:
+    build:
+      context: ./control-plane
+    container_name: tfm-fase2-control-plane
+    depends_on:
+      - redis
+    environment:
+      - PORT=8080
+      - NODE_ENV=production
+      - APP_ORIGIN=http://localhost:9400
+      - ACCESS_TOKEN_SECRET=phase2-access-secret
+      - PLAYBACK_TOKEN_SECRET=phase2-playback-secret
+      - ORIGIN_BASE_URL=http://origin
+      - LICENSE_SERVER_URL=http://license-server:8080
+      - REDIS_URL=redis://redis:6379
+      - MAX_CONCURRENT_STREAMS=1
+      - ACCESS_TOKEN_TTL_SECONDS=3600
+      - PLAYBACK_TOKEN_TTL_SECONDS=90
+      - HEARTBEAT_GRACE_SECONDS=45
+      - AUTO_BAN_THRESHOLD=100
+      - EVENT_RETENTION=300
+    networks:
+      - ott-fase2-net
+    restart: unless-stopped
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: tfm-fase2-redis
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    networks:
+      - ott-fase2-net
+    restart: unless-stopped
+
+  origin:
+    image: nginx:1.27-alpine
+    container_name: tfm-fase2-origin
+    volumes:
+      - ../origin-content:/usr/share/nginx/html:ro
+    networks:
+      - ott-fase2-net
+    restart: unless-stopped
+
+  license-server:
+    build:
+      context: ./license-server
+    container_name: tfm-fase2-license-server
+    environment:
+      - PORT=8080
+      - NODE_ENV=production
+    networks:
+      - ott-fase2-net
+    restart: unless-stopped
+
+  ott-client:
+    image: nginx:1.27-alpine
+    container_name: tfm-fase2-client
+    ports:
+      - "9400:80"
+    volumes:
+      - ./client:/usr/share/nginx/html:ro
+    networks:
+      - ott-fase2-net
+    restart: unless-stopped
+
+networks:
+  ott-fase2-net:
+    name: tfm-fase2-net

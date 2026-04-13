@@ -1,0 +1,13 @@
+{
+  "name": "tfm-phase2-control-plane",
+  "version": "0.1.0",
+  "description": "Control plane con Redis, eventos y antifraude para la fase 2",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "redis": "^4.7.0"
+  }
+}
