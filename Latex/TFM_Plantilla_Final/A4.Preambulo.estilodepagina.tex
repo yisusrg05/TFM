@@ -1,0 +1,21 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Documento LaTeX - Estilo de pagina del TFG original
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% El TFG original delega los margenes en geometry:
+% \usepackage[a4paper,bindingoffset=3mm,bottom=35mm]{geometry}
+% Por eso este archivo no redefine \textwidth, \oddsidemargin ni
+% \topmargin como hacia la plantilla base.
+
+\setlength{\parskip}{0.75em}
+\renewcommand{\baselinestretch}{1.25}
+\spacing{1}
+
+\pagestyle{fancy}
+\renewcommand{\chaptermark}[1]{\markboth{Capítulo \thechapter.\ #1}{}}
+\fancyhf{}
+\fancyhead[LO]{\leftmark}
+\fancyhead[RO]{}
+\fancyhead[RE]{\nouppercase\rightmark}
+\fancyhead[LE]{}
+\fancyfoot[C]{\thepage}

@@ -1,0 +1,209 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Documento LaTeX - Comandos
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% 1. Informacion del documento
+\newcommand{\tfgtitlename}{Evaluación de Seguridad en Ecosistemas Widevine DRM: Diseño de una Arquitectura de Defensa en Profundidad para el \textit{Streaming} en Directo}
+\newcommand{\tfgtitlenameENG}{Security Evaluation of Widevine DRM Ecosystems: Designing a Defense-in-Depth Architecture for Live Streaming}
+\newcommand{\tfgauthorname}{Jesús Ramírez Gálvez}
+\newcommand{\tfgtutorname}{Antonio Muñoz Gallego}
+\newcommand{\tfganno}{2026}
+
+% 2. Datos de portada en el formato del TFG original
+\newcommand{\nombreautor}{\tfgauthorname}
+\newcommand{\nombretutor}{\tfgtutorname}
+\newcommand{\titulotrabajo}{\tfgtitlename}
+\newcommand{\escuela}{Escuela Técnica Superior\\de Ingeniería Informática}
+\newcommand{\escuelalargo}{Escuela Técnica Superior de Ingeniería Informática}
+\newcommand{\universidad}{Universidad Rey Juan Carlos}
+\newcommand{\fecha}{Fecha}
+\newcommand{\grado}{Máster en Ciberseguridad}
+\newcommand{\curso}{Curso 2025-2026}
+\newcommand{\logoUniversidad}{logoURJC.pdf}
+
+% 3. Comandos generales de texto
+\newcommand{\R}{\textsuperscript{\textregistered}}
+\newcommand{\C}{\textsuperscript{\copyright}}
+\newcommand{\TM}{\texttrademark}
+\newcommand{\tit}{\textit}
+\newcommand{\tbf}{\textbf}
+\newcommand{\ttw}[1]{\texttt{#1}}
+\newcommand{\textittt}[1]{\textit{\texttt{#1}}}
+\newcommand{\textittw}{\textittt}
+\newcommand{\tittw}{\textittw}
+\newcommand{\tbftw}[1]{\tbf{\ttw{#1}}}
+\newcommand{\nli}{\\ \indent}
+\newcommand{\mailto}[1]{\href{mailto:#1}{#1}}
+\newcommand{\miindex}[1]{#1\index{#1}}
+\newcommand{\hs}{\hspace}
+\newcommand{\vs}{\vspace}
+
+% 4. Abreviaturas matematicas
+\newcommand{\realnumbers}{\mathbb R}
+\newcommand{\naturalnumbers}{\mathbb N}
+\newcommand{\integernumbers}{\mathbb Z}
+\newcommand{\rationalnumbers}{\mathbb Q}
+\newcommand{\complexnumbers}{\mathbb R}
+\newcommand{\irrationalnumbers}{\mathbb I}
+\newcommand{\doublebar}[1]{\bar{\bar{#1}}}
+\newcommand{\transpuesta}{\mbox{\tiny $\mathsf{T}$}}
+
+% 5. Paginas, capitulos e indices
+\newcommand\blankpage{%
+    \newpage
+    \null
+    \thispagestyle{empty}%
+    \newpage}
+
+\newcommand{\sectionx}[1]{%
+    \section*{#1}
+    \addcontentsline{toc}{section}{#1}}
+
+\newcommand{\sectiony}[1]{%
+    \section*{#1}}
+
+\newcommand{\chapterx}[1]{%
+    \chapter*{#1}
+    \addcontentsline{toc}{chapter}{#1}}
+
+\newcommand{\chapterbegin}[1]{%
+    \pagestyle{fancy}
+    \chapter{#1}}
+
+\newcommand{\chapterbeginx}[1]{%
+    \pagestyle{fancy}
+    \chapterx{#1}}
+
+\newcommand{\chapterend}{%
+    \clearpage
+    \thispagestyle{empty}}
+
+% 6. Colores, enlaces y textos automaticos
+\definecolor{BlueLink}{rgb}{0.165,0.322,0.745}
+\definecolor{PinkLink}{rgb}{0.8,0.22,0.5}
+\definecolor{gray}{rgb}{0.6,0.6,0.6}
+\definecolor{codegray}{rgb}{0.95,0.95,0.95}
+
+\hypersetup{hidelinks,pageanchor=true,colorlinks,citecolor=PinkLink,urlcolor=black,linkcolor=BlueLink}
+
+\addto{\captionsspanish}{\renewcommand{\bibname}{Bibliografía}}
+\addto\captionsspanish{%
+    \def\tablename{Tabla}
+    \def\listtablename{Índice de tablas}}
+\addto\captionsspanish{\renewcommand{\contentsname}{Índice de contenidos}}
+
+\floatname{algorithm}{Algoritmo}
+
+% 7. Entornos auxiliares heredados de la plantilla base
+\newcommand{\benu}{\begin{enu}}
+\newcommand{\eenu}{\end{enu}}
+
+\newcommand{\code}[3]{%
+\begin{minipage}{0.96\linewidth}
+\begin{center}
+    \lstinputlisting[
+        language   = Python,
+        frame      = lines,
+        framexleftmargin = 5mm,
+        caption    = {#1},
+        label      = {#3},
+    ]{#2}
+\end{center}
+\end{minipage}}
+
+% 8. Estilo de codigo del TFG original
+\definecolor{bg}{rgb}{0.95,0.95,0.95}
+\definecolor{mydeepteal}{rgb}{0.16,0.22,0.23}
+\definecolor{myteal}{rgb}{0.31,0.44,0.46}
+\definecolor{mymediumteal}{rgb}{0.41,0.58,0.60}
+
+\DeclareFixedFont{\ttb}{T1}{txtt}{bx}{n}{12}
+\DeclareFixedFont{\ttm}{T1}{txtt}{m}{n}{12}
+
+\newcommand*{\FormatDigit}[1]{\textcolor{black}{#1}}
+
+\newcommand\mypythonstyle{\lstset{
+language=Python,
+basicstyle=\ttfamily\small,
+otherkeywords={self},
+keywordstyle=\bfseries\ttfamily\color{myteal},
+commentstyle=\itshape\color{myteal},
+stringstyle=\color{mydeepteal},
+emph={MyClass,__init__},
+emphstyle=\ttb\color{mydeepteal},
+showstringspaces=false,
+backgroundcolor=\color{bg},
+rulecolor=\color{bg},
+breaklines=true,
+numbers=left,
+numbersep=5pt,
+numberstyle=\tiny,
+tabsize=4,
+xleftmargin=1em,
+frame=single,
+framesep=3pt,
+framextopmargin=0pt,
+framexbottommargin=0pt,
+framexleftmargin=0pt,
+framexrightmargin=0pt,
+fontadjust=true,
+basewidth=0.55em,
+upquote=true,
+}}
+
+\lstnewenvironment{mypython}[1][]
+{
+\mypythonstyle
+\lstset{#1}
+}
+{}
+
+\newcommand\mypythonstylenormalinline{\lstset{
+language=Python,
+basicstyle=\ttfamily\normalsize,
+otherkeywords={self},
+keywordstyle=\bfseries\ttfamily\color{myteal},
+commentstyle=\itshape\color{mymediumteal},
+stringstyle=\color{mydeepteal},
+emph={MyClass,__init__},
+emphstyle=\ttb\color{mydeepteal},
+showstringspaces=false,
+backgroundcolor=\color{bg},
+rulecolor=\color{bg},
+breaklines=false,
+numbers=left,
+numbersep=5pt,
+numberstyle=\tiny,
+tabsize=4,
+xleftmargin=0em,
+frame=single,
+framesep=3pt,
+framextopmargin=0pt,
+framexbottommargin=0pt,
+framexleftmargin=0pt,
+framexrightmargin=0pt,
+fontadjust=true,
+upquote=true,
+}}
+
+\newcommand\mypythoninline[1]{{\mypythonstylenormalinline\lstinline!#1!}}
+
+\lstdefinelanguage{yaml}{
+  keywords={true,false,null,y,n},
+  keywordstyle=\color{blue}\bfseries,
+  basicstyle=\ttfamily\footnotesize,
+  comment=[l]{\#},
+  morecomment=[s]{/*}{*/},
+  commentstyle=\color{gray}\ttfamily,
+  stringstyle=\color{red},
+  moredelim=[l][\color{orange}]{\&},
+  moredelim=[s][\color{orange}]{<}{>},
+  morestring=[b]',
+  morestring=[b]",
+  sensitive=true,
+  tabsize=2,
+  showspaces=false,
+  showstringspaces=false,
+  backgroundcolor=\color{codegray},
+  frame=single
+}

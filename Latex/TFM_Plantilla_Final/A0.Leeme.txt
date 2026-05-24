@@ -1,0 +1,52 @@
+LÉAME
+-----
+
+La plantilla latex usa algunas variables para evitar tener que repetir
+información que debe aparecer varias veces en el texto (Autor, título,
+etc.). Esas variables son:
+
+\newcommand{\tfgtitlename}{<Título del Trabajo Fin de Grado>}
+\newcommand{\tfgtitlenameENG}{<Título del TFG en inglés>}
+\newcommand{\tfgauthorname}{<Nombre del autor>}
+\newcommand{\tfgtutorname}{<Nombre del tutor>}
+\newcommand{\tfganno}{<año de publicación>}
+
+y debes particularizarlas para tu TFG en la línea 17 del fichero
+A2.Preambulo.comandos.tex
+
+LaTeX trabaja por defecto con la tipografía Computer Modern pero el
+TFG debe usar la tipografía Arial (como la plantilla disponible para
+Microsoft Word) por lo que en las líneas 150 y 151 del archivo
+A2.Preambulo.comandos.tex se han renombrado los siguientes comandos:
+
+	\renewcommand{\rmdefault}{phv} % Arial
+	\renewcommand{\sfdefault}{phv} % Arial
+
+Si para algún otro propósito quieres usar esta plantilla pero con
+tipografía Computer Modern, puedes comentar esas dos líneas.
+
+Estructura de la plantilla y sus archivos:
+
+La plantilla cumple la estructura que la ETSIT establece en un
+TFG/TFM. Además, está nombrada para que su utilización desde el
+entorno de desarrollo sea ordenada y lineal, de manera que los
+archivos respeten el orden secuecial de los capítulos.
+
+Para conseguir esta ordenación lineal, se hace uso de Letras  y
+números adecuadamente. Por ejemplo, A0, A1, B1, B2, D0, D1, E1, ó F.
+Por ejemplo, el documento maestro "A0.MiTFG.tex" aparece al principio
+de los archivos para  que sea fácilmente localizable. Además, los
+archivos de entornos y preámbulos aparecen  al principio, los archivos
+que contienen bibliografía y apéndices al final.
+
+Se recomienda mantener esta ordenación durante la elaboración del
+TFG/TFM.
+
+También se recomienda generar el documento PDF incrementalmente,
+anulando (comentando con %) las secciones que no se utilicen desde el
+archivo principal, para que la revisión sea lo más rápida posible. Por
+ejemplo, al elaborar el capítulo 3 y generar el documento PDF, no es
+necesario ni el prólogo, ni los capítulos anteriores ni posteriores.
+
+Hay que tener en cuenta que un TFG/TFM es un documento extenso, por
+ello es mejor seguir estas reglas de uso.
