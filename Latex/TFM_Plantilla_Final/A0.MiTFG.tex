@@ -2,17 +2,18 @@
 %%% Documento LaTeX - Plantilla final TFM
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\documentclass[12pt,twoside,titlepage,a4paper,openany]{book}
+\documentclass[12pt,twoside,titlepage,a4paper]{report}
 
 \input{A1.Preambulo.paquetes.tex}
 \input{A2.Preambulo.comandos.tex}
-\input{A3.Preambulo.entornos.tex}
 \input{A4.Preambulo.estilodepagina.tex}
 
 \begin{document}
 
-\frontmatter
+\setcounter{tocdepth}{2}
+
 \pagestyle{plain}
+\pagenumbering{Roman}
 
 \input{B1.Portada.tex}
 \input{B2a.ResumenTFG-ESP.tex}
@@ -24,8 +25,9 @@
 \input{B4.TableOfTables.tex}
 \input{B4.TableOfListings.tex}
 
-\mainmatter
-\pagestyle{fancy}
+\clearpage
+\pagenumbering{arabic}
+\tfmmainpagestyle
 \setlength{\parskip}{0.75em}
 \renewcommand{\baselinestretch}{1.25}
 \spacing{1}
@@ -36,15 +38,10 @@
 \input{Capitulo04.tex}
 \input{Capitulo05.tex}
 \input{Capitulo06.tex}
+\input{Capitulo07.tex}
+\input{Capitulo08.tex}
 
-\appendix
-\phantomsection
-\addcontentsline{toc}{part}{Apéndices}
-\part*{Apéndices}
-\input{D1.AppendixA.tex}
-\input{D2.AppendixB.tex}
-
-\backmatter
+\clearpage
 \input{E1.Bibliografia.tex}
 \input{F1.Index.tex}
 

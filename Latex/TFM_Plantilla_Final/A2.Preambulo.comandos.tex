@@ -15,11 +15,11 @@
 \newcommand{\titulotrabajo}{\tfgtitlename}
 \newcommand{\escuela}{Escuela Técnica Superior\\de Ingeniería Informática}
 \newcommand{\escuelalargo}{Escuela Técnica Superior de Ingeniería Informática}
-\newcommand{\universidad}{Universidad Rey Juan Carlos}
-\newcommand{\fecha}{Fecha}
-\newcommand{\grado}{Máster en Ciberseguridad}
+\newcommand{\universidad}{Universidad de Málaga}
+\newcommand{\fecha}{XX de septiembre de 2026}
+\newcommand{\grado}{Máster Universitario en Ciberseguridad}
 \newcommand{\curso}{Curso 2025-2026}
-\newcommand{\logoUniversidad}{logoURJC.pdf}
+\newcommand{\logoUniversidad}{figuras/marcaUMA.png}
 
 % 3. Comandos generales de texto
 \newcommand{\R}{\textsuperscript{\textregistered}}
@@ -78,6 +78,9 @@
     \clearpage
     \thispagestyle{empty}}
 
+% Permite cortes de página razonables en apartados que aún solo tienen título.
+\newcommand{\apartadoPendiente}{\leavevmode\par\vspace{0.2\baselineskip}\pagebreak[1]}
+
 % 6. Colores, enlaces y textos automaticos
 \definecolor{BlueLink}{rgb}{0.165,0.322,0.745}
 \definecolor{PinkLink}{rgb}{0.8,0.22,0.5}
@@ -91,8 +94,6 @@
     \def\tablename{Tabla}
     \def\listtablename{Índice de tablas}}
 \addto\captionsspanish{\renewcommand{\contentsname}{Índice de contenidos}}
-
-\floatname{algorithm}{Algoritmo}
 
 % 7. Entornos auxiliares heredados de la plantilla base
 \newcommand{\benu}{\begin{enu}}
@@ -207,3 +208,4 @@ upquote=true,
   backgroundcolor=\color{codegray},
   frame=single
 }
+

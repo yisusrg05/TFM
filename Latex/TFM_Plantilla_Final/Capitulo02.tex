@@ -1,100 +1,96 @@
-% !TEX root = A0.MiTFM.tex
+% !TEX root = A0.MiTFG.tex
 
-\chapter{Estado del arte}\label{chap:estadoarte}
+\chapter{Fundamentos teóricos y estado del arte}
 
+\section{\textit{Streaming} OTT}
+\apartadoPendiente
 
-\section{Ciberseguridad en la nube}
+\subsection{Arquitectura OTT}
+\apartadoPendiente
 
-En los últimos años se ha acelerado la adopción de servicios en la nube en el ámbito empresarial, lo que ha elevado la importancia de la ciberseguridad en la nube. Tan solo en 2023, el gasto mundial en nube pública creció alrededor de un 20\%, superando previsiones previas \cite{csa2023top}. Este auge implica que una proporción cada vez mayor de datos y operaciones críticas residan en entornos de nube, haciendo vital garantizar su seguridad para mantener la confidencialidad, integridad y disponibilidad de la información. 
+\subsection{\textit{Live streaming}}
+\apartadoPendiente
 
-\paragraph{Evolución reciente e importancia \\ \\}
+\subsection{CDN}
+\apartadoPendiente
 
-La seguridad en la nube ha evolucionado de enfoques iniciales centrados en proteger la infraestructura del proveedor, hacia una visión integral que abarca la configuración segura de los servicios \textit{cloud} por parte del cliente. El modelo de responsabilidad compartida establece que el proveedor \textit{cloud} asegura la infraestructura subyacente, mientras que el cliente debe proteger sus datos y configuraciones. En la práctica, este modelo ha generado desafíos: muchas brechas de seguridad provienen de errores de configuración o uso indebido por parte del cliente, más que de fallos en el proveedor. Así, la atención se ha desplazado a asegurar el entorno \textit{cloud} de punta a punta, combinando medidas técnicas y buenas prácticas organizativas.
+\subsection{HLS y MPEG-DASH}
+\apartadoPendiente
 
-\paragraph{Principales amenazas \\ \\}
+\section{Sistemas DRM}
+\apartadoPendiente
 
-La computación en la nube es susceptible a numerosas amenazas de ciberseguridad. Entre las más relevantes se encuentran \cite{ahmadi2024cloud}:
+\subsection{Concepto de DRM}
+\apartadoPendiente
 
-\begin{itemize}
-\item \textbf{Brechas o filtraciones de datos:} accesos no autorizados o robo de datos sensibles almacenados en la nube, con graves consecuencias financieras y de reputación. Es una de las amenazas más reportadas en el entorno \textit{cloud}.
+\subsection{PlayReady}
+\apartadoPendiente
 
-\item \textbf{Secuestro de cuentas y credenciales:} los atacantes pueden comprometer cuentas de administradores o usuarios (por ejemplo, mediante phishing o malware), obteniendo accesos con los máximos privilegios en el entorno \textit{cloud}. El \textbf{account hijacking} ha sido destacado como un riesgo crítico, ya que la pérdida de credenciales permite al atacante controlar recursos y datos.
+\subsection{FairPlay}
+\apartadoPendiente
 
-\item \textbf{Ataques de denegación de servicio (DDoS):} sobrecargan servicios en la nube con tráfico malicioso, volviéndolos inaccesibles para usuarios legítimos. Los ataques DDoS hacia aplicaciones \textit{cloud} pueden interrumpir operaciones y requieren contramedidas de elasticidad y filtrado de tráfico.
+\subsection{Widevine}
+\apartadoPendiente
 
-\item \textbf{Malware y vulnerabilidades no parcheadas:} las cargas de trabajo en la nube pueden sufrir las mismas vulnerabilidades de software que cualquier sistema. Si no se aplican parches de seguridad o se configuran controles adecuados, los atacantes pueden explotar fallos conocidos para penetrar sistemas \textit{cloud}. Asimismo, la introducción de malware a través de máquinas virtuales o contenedores comprometidos es una amenaza latente.
+\section{Arquitectura Widevine}
+\apartadoPendiente
 
-\item \textbf{Amenazas internas y errores de configuración:} empleados malintencionados o descuidados pueden abusar de accesos legítimos (\textit{insider threats}), y configuraciones erróneas de servicios (como almacenar datos sin cifrar en buckets públicos) son causas frecuentes de incidentes. De hecho, la mala configuración de los sistemas se reconoce como factor en la mayoría de brechas \textit{cloud}, exponiendo interfaces y recursos a Internet de manera inadvertida.
-\end{itemize}
+\subsection{EME}
+\apartadoPendiente
 
-Estas amenazas ponen de manifiesto la obligación de las organizaciones para reforzar tanto las medidas técnicas (cifrado de datos, gestión de identidades, monitorización continua, etc.) como la concienciación y formación del personal, para reducir errores humanos.
+\subsection{CDM}
+\apartadoPendiente
 
-\paragraph{Retos actuales \\ \\}
+\subsection{\textit{License server}}
+\apartadoPendiente
 
-Además de las amenazas directas, la seguridad \textit{cloud} enfrenta retos estratégicos y operativos. Uno de los más citados es la falta de visibilidad y control en entornos multinube e híbridos. Las empresas suelen distribuir cargas de trabajo entre múltiples proveedores (AWS, Azure, GCP, etc.) y centros de datos propios, lo que dificulta tener una visión unificada de la postura de seguridad. Garantizar el cumplimiento normativo en la nube es otro desafío, ya que las organizaciones deben alinear configuraciones y procesos con estándares (ISO 27017, CSA CCM) y leyes de protección de datos en jurisdicciones diversas, todo ello en un entorno altamente dinámico. Asimismo, la escasez de expertos en seguridad \textit{cloud} agrava el problema – los equipos de ciberseguridad tradicionales deben adquirir nuevas habilidades \textit{cloud}, pues simplemente trasladar controles on-premise a la nube resulta insuficiente.
+\subsection{\textit{Packaging}}
+\apartadoPendiente
 
-Para afrontar estos retos, la industria promueve enfoques como la seguridad desde el diseño y automatización (DevSecOps) y modelos de confianza cero (Zero Trust). También se adoptan herramientas especializadas: por ejemplo, sistemas de SIEM en la nube para monitorizar eventos de seguridad en tiempo real, y plataformas de gestión de postura de seguridad \textit{cloud} (CSPM), que detectan configuraciones inadecuadas \cite{li2024cloud}. En resumen, la ciberseguridad en la nube se ha vuelto un esfuerzo continuo que combina tecnología, procesos y personas, adaptándose constantemente a la evolución de las amenazas.
+\subsection{CENC}
+\apartadoPendiente
 
+\subsection{Flujo de intercambio de claves}
+\apartadoPendiente
 
-\section{Literatura sobre motores de políticas en Kubernetes}
+\section{Amenazas en ecosistemas DRM}
+\apartadoPendiente
 
-En el ecosistema \textit{cloud-native}, Kubernetes se ha consolidado como la plataforma dominante de orquestación de contenedores. Garantizar la seguridad y gobernanza en Kubernetes exige controlar qué configuraciones y recursos se despliegan en el clúster, respetando políticas corporativas y mejores prácticas. Esto ha dado lugar en la última década al desarrollo de motores de políticas especializados para Kubernetes, en línea con el paradigma Policy as Code (políticas definidas como código). A continuación, se presenta una revisión temática y cronológica (2015–2025) de la literatura y avances principales en este campo, enfocando en tres proyectos clave: Open Policy Agent (OPA), Gatekeeper y Kyverno. 
+\subsection{\textit{Token theft}}
+\apartadoPendiente
 
-\paragraph{Primeros enfoques (2015–2018) \\ \\}
-En los años iniciales de Kubernetes, el control de políticas de seguridad se limitaba a mecanismos nativos relativamente básicos. Kubernetes incorporó Políticas de Seguridad de Pods (PodSecurityPolicy, PSP) como característica para restringir las operaciones de Pods (p. ej., evitar contenedores privilegiados). Sin embargo, las PSP presentaban limitaciones: solo aplicaban a Pods, no permitían acciones más allá de negar despliegues, y su gestión resultaba poco flexible. Ante el rápido crecimiento de Kubernetes, surgió la necesidad de una solución más genérica y programable para políticas. En 2016, ingenieros de Styra Inc. crearon Open Policy Agent (OPA), un motor de políticas de propósito general diseñado para unificar la definición y enforcement de políticas en diversos sistemas \textit{cloud-native} \cite{castro2024policy}. OPA introdujo un lenguaje declarativo específico llamado Rego para expresar reglas sobre datos estructurados (JSON/YAML) de forma consistente. El proyecto ganó tracción rápidamente: en 2018 OPA fue donado a la CNCF (Cloud Native Computing Foundation) y, tras demostrar adopción, alcanzó el estatus de proyecto graduado en 2021. La graduación en CNCF indica que OPA se volvió estable y ampliamente adoptado, consolidándose como un estándar emergente en Policy as Code. De hecho, OPA empezó a emplearse no solo en Kubernetes, sino también integrándose con herramientas como Terraform (infraestructura como código), plataformas de API Gateway/Service Mesh (e.g. Envoy) y más, evidenciando su versatilidad más allá de Kubernetes.
+\subsection{\textit{Replay}}
+\apartadoPendiente
 
-\paragraph{Integración con Kubernetes-OPA/Gatekeeper (2019–2020) \\ \\}
+\subsection{\textit{Credential sharing}}
+\apartadoPendiente
 
-Para aplicar OPA eficazmente dentro de Kubernetes, se requería una integración nativa en el proceso de admisión de recursos del clúster. En 2019, un grupo colaborativo de desarrolladores de Microsoft, Google, Red Hat y Styra presentó OPA Gatekeeper \cite{zhang2019gatekeeper}. Gatekeeper actúa como un controlador de admisión validante que intercepta cada solicitud de creación/actualización de objetos en Kubernetes, evaluándola contra las políticas definidas en OPA. A diferencia de las PSP (basadas en configuraciones estáticas), Gatekeeper permitió personalizar políticas mediante configuración declarativa, separando las decisiones de políticas del código del API server. En su evolución, Gatekeeper introdujo la noción de plantillas de restricciones (constraint templates), representadas como CRDs (Custom Resource Definitions) en Kubernetes, donde los operadores pueden definir políticas Rego reutilizables y luego instanciar restricciones concretas a partir de ellas. Para 2020, OPA + Gatekeeper ya ofrecían un marco robusto de governance en Kubernetes, soportando validación de configuraciones (p. ej., “ningún Pod puede ejecutarse sin límites de CPU/memoria”) e incluso comenzando a incorporar mutación automática de recursos. La literatura técnica de este período resalta que OPA/Gatekeeper habilitó políticas contextuales y granulares en Kubernetes, integrando la seguridad en el ciclo de vida DevOps (shift-left security). Vakhula y Opirskyy (2024) \cite{vakhula2024security} describen la implementación de “Seguridad como Código” en clústeres Kubernetes precisamente mediante OPA y Gatekeeper, demostrando que esta combinación permite un enforcement consistente de políticas desde el despliegue hasta producción. En resumen, hacia 2020 OPA Gatekeeper se había posicionado como la solución de referencia para policy enforcement en Kubernetes, llenando el vacío dejado por las limitaciones de PSP.
+\subsection{CDN \textit{leeching}}
+\apartadoPendiente
 
+\subsection{\textit{Session hijacking}}
+\apartadoPendiente
 
-\paragraph{Aparición de Kyverno y alternativas nativas (2020–2025) \\ \\}
+\subsection{\textit{Proxying}}
+\apartadoPendiente
 
-Si bien OPA/Gatekeeper aportó flexibilidad, también introdujo complejidad al requerir el lenguaje Rego y operarlo externamente a Kubernetes. En 2019 surge Kyverno, un motor de políticas creado por la empresa Nirmata con un enfoque distinto: ser Kubernetes-nativo, operando mediante políticas definidas en YAML (esquemas familiares para los usuarios de Kubernetes) en lugar de un lenguaje nuevo. Kyverno fue diseñado exclusivamente para Kubernetes y se integró como un controlador dentro del clúster, utilizando CRDs para definir Policies y Rules. Esto permite a los administradores expresar reglas de validación, mutación e incluso generación automática de recursos Kubernetes de manera declarativa, aprovechando la estructura y el ecosistema nativo de Kubernetes. Kyverno alcanzó madurez rápidamente: en 2020 fue aceptado en CNCF (como sandbox) y en 2022 progresó a proyecto incubado, reflejando el crecimiento de su comunidad. Tanto OPA como Kyverno son hoy soluciones open-source activamente mantenidas, con apoyo de CNCF, lo que evidencia la importancia estratégica de los motores de políticas en la seguridad cloud-native. 
+\subsection{\textit{Abuse automation}}
+\apartadoPendiente
 
-Varios trabajos técnicos y académicos recientes comparan las virtudes de OPA/Gatekeeper contra Kyverno, destacando Chip Zoller en 2022 \cite{zoller2022kyverno}. Ambos enfoques permiten implementar políticas declarativas para Kubernetes, pero presentan diferencias significativas. OPA (con Gatekeeper) ofrece mayor generalidad: al ser un motor de propósito general, el mismo conjunto de políticas puede aplicarse en distintas capas (Kubernetes, microservicios, CI/CD, etc.), y su lenguaje Rego posibilita expresar lógicas complejas de control. Sin embargo, esta potencia conlleva una curva de aprendizaje considerable – Gatekeeper requiere conocer Rego y manejar plantillas, lo que puede añadir deuda técnica y complejidad en entornos corporativos. Además, Gatekeeper inicialmente se centró solo en validación (permitir o denegar objetos), incorporando la mutación de forma limitada en versiones más recientes, y no posee funcionalidad nativa para generar nuevos recursos. Por el contrario, Kyverno se distingue por su facilidad de uso: no obliga a los usuarios a programar en un lenguaje nuevo, ya que las políticas se formulan en YAML siguiendo la sintaxis de Kubernetes, lo que reduce la barrera de adopción. Kyverno también sobresale en capacidades avanzadas dentro de Kubernetes, al soportar desde el inicio mutación de configuraciones en tiempo de admisión y generación automática de objetos (por ejemplo, crear un ConfigMap base si no existe), algo que OPA/Gatekeeper no realiza de forma nativa. Como aspecto negativo, Kyverno se limita al ámbito de Kubernetes – no es utilizable como motor de políticas en otras aplicaciones o plataformas, a diferencia de OPA que sí lo es. En cuanto a madurez, OPA/Gatekeeper tienen algunos años más de desarrollo (OPA nació en 2016/2017, Gatekeeper en 2019), mientras Kyverno es más reciente (2019) pero ha mostrado un crecimiento acelerado en su comunidad y funcionalidades. En la práctica, ambas soluciones coexisten y son a veces usadas de forma complementaria según las necesidades: organizaciones con fuertes requerimientos multi-plataforma pueden optar por OPA, mientras que para usos basados puramente en Kubernetes con foco en simplicidad, Kyverno resulta muy atractivo.
+\section{Estado del arte académico}
+\apartadoPendiente
 
-En síntesis, la literatura de entre 2015 y 2025 muestra una evolución clara: se pasó de controles básicos y específicos (PSP) a motores de políticas sofisticados que permiten implementar la seguridad y cumplimiento normativo de forma declarativa y automatizada en Kubernetes. OPA/Gatekeeper y Kyverno representan hoy el estado del arte en esta materia. Su uso se ha vuelto una práctica recomendada dentro de la seguridad cloud-native, habilitando a las organizaciones a fortalecer la postura de seguridad de sus clústeres Kubernetes sin sacrificar agilidad. Continúa abierto el reto de mejorar la usabilidad y alcance de estas herramientas – por ejemplo, facilitando la creación de políticas para desarrolladores y ampliando el catálogo de políticas predefinidas. No obstante, queda patente que la gestión de políticas mediante motores dedicados se ha consolidado como un pilar fundamental de la ciberseguridad en entornos de nube y contenedores en la actualidad.
+\subsection{\textit{Exploring Widevine for Fun and Profit}}
+\apartadoPendiente
 
-\section{Justificación de la elección de Kyverno frente a OPA/Gatekeeper}
+\subsection{\textit{Your DRM Can Watch You Too}}
+\apartadoPendiente
 
-A la luz de los sistemas analizados, resulta pertinente explicar por qué este trabajo opta por Kyverno como motor de políticas en Kubernetes en lugar de OPA/Gatekeeper. Si bien OPA con Gatekeeper se consolidó tempranamente como solución de policy-as-code en Kubernetes, también introdujo complejidad operativa al requerir el lenguaje Rego y componentes externos al plano de control de Kubernetes. Kyverno, en cambio, nace con un enfoque Kubernetes-nativo: las políticas se definen en formato YAML, integrándose como CRDs dentro del clúster y evitando lenguajes especializados\cite{zoller2022kyverno}. Esta diferencia fundamental reduce la curva de aprendizaje y la sobrecarga cognitiva. De hecho, diversas comparativas señalan que escribir políticas en Kyverno resulta más natural para equipos familiarizados con Kubernetes, mientras que Gatekeeper/OPA exige formación en Rego con la complejidad añadida que ello conlleva. Incluso en el ámbito académico se reconoce la sencillez de Kyverno: un estudio reciente de 2025 adopta la sintaxis de Kyverno por considerarla bien estructurada y familiar para los usuarios, resaltando que su popularidad facilita la adopción en la comunidad \cite{chen2025policyrule}. 
+\subsection{Otros trabajos sobre DRM y protección OTT}
+\apartadoPendiente
 
-Además de la simplicidad técnica, Kyverno ofrece ventajas operativas y funcionales que refuerzan su elección. Una de ellas es la completitud de funcionalidades nativas: desde su diseño inicial Kyverno soporta no solo validación de configuraciones, sino también mutación automática y generación de recursos, todo mediante reglas declarativas sencillas. En contraste, Gatekeeper se enfocó originalmente solo en la validación (permitir o denegar objetos) e incorporó la mutación de manera limitada en versiones posteriores (mediante CRDs especiales como Assign), sin capacidad nativa de generar nuevos objetos en el clúster. Esto implica que con Kyverno es posible, por ejemplo, añadir configuraciones o etiquetas por defecto a recursos entrantes, o crear objetos complementarios (Configs, Secrets, NetworkPolicies, etc.) automáticamente para reforzar la seguridad, algo que OPA/Gatekeeper no realiza de forma integrada. Otra capacidad destacada de Kyverno es la verificación de imágenes de contenedor: el motor puede comprobar firmas criptográficas o attestations de las imágenes antes de su despliegue, bloqueando aquellas no confiables según políticas de suministro de software seguro. Lograr un nivel equivalente de validación de imágenes en Gatekeeper requeriría lógicas personalizadas y herramientas externas, ya que OPA no ofrece esa función de forma directa. En conjunto, estas características hacen de Kyverno una solución más completa en cuanto a enforcement de políticas dentro de Kubernetes. 
+\subsection{Comparativa de enfoques y limitaciones}
+\apartadoPendiente
 
-Desde el punto de vista operativo y de adopción por equipos, Kyverno también aporta beneficios significativos. Al emplear configuraciones YAML nativas, la gestión de políticas se integra fácilmente con prácticas DevOps existentes (p.ej., GitOps con ficheros YAML versionados) y con las herramientas estándar de Kubernetes (kubectl, client APIs), sin necesidad de traductores ni plantillas intermedias. Esto se traduce en facilidad de mantenimiento y menor resistencia por parte de los operadores: en la práctica, equipos de SRE y desarrolladores pueden comprender y escribir políticas Kyverno sin tener que dominar un lenguaje adicional, lo cual incentiva una mayor participación en la creación y revisión de políticas. Por el contrario, con Gatekeeper el uso de Rego a menudo queda relegado a unos pocos especialistas, aumentando la carga de trabajo y la deuda técnica en entornos corporativos. Otro aspecto operacional es la eficiencia y rendimiento. Estudios en entornos productivos han observado que Kyverno tiende a ser más ligero en consumo de recursos a medida que crece la complejidad y número de políticas, dado que no requiere sincronizar todo el estado del clúster en memoria para evaluaciones contextuales. Gatekeeper, al basarse en OPA, suele mantener un inventario en memoria de los objetos del cluster para ciertas políticas, lo que puede conllevar sobrecarga de memoria y latencia en escenarios complejos. De hecho, OPA alcanzó la graduación CNCF por su madurez, pero Kyverno –aunque más joven– ha demostrado un crecimiento acelerado desde su incubación CNCF en 2022, impulsado por una amplia adopción comunitaria y por cubrir las carencias que presentaban las PSP y otras soluciones previas. En síntesis, Kyverno equilibra un conjunto rico de funcionalidades con una usabilidad superior en Kubernetes, lo que reduce costos operativos y riesgos de errores de configuración al gestionar la seguridad. 
-
-Un caso de uso real ilustra estas ventajas de forma concreta. En 2024, el equipo de plataforma de Adevinta (empresa del sector online marketplaces) decidió migrar su mecanismo de políticas de Gatekeeper (OPA) hacia Kyverno, tras identificar diversos beneficios prácticos \cite{adevinta2024}. Según su informe, la transición se motivó principalmente por la facilidad de escritura y mantenimiento de políticas – al usar YAML en lugar de Rego, más ingenieros pudieron colaborar en definir reglas de seguridad – y por la mayor cobertura de características – Kyverno permitía implementar directamente políticas mutativas y otros casos que con Gatekeeper eran engorrosos o imposibles. Adicionalmente, reportaron mejoras en el rendimiento y uso de recursos del clúster al eliminar la necesidad de sincronizar inventarios de objetos en memoria, problema que habían enfrentado con OPA. En el ámbito académico también se encuentra respaldo a la superioridad de Kyverno en su nicho: por ejemplo, una investigación reciente sobre ciberseguridad en Kubernetes optó por basar su gestión de políticas en Kyverno precisamente por su simplicidad de uso y por alinearse mejor con la mentalidad declarativa de Kubernetes. Los autores destacan que muchas organizaciones ya están familiarizadas con la sintaxis de Kyverno, lo que facilita su adopción frente a alternativas más generales. Asimismo, Kyverno introduce mecanismos de control de excepciones más flexibles que su contraparte: dispone de un recurso dedicado PolicyException para exceptuar casos puntuales sin tener que deshabilitar ni modificar la política original. Esta capacidad de gestionar excepciones de forma desacoplada es especialmente útil en escenarios de “ruptura de cristal” (break-glass) o necesidades temporales, permitiendo conceder pases excepcionales a ciertos recursos sin comprometer el cumplimiento general de las normas. En Gatekeeper, lograr algo similar requiere incorporar condiciones de exclusión dentro de las propias reglas Rego o instancias de Constraint, lo cual es menos flexible y más propenso a errores operativos.
-
-En definitiva, al comparar ambas soluciones, se aprecia que Kyverno ofrece un enfoque más orientado a Kubernetes que simplifica la adopción de políticas y amplía las capacidades disponibles de forma nativa. Para un trabajo enfocado en seguridad ofensiva dentro de Kubernetes, estas ventajas se traducen en una implementación más ágil, con políticas declarativas fáciles de mantener y extender, y con un alcance funcional mayor (incluyendo mutaciones, generación de recursos y verificaciones de integridad) sin añadir complejidad innecesaria. Por estas razones, Kyverno es la opción elegida como base tecnológica en este proyecto, garantizando un equilibrio óptimo entre rigor en el enforcement de seguridad y operatividad en entornos reales.
-
-En la tabla \ref{tab:kyverno-better} se resumen las principales funcionalidades ofrecidas por OPA/Gatekeeper frente a Kyverno, evidenciando las diferencias mencionadas:
-
-\begin{table}[htbp]
-\centering
-\small
-\caption{Comparativa funcional entre OPA/Gatekeeper y Kyverno}
-\label{tab:kyverno-better}
-\begin{tabular}{@{}p{4.2cm}p{5.3cm}p{5.3cm}@{}}
-\toprule
-\textbf{Funcionalidad} & \textbf{OPA/Gatekeeper} & \textbf{Kyverno} \\ \midrule
-\textbf{Validación de recursos} & Sí, mediante reglas Rego (`Constraint` y `ConstraintTemplate`) & Sí, con reglas declarativas `validate` en YAML \\[0.2cm]
-\textbf{Mutación automática} & Parcial, mediante CRDs como `Assign` y `AssignMetadata` & Soporte completo con reglas `mutate` nativas \\[0.2cm]
-\textbf{Generación de recursos} & No soportado de forma nativa & Soporte completo con reglas `generate` para crear objetos \\[0.2cm]
-\textbf{Verificación de imágenes} & No disponible directamente; requiere herramientas externas & Soportado mediante reglas `verifyImage` para firmas y attestations \\[0.2cm]
-\textbf{Gestión de excepciones} & Sin recurso dedicado; requiere lógica condicional en Rego & Soportado mediante el recurso `PolicyException` \\[0.2cm]
-\textbf{Lenguaje de políticas} & Rego (específico y con curva de aprendizaje) & YAML (estructura estándar de Kubernetes) \\[0.2cm]
-\textbf{Facilidad de adopción} & Requiere conocimientos previos de Rego y plantillas personalizadas & Alta; fácil de entender y mantener por equipos DevOps \\[0.2cm]
-\textbf{Alcance fuera de Kubernetes} & Sí, puede aplicarse en CI/CD, microservicios, infraestructura general & No, limitado exclusivamente a clústeres Kubernetes \\ \bottomrule
-\end{tabular}
-\end{table}
-
-
-%\blankpage
-
-
-
-
-
-
-% Capítulo 3
+\section{Limitaciones actuales de Widevine}
+\apartadoPendiente

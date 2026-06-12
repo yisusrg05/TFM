@@ -1,38 +1,45 @@
-% !TEX root = A0.MiTFM.tex
+% !TEX root = A0.MiTFG.tex
 
-\chapter{Conclusiones y trabajos futuros}\label{chap:conclusiones}
+\chapter{Implementación}
 
-En este capítulo se exponen las conclusiones extraídas del experimento llevado a cabo y se proponen líneas de trabajo que se podrían realizar en un futuro como fruto de este proyecto.
+\section{Despliegue con Docker}
+\apartadoPendiente
 
-A lo largo de este Trabajo Fin de Grado se ha configurado un entorno de Kubernetes vulnerable por una mala configuración, explotando el acceso al clúster mediante un RCE. Una vez dentro, se ha procedido a usar como herramienta de ataque Kyverno, modificando una política ya existente y creando una nueva por cada tipo: validación, generación y mutación.
+\subsection{Contenedores}
+\apartadoPendiente
 
-Este trabajo también ha servido para seguir expandiendo lo aprendido en las asignaturas del grado sobre Kubernetes, pudiendo aplicar la filosofía principal en el sector de la ciberseguridad: piensa fuera de la caja. Con ese pensamiento, se ha conseguido otorgar un enfoque ofensivo bastante interesante a una herramienta, a priori defensiva, como Kyverno. 
+\subsection{Redes}
+\apartadoPendiente
 
-Respecto al análisis de los resultados obtenidos en los diferentes tipos de políticas, las 3 políticas presentan resultados potentes desde el punto de vista de un atacante, añadiendo persistencia en el acceso al sistema con algunas variantes bastantes sigilosas.
+\subsection{Servicios}
+\apartadoPendiente
 
-Por otro lado, se ha realizado un análisis de riesgos con la metodología STRIDE, aplicando también los conocimientos obtenidos durante las asignaturas del grado.
+\section{Desarrollo del proxy}
+\apartadoPendiente
 
-En cuanto a trabajos futuros, se propone seguir explorando Kyverno para identificar más vías de explotación que puedan tener un enfoque ofensivo, al igual que aplicar este estudio sobre el otro Admission Controller mencionado en la sección \nameref{chap:estadoarte}, OPA/Gatekeeper.
+\subsection{Arquitectura software}
+\apartadoPendiente
 
-También sería interesante probar con escenarios mejor configurados de Kubernetes, donde resulta más complicado escapar del nodo y poder tomar el control; o incluso acceder e instalar Kyverno en un clúster que no lo tenía instalado previamente. Además, otro punto a investigar sería de desplegar esto en entornos más realistas, como usando Google Cloud.
+\subsection{\textit{Endpoints}}
+\apartadoPendiente
 
-Para finalizar, cabe destacar que se han cumplido todos los objetivos propuestos al inicio de este proyecto, en la sección \nameref{chap:objetivos}.
+\subsection{\textit{Middleware}}
+\apartadoPendiente
 
+\section{Implementación de validaciones}
+\apartadoPendiente
 
-\blankpage
+\subsection{JWT}
+\apartadoPendiente
 
+\subsection{Geolocalización}
+\apartadoPendiente
 
+\subsection{Control de sesiones}
+\apartadoPendiente
 
+\section{Sistema de \textit{logging} y monitorización}
+\apartadoPendiente
 
-
-
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Bibliografía %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\phantomsection
-\addcontentsline{toc}{chapter}{Bibliografía}
-
-\footnotesize{
-%
+\section{Integración completa del entorno}
+\apartadoPendiente

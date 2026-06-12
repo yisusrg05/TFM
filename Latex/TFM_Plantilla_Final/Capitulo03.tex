@@ -1,184 +1,93 @@
-% !TEX root = A0.MiTFM.tex
+% !TEX root = A0.MiTFG.tex
 
-\chapter{Descripción informática}\label{chap:descinformatica}
-\label{chap:contenidos}
+\chapter{Diseño del entorno experimental}
 
-En este capítulo se detallan los objetivos que se buscan alcanzar en el desarrollo de este proyecto, las herramientas necesarias para poder llevarlo a cabo y una descripción de cómo se ha preparado el laboratorio para simular un entorno real de Kubernetes. También se realizará un análisis de riesgos sobre el entorno creado usando la metodología STRIDE.
+\section{Objetivos del laboratorio}
+\apartadoPendiente
 
-\section{Objetivos} \label{chap:objetivos}
+\section{Arquitectura general}
+\apartadoPendiente
 
-Los objetivos generales que se plantean alcanzar en el transcurso de este proyecto son los siguientes:
+\subsection{Cliente}
+\apartadoPendiente
 
-\begin{itemize}
+\subsection{CDN}
+\apartadoPendiente
 
-\item Simular un ataque desde una máquina externa a una red interna con un clúster de Kubernetes.
+\subsection{\textit{Origin server}}
+\apartadoPendiente
 
-\item Reforzar y ampliar los conocimientos en Kubernetes, configurando desde cero un sistema funcional.
+\subsection{\textit{Packager}}
+\apartadoPendiente
 
-\item Realizar un análisis de riesgos completo con la metodología STRIDE, para luego poder explotarlos durante el ataque, sirviendo de guía a seguir.
+\subsection{\textit{License server}}
+\apartadoPendiente
 
-\item Tener un primer acercamiento en el campo de la investigación de la seguridad informática.
+\subsection{Proxy de seguridad}
+\apartadoPendiente
 
-\end{itemize}
+\section{Tecnologías utilizadas}
+\apartadoPendiente
 
-En paralelo, los objetivos específicos que se esperan conseguir son:
+\subsection{Docker}
+\apartadoPendiente
 
-\begin{itemize}
+\subsection{Python}
+\apartadoPendiente
 
-\item Aprender a integrar Kyverno en un sistema con Kubernetes.
+\subsection{Widevine}
+\apartadoPendiente
 
-\item Realizar un reconocimiento en una máquina externa que permite identificar que el sistema está utilizando Kubernetes; una vez identificado Kubernetes, explorar si cuenta también con Kyverno.
+\subsection{HTTP}
+\apartadoPendiente
 
-\item Explotar el uso de Kyverno de forma ofensiva en un sistema de Kubernetes. Se busca llevar a cabo un ataque completo, con el objetivo de no solo generar un acceso no autorizado al sistema, sino también una persistencia que permita mantener el acceso en el sistema durante un tiempo prolongado.
+\subsection{Linux}
+\apartadoPendiente
 
-\end{itemize}
+\subsection{Wireshark}
+\apartadoPendiente
 
+\subsection{\textit{tcpdump}}
+\apartadoPendiente
 
-\section{Herramientas de trabajo}
+\subsection{JWT}
+\apartadoPendiente
 
-Para la elaboración de este Trabajo Fin de Grado se ha hecho uso de un amplio
-abanico de herramientas, las cuales han hecho posible el desarrollo de este proyecto de manera satisfactoria.
+\section{Diseño de la infraestructura OTT}
+\apartadoPendiente
 
-Overleaf ha sido la herramienta principal utilizada para el desarrollo de este documento, ya que es un editor en la nube de \LaTeX \footnote{\url{https://www.latex-project.org/about}}, software libre distribuido bajo la licencia LPPL (\LaTeX Project Public License).
+\subsection{Segmentación}
+\apartadoPendiente
 
-Para poder simular la existencia de diferentes máquinas, se ha utilizado el programa de virtualización Oracle VirtualBox \footnote{\url{https://www.virtualbox.org/wiki/Licensing_FAQ}}, software libre distribuido bajo la licencia PUEL (VirtualBox Extension Pack Personal Use and Educational License). Poder tener diferentes servicios virtualizados es clave para poder realizar un trabajo como este, ya que montar diferentes máquinas supondría un coste que no permitiría hacer este tipo de investigaciones.
+\subsection{Flujo de vídeo}
+\apartadoPendiente
 
-Como máquina servidor que aloja el clúster de Kubernetes, se ha utilizado la distribución de Linux Ubuntu\footnote{\url{https://ubuntu.com}}, basada en Debian, en su versión 24.04.2 LTS, que es un software libre. Como máquina atacante, se ha utilizado la distribución ofensiva Kali Linux\footnote{\url{https://www.kali.org}}, también basada en Debian, en su versión 2023.3, de software libre.
+\subsection{\textit{Packaging}}
+\apartadoPendiente
 
-Para la gestión del clúster de Kubernetes, se ha utilizado la herramienta Minikube \footnote{\url{https://minikube.sigs.k8s.io/docs/}}, de código abierto , que permite ejecutar un clúster local de Kubernetes en una máquina local sin necesidad de desplegar un clúster completo en la nube o en múltiples servidores. Para comunicarse con el clúster local de Kubernetes, se ha utilizado la herramienta de consola de comandos kubectl \footnote{\url{https://kubernetes.io/docs/tasks/tools/}}.
+\subsection{Distribución}
+\apartadoPendiente
 
-El lenguaje utilizado por Kubernetes para la creación de los diferentes elementos dentro del clúster ha sido YAML\footnote{\url{https://yaml.org/}}, el cual es ampliamente utilizado para la serialización de datos.
+\section{Integración de Widevine}
+\apartadoPendiente
 
-El clúster de Kubernetes contaba con el servicio DVWA\footnote{\url{https://github.com/digininja/DVWA}}(Damn Vulnerable Web Application) montado en él, el cual es una aplicación web de código abierto que cuenta con una gran variedad de vulnerabilidades. El objetivo de este servicio es ayudar a concienciar sobre la ciberseguridad y poder probar las principales vulnerabilidades que sufren los servicios web.
+\subsection{Configuración}
+\apartadoPendiente
 
-Por último, se ha creado un repositorio público de GitHub \footnote{\url{https://github.com/yisusrg05/TFG-Kyverno}} con todos los ficheros de tipo YAML utilizados tanto para la creación del entorno como para llevar a cabo el ataque.
+\subsection{Flujo de licencias}
+\apartadoPendiente
 
-\section{Descripción del entorno}
+\subsection{Interacción con el CDM}
+\apartadoPendiente
 
-La realización de este Trabajo Fin de Grado es mayoritariamente de tipo práctico, por lo que se ha necesitado diseñar un laboratorio virtual reproducible que simula un clúster de Kubernetes mal configurado en términos de seguridad para llevar a cabo un análisis ofensivo de Kyverno.
+\section{Configuración del entorno de captura y monitorización}
+\apartadoPendiente
 
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.75\textwidth,clip=true]{figuras/laboratorio_kubernetes.png}
-  \caption{Diseño laboratorio Kubernetes}
-  \label{fig:laboratoriokubernetes}
-\end{figure}
+\subsection{PCAP}
+\apartadoPendiente
 
-La estructura general del entorno, ilustrada en la figura \ref{fig:laboratoriokubernetes}, sería la siguiente:
+\subsection{\textit{Logging}}
+\apartadoPendiente
 
-\begin{itemize}
-\item Minikube 1.35 en Ubuntu 24.04, con Kubernetes 1.28 y Kyverno 1.11.1.
-
-\item Namespace dvwa para aislar los recursos de la aplicación vulnerable.
-
-\item Base de datos MySQL 5.7 desplegada como Deployment, expuesta internamente por un Service.
-
-\item Aplicación DVWA desplegada con variables de entorno configuradas para conectarse a la base de datos.
-
-\item Exposición de DVWA a través de un Service de tipo NodePort en el puerto 30080, accesible desde la máquina atacante Kali.
-
-\item Service Account de DVWA con permisos de creación de pods, aspecto que será explotado para poder escapar del pod.
-
-
-\end{itemize}
-
-
-\subsection{Deployment DVWA}
-
-El archivo \nameref{lst:dvwa-deployment} contiene todos los recursos necesarios para desplegar la aplicación vulnerable DVWA junto con su base de datos MySQL. Las características a destacar son las siguientes:
-
-\begin{itemize}
-    \item Uso del namespace dvwa: Esta separación facilita la gestión de las políticas de Kyverno y permite un aislamiento lógico. También permite demostrar ataques a políticas específicas de un namespace.
-
-    \item La base de datos MySQL cuenta con variables de entorno estáticas que simplifican la configuración, pero son inseguras y permiten demostrar ataques por credenciales hardcodeadas.
-
-    \item DVWA:
-        \begin{itemize}
-            \item Imagen vulnerables/web-dvwa, diseñada explícitamente con vulnerabilidades conocidas.
-            \item Expone el puerto 80 y se conecta a la base de datos vía variables de entorno.
-            \item No se ejecuta a nivel de root, por lo que tiene permisos limitados.
-        \end{itemize}
-
-    \item Servicio NodePort: expone DVWA a la red externa por el puerto 30080, permitiendo que la máquina atacante Kali interactúe directamente con la aplicación vulnerable.
-    \item Service Account DVWA: solo tiene permisos de creación de pods, estando limitadas el resto de las acciones.
-
-
-\end{itemize}
-
-\subsection{Motivación del diseño}
-
-Este entorno reproduce un escenario ofensivo en condiciones controladas, destacando varios vectores:
-\begin{itemize}
-    \item \textbf{Configuración realista:} errores como credenciales hardcodeadas o bindings mal configurados son comunes en despliegues reales mal gestionados. En este caso, se va a aprovechar que la Service Account de Kyverno puede crear pods para poder escapar al nodo.
-    \item \textbf{Uso ofensivo de Kyverno:} el laboratorio permite demostrar cómo Kyverno puede ser manipulado por un atacante interno para modificar las reglas existentes o aplicar políticas que generen recursos maliciosos.
-    \item \textbf{Relevancia académica y práctica:} el entorno permite estudiar tanto la superficie de ataque como las capacidades de mitigación de Kyverno, aportando valor desde un enfoque ofensivo poco explorado en la literatura, como se ha podido demostrar en \nameref{chap:estadoarte}.
-\end{itemize}
-
-\section{Metodología STRIDE}
-
-La metodología de análisis de riesgos STRIDE \footnote{\url{https://en.wikipedia.org/wiki/STRIDE_model}} se ha convertido en un estándar de facto en el \textit{threat modelling} de sistemas cloud porque ofrece un marco sistemático, y fácilmente memorizable, para responder a la pregunta clave en seguridad: «¿Qué puede salir mal en mi sistema?». Al clasificar las amenazas en seis categorías (Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service y Elevation of Privilege), STRIDE cubre las propiedades esenciales de la ciberseguridad (autenticación, integridad, no repudio, confidencialidad, disponibilidad y autorización) y permite mapear cada riesgo a controles concretos desde las fases tempranas de diseño. Esta visión encaja perfectamente con prácticas DevSecOps y marcos como NIST: integra la seguridad en el ciclo de vida del software, prioriza mitigaciones según impacto y facilita la comunicación entre desarrolladores, arquitectos y equipos de ciberseguridad. Por ello, aplicar STRIDE antes de desplegar un clúster Kubernetes con Kyverno, con su posterior validación mediante pruebas ofensivas, no solo refuerza la solidez técnica del proyecto, sino que demuestra una aproximación proactiva y rigurosa a la gestión de riesgos.
-
-\subsection{Diagrama de Flujo de Datos (DFD)}
-
-El paso inicial de un análisis de STRIDE es realizar el Diagrama de Flujo de Datos, visible en la figura \ref{fig:dfd_baseline}, que resalta los procesos, almacenamientos de datos y flujos del entorno. A raíz de este DFD, se podrán listar los riesgos del sistema usando la metodología STRIDE.
-
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.95\textwidth,clip=true]{figuras/dfd_baseline_k8s.png}
-  \caption{Diagrama de Flujo de Datos para STRIDE}
-  \label{fig:dfd_baseline}
-\end{figure}
-
-\subsection{Spoofing (Suplantación de Identidad)}
-
-\begin{itemize}
-    \item Activos afectados: credenciales y tokens de Service Accounts de Kubernetes (por ejemplo, los tokens de ServiceAccount de DVWA y Kyverno), identidades de componentes internos (la identidad del propio Kyverno) y certificados de API server. 
-    \item Escenario de ataque: un atacante que ya haya conseguido acceso interno al comprometer un Pod puede robar el token de su ServiceAccount montado por defecto. En el escenario descrito previamente, tras conseguir acceso al contenedor de DVWA, el atacante podría extraer el token de la SA de DVWA y utilizarlo para llamar a la API Kubernetes con esa identidad, la cual tiene permisos para crear pods. Más adelante, al escapar al nodo mediante un Pod privilegiado, el atacante podría acceder a los ficheros del host y obtener también el token del ServiceAccount de Kyverno, que tiene altos privilegios . De este modo, se suplanta la identidad de Kyverno ante la API (operando con sus credenciales). Estas acciones permiten al atacante actuar en el clúster como si fuera una entidad legítima (DVWA o Kyverno), eludiendo controles basados en identidad.
-    \item Consecuencias: la suplantación de identidades internas compromete la autenticación y autorizaciones del clúster. Con el token de DVWA, el atacante podría ejecutar operaciones permitidas a esa cuenta (crear Pods maliciosos en el namespace) . Con el token de Kyverno (que típicamente tiene amplios permisos administrativos), el atacante obtiene efectivamente privilegios de cluster-admin, pudiendo listar, modificar o crear recursos críticos como políticas de admisión . En suma, la amenaza de spoofing permite al atacante elevar sus privilegios y realizar acciones en nombre de cuentas de confianza, rompiendo la seguridad basada en identidad. 
-    \item Mitigaciones: aplicar el principio de mínimo privilegio en los ServiceAccounts y sus tokens. Cada aplicación debe usar cuentas con los permisos estrictamente necesarios; por ejemplo, DVWA no debería poder crear Pods en un entorno seguro. También se puede usar Kyverno para crear políticas de validación que no permitan crear Pods al montar su volumen como hostPath.
-\end{itemize}
-
-\subsection{Tampering (Manipulación de Datos)}
-
-\begin{itemize}
-    \item Activos afectados: las políticas de Kyverno (ClusterPolicies/Policies en formato YAML), que definen la configuración de seguridad del clúster, son un activo crítico susceptible de manipulación. Asimismo, los manifiestos de recursos (Deployments, Pods, imágenes de contenedor) pueden ser alterados por un atacante con altos privilegios. También tenemos el pod inicial de DVWA, que al ser vulnerable, puede ejecutar instrucciones del atacante.
-    \item Escenario de ataque: un atacante que haya obtenido credenciales privilegiadas puede modificar las políticas de Kyverno existentes o cargar nuevas políticas maliciosas. Se podrían cambiar las políticas de validación de modo Enforce a Audit. O en el caso de políticas de mutación, podría modificar los recursos que se modifican para otorgarle privilegios elevados y aprovechar vulnerabilidades futuras para escapar al nodo.  Por otro lado, otro escenario es el de la explotación de la máquina DVWA, ya que accediendo a ella con algún exploit o vulnerabilidad, se podría tomar control total sobre la máquina.
-    \item Consecuencias: la manipulación de políticas debilita o invierte los controles de seguridad, convirtiendo el plano de control en el aliado del atacante: el sistema aplicará configuraciones manipuladas en contra de su propia seguridad. Además, se pierde confianza en la integridad de las políticas, abriendo la puerta a backdoors, fuga de datos y sabotaje operativo sin necesidad de intervención directa continua del atacante. En el caso de la máquina DVWA, se puede obtener control sobre ella y acceder al API Server del clúster, pudiendo  modificar los recursos sobre los que tenga permisos el pod comprometido.
-    \item Mitigaciones: proteger la integridad de la configuración y las políticas es primordial. Solo usuarios altamente confiables (admin) deberían tener permisos para modificar ClusterPolicies de Kyverno – implementar controles RBAC estrictos para ello. Se deben monitorizar y auditar los cambios en políticas: por ejemplo, usando Falco para detectar la creación o edición de una ClusterPolicy fuera de los procesos normales. Por otro lado, tambien se debe de tener los servicios actualizado y evitar vulnerabilidades críticas para poder reducir los vectores de entrada.
-\end{itemize}
-
-\subsection{Repudiation (Repudio)}
-
-\begin{itemize}
-    \item Activos afectados: logs y evidencias de auditoría de acciones en el clúster (registros de eventos de Kyverno, logs de Kubernetes API Server, métricas de seguridad). También los mensajes de error/alerta que informan de políticas violadas o fallos de admisión.
-    \item Escenario de ataque: un atacante sofisticado buscará ocultar sus huellas o generar confusión sobre sus actividades. Modificando las políticas de Kyverno, muchas acciones ofensivas pasarán desapercibidas o parecerán fallos del sistema. Por ejemplo, al cambiar la política de validación de Enforce a Audit, ya no se bloquean las acciones prohibidas sino que solo se registran advertencias – y a nivel de usuario todo “funciona” sin alertas visibles. Esto dificulta notar que la política ha sido violada, posponiendo su detección.
-    \item Consecuencias: la falta de registros claros y alertas dificulta la atribución y respuesta. Los administradores podrían tardar horas o días en notar que las políticas fueron alteradas (especialmente si el clúster “sigue funcionando” salvo detalles sutiles). En el peor caso, el atacante podría negar su autoría alegando que los problemas fueron fallos del sistema, especialmente si no hay evidencia concreta en logs de sus acciones.
-    \item Mitigaciones: fortalecer la observabilidad y detección temprana de actividades anómalas. Es esencial habilitar el auditing del API Server de Kubernetes y de Kyverno, registrando quién, cuándo y qué modifica en las políticas y otros recursos sensibles. Estas auditorías deben enviarse a sistemas inmutables (servidor de logs externo) para evitar su manipulación a posteriori.
-\end{itemize}
-
-\subsection{Information Disclosure (Divulgación de Información)}
-
-\begin{itemize}
-    \item Activos afectados: información sensible dentro del clúster, incluyendo secretos y credenciales (tokens de autenticación, contraseñas de BBDD), archivos confidenciales del nodo y datos en tránsito en la red interna del clúster.
-    \item Escenario de ataque: siguiendo el laboratorio indicado previamente, un atacante podría conseguir los tokens de los Service Account no solo de Kyverno, sino de otros Service Accounts y podría acceder a ellos con los permisos otorgados. En algunos casos, esto podría suponer acceder a bases de datos con información crítica.
-    \item Consecuencias: la exposición de estos activos permite movimiento lateral y escalada. Por ejemplo, con las credenciales de base de datos el atacante podría extraer información de la misma (si el objetivo incluye robo de datos). Con el token de Kyverno o el admin.conf, obtiene acceso administrador al clúster completo (impacto catastrófico a la confidencialidad de todos los recursos). Estas filtraciones de información comprometen gravemente la confidencialidad y pueden preludiar daños mayores (como abuso de cuentas comprometidas, robo de propiedad intelectual o datos personales, etc.).
-    \item Mitigaciones: en primer lugar, asegurar la configuración de las aplicaciones, no usando credenciales hardcodeadas ni en texto plano en variables de entorno de los Pods. En su lugar, utilizar objetos Secret con cifrado en reposo y montajes efímeros. Por otro lado, también se podrían aplicar políticas de Kyverno para impedir despliegues inseguros. Finalmente, hacer hardening del nodo: por ejemplo, proteger archivos como admin.conf (usando kubeconfig con certificados de cliente que expiren, o limitando su distribución), y rotar regularmente los secretos y tokens del clúster de modo que aunque se filtren, su ventana de uso sea corta.
-\end{itemize}
-
-\subsection{Denial of Service (Denegación de Servicio)}
-
-\begin{itemize}
-    \item Activos afectados: la disponibilidad de los servicios del clúster Kubernetes y sus aplicaciones. Esto incluye la capacidad de desplegar nuevos Pods/recursos, la estabilidad del API Server/Admission Controller, y los recursos computacionales del clúster (CPU, memoria, etc.).
-    \item Escenario de ataque: se podría aplicar una política de Kyverno de tipo validación que actuase como un "kill switch" silencioso, bloqueando todas las solicitudes de creación de objetos en el clúster, generando una denegación de servicio inmediata y muy grande.
-    \item Consecuencias: el impacto de un DoS exitoso es inmediato en la continuidad del servicio. Realizando el "kill-switch", ningún nuevo contenedor puede lanzarse mientras la política esté activa, por lo que los despliegues quedan “atascados” recibiendo errores genéricos. Esto podría paralizar la entrega de software durante horas; de hecho, si se ejecuta en un momento crítico (ej. antes de un despliegue programado), podría causar caídas de hasta un día completo. En el peor caso, un DoS combinado con persistencia puede dejar al clúster inutilizable mientras el atacante mantiene sus puertas traseras, complicando la recuperación. La confianza en el plano de control (admission controllers) también se ve minada, pues un administrador podría verse forzado a apagar Kyverno para restaurar el servicio, dejando al cluster sin esa capa de protección.
-    \item Mitigaciones: para mitigar un DoS es esencial limitar las capacidades que puedan ser abusadas y detectar rápidamente condiciones anómalas. La clave es monitorizar cambios en políticas de admisión: una alerta debe dispararse si aparece una ClusterPolicy nueva o si una existente cambia para denegar por defecto.
-\end{itemize}
-
-\subsection{Elevation of Privilege (Elevación de Privilegios)}
-
-\begin{itemize}
-    \item Activos afectados:mecanismos de control de acceso del clúster (Roles, RoleBindings, ClusterRoles), nodos del clúster y sus recursos (kubelet, contenedor runtime), y en general cualquier componente al que un atacante pudiera obtener acceso de mayor privilegio del que inicialmente tendría.
-    \item Escenario de ataque: el punto principal del laboratorio es el acceder al clúster explotando al Pod de DVWA. Una vez dentro, se podría obtener el token del Service Account, que tiene permisos de creación de Pods, y se crearía un nuevo Pod con privilegios (usuario root y privileged: true) y con un volumen hostPath que monta el filesystem raíz del nodo. Así, al ejecutar ese Pod (gracias a los permisos de la SA comprometida), se obtiene acceso de nivel nodo/host. Es decir, escalar desde usuario de contenedor sin privilegios a root en el nodo Kubernetes (control completo del sistema operativo del nodo). Este es un salto de privilegio crítico facilitado por la configuración insegura (Kubernetes no debería permitir hostPath+privileged a cuentas no privilegiadas).
-    \item Consecuencias: la elevación de privilegios es la categoría de amenaza más crítica, pues el atacante puede actuar con el mismo poder que un administrador legítimo (o incluso más, al introducir puertas traseras). En este escenario, la consecuencia final sería un compromiso completo del clúster: el atacante puede desplegar cualquier carga, extraer cualquier dato y modificar cualquier configuración a su antojo. Por ejemplo, podría permitir Pods peligrosos (saltándose políticas de seguridad) e incluso delegar al propio clúster la recreación de sus cargas maliciosas (persistencia automática). La integridad y disponibilidad de todo el entorno quedan comprometidas: el atacante de privilegios altos puede sabotear o manipular registros (dificultando futuras investigaciones), deshabilitar mecanismos de seguridad (como Kyverno mismo) y en general tomar control de la infraestructura.
-    \item Mitigaciones: limitar drásticamente los privilegios de las cuentas de servicio de aplicaciones sería clave para evitar este ataque. En un entorno seguro, DVWA no debería haber podido crear Pods ni otros recursos que faciliten escaladas. Esto se logra mediante una definición cuidadosa de Roles/RoleBindings (RBAC). Por ejemplo, un Role para DVWA que no incluya rol de creación de pods habría contenido al atacante dentro del Pod web inicial, sin forma de escapar.
-\end{itemize}
+\subsection{Métricas}
+\apartadoPendiente

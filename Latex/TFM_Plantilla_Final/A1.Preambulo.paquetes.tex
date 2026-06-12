@@ -2,50 +2,37 @@
 %%% Documento LaTeX - Paquetes
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\usepackage[a4paper,bindingoffset=3mm,bottom=35mm]{geometry}
+\usepackage[a4paper,bindingoffset=3mm,bottom=35mm,includefoot,footskip=12mm]{geometry}
 
 \usepackage[utf8]{inputenc}
 \usepackage[spanish]{babel}
-\usepackage{eurosym}
 
-\usepackage{amsmath,amssymb,latexsym,amsfonts}
-\usepackage{ifthen}
-\usepackage[squaren]{SIunits}
-
-\usepackage[pdftex]{graphicx}
-\usepackage{graphics,subcaption,wrapfig,float,graphpap}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{color}
 \usepackage{afterpage}
-\usepackage{rotating}
-
-\usepackage{color,xcolor,colortbl}
-\usepackage{array,tabularx,longtable,multirow,booktabs}
-\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
-
-\usepackage{setspace}
 \usepackage{paralist}
+\usepackage{array}
 \usepackage{enumerate}
 \usepackage{enumitem}
+\usepackage{float}
+\usepackage{setspace}
+\usepackage{listings}
+\usepackage{fancyhdr}
+\usepackage{rotating}
+\usepackage{multirow}
+\usepackage{booktabs}
 \usepackage{caption}
+\usepackage{makeidx}
+
 \usepackage{quotchap}
 \usepackage{lipsum}
+\usepackage{xcolor}
+\usepackage{tabularx}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
 
-\usepackage{fancyhdr}
-\setlength{\headheight}{16pt}
-\usepackage{titlesec,titletoc}
-\raggedbottom
-\usepackage{alltt}
-\usepackage{tipa}
-\usepackage{emptypage}
-
-\usepackage{listings}
-\usepackage{algorithm}
-\usepackage{algorithmic}
-
-\usepackage{imakeidx}
-\makeindex[columns=2, title=Glosario, intoc]
-\usepackage{acronym}
-\usepackage{minitoc}
-
-\usepackage[pdftex,bookmarksnumbered,hidelinks]{hyperref}
+\makeindex
 
 \renewcommand{\lstlistingname}{Listado}
+
+\usepackage[bookmarksnumbered,hidelinks]{hyperref}
