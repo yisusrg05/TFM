@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fase 0 - Laboratorio DRM</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.14.6/shaka-player.compiled.min.js"></script>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 2rem; background: #0b1120; color: #e5e7eb; }
+      main { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 360px 1fr; gap: 1rem; }
+      section { border: 1px solid #334155; border-radius: 8px; padding: 1rem; background: #111827; }
+      input { width: 100%; box-sizing: border-box; padding: .55rem; margin: .25rem 0 .75rem; background: #020617; color: #93c5fd; border: 1px solid #374151; border-radius: 6px; }
+      button { margin-right: .5rem; margin-bottom: .5rem; padding: .6rem 1rem; cursor: pointer; }
+      video { width: 100%; background: #000; border-radius: 8px; }
+      pre { white-space: pre-wrap; background: #020617; padding: .75rem; border-radius: 6px; min-height: 220px; }
+      .ok { color: #86efac; }
+      .bad { color: #fca5a5; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section>
+        <h1>Laboratorio DRM</h1>
+        <p>Introduce MPD y servidor de licencias observados en red para validar si se puede reproducir fuera de la app.</p>
+
+        <label>MPD</label>
+        <input id="manifest" value="https://storage.googleapis.com/shaka-demo-assets/sintel-widevine/dash.mpd" />
+
+        <label>License server</label>
+        <input id="license" value="http://localhost:8080/license/no_auth" />
+
+        <button id="play">Simular cliente externo</button>
+        <button id="probe">Comprobar soporte EME</button>
+        <button id="keys">Intentar mostrar claves</button>
+        <p id="status"></p>
+      </section>
+
+      <section>
+        <video id="video" controls autoplay muted></video>
+        <h3>Evidencias</h3>
+        <pre id="log"></pre>
+      </section>
+    </main>
+
+    <script>
+      const video = document.getElementById('video');
+      const player = new shaka.Player(video);
+      const statusEl = document.getElementById('status');
+      const logEl = document.getElementById('log');
+      const events = [];
+
+      function addEvent(event) {
+        events.push({ time: new Date().toISOString(), ...event });
+        logEl.textContent = JSON.stringify(events, null, 2);
+      }
+
+      function setStatus(message, ok = true) {
+        statusEl.textContent = message;
+        statusEl.className = ok ? 'ok' : 'bad';
+      }
+
+      function configure() {
+        player.configure({
+          drm: {
+            servers: {
+              'com.widevine.alpha': document.getElementById('license').value.trim()
+            }
+          }
+        });
+      }
+
+      player.getNetworkingEngine().registerRequestFilter((type, request) => {
+        if (type === shaka.net.NetworkingEngine.RequestType.MANIFEST) {
+          addEvent({ type: 'MANIFEST_REQUEST', uri: request.uris[0] });
+        }
+        if (type === shaka.net.NetworkingEngine.RequestType.LICENSE) {
+          request.headers['Content-Type'] = 'application/octet-stream';
+          addEvent({ type: 'LICENSE_REQUEST', uri: request.uris[0] });
+        }
+      });
+
+      player.getNetworkingEngine().registerResponseFilter((type, response) => {
+        if (type === shaka.net.NetworkingEngine.RequestType.LICENSE) {
+          addEvent({
+            type: 'LICENSE_RESPONSE',
+            uri: response.uri,
+            bytes: response.data ? response.data.byteLength : 0
+          });
+        }
+      });
+
+      document.getElementById('probe').addEventListener('click', async () => {
+        const support = await shaka.Player.probeSupport();
+        addEvent({ type: 'EME_SUPPORT', widevine: !!support.drm['com.widevine.alpha'] });
+        setStatus(support.drm['com.widevine.alpha'] ? 'Widevine disponible en el navegador.' : 'Widevine no disponible.', !!support.drm['com.widevine.alpha']);
+      });
+
+      document.getElementById('play').addEventListener('click', async () => {
+        try {
+          configure();
+          await player.unload();
+          await player.load(document.getElementById('manifest').value.trim());
+          addEvent({ type: 'PLAYBACK_STARTED' });
+          setStatus('Reproduccion iniciada.');
+        } catch (error) {
+          addEvent({ type: 'PLAYBACK_ERROR', message: error.message });
+          setStatus(`Error: ${error.message}`, false);
+        }
+      });
+
+      document.getElementById('keys').addEventListener('click', () => {
+        addEvent({
+          type: 'KEY_EXTRACTION_BLOCKED',
+          result: 'El navegador no expone las content keys del CDM por EME. El laboratorio registra que se obtuvo una licencia y si hubo reproduccion, pero no extrae claves.'
+        });
+        setStatus('Las claves no son exportables desde el CDM mediante EME.', false);
+      });
+
+      setStatus('Listo para auditar reproduccion externa.');
+    </script>
+  </body>
+</html>

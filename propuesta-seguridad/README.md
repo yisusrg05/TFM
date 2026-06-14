@@ -5,16 +5,16 @@
 La maqueta existente valida bien la topologia basica:
 
 - `client/`: cliente web estatico con Shaka Player.
-- `infra/varnish/default.vcl`: CDN local con Varnish.
-- `origin-content/`: contenido DASH VOD minimo servido por Nginx.
-- `license-server/`: mock HTTP de licencias.
+- `fase0-basico/varnish/default.vcl`: CDN local con Varnish.
+- `origin-content/`: contenido DASH VOD minimo y carpeta preparada para CENC/Widevine local.
+- `license-server/`: endpoint de licencias compatible con challenges Widevine; en fase 0 proxifica por defecto el servidor publico de pruebas Shaka/CWIP.
 
 La arquitectura actual es util para laboratorio, pero todavia no implementa controles reales de seguridad a nivel OTT:
 
 - No hay autenticacion de usuarios ni autorizacion por activo.
 - No hay control de acceso entre aplicacion, CDN y servidor de licencias.
 - No existe atadura entre identidad, sesion, dispositivo y peticion de segmento.
-- El contenido DASH actual es `clear` y el servidor de licencias es solo un mock.
+- La fase 0 ya contempla DRM/CENC/Widevine funcional con contenido publico de Shaka, pero el flujo de licencia queda expuesto sin controles de acceso de negocio.
 - `origin` y `license-server` quedan expuestos directamente, por lo que se puede eludir la CDN.
 
 ## 2. Brechas principales observadas
@@ -30,17 +30,17 @@ La arquitectura actual es util para laboratorio, pero todavia no implementa cont
    - Cualquier cliente que conozca el MPD puede pedir segmentos y licencias.
 
 3. **Licencia desacoplada del contexto de reproduccion**
-   - `license-server/src/index.js` devuelve una respuesta fija.
-   - No existen checks de usuario, activo, dispositivo, expiracion, nonce, integridad ni politica de uso.
+   - `license-server/src/index.js` acepta challenges Widevine y puede actuar como proxy.
+   - No existen checks de usuario, activo, dispositivo, expiracion, nonce, integridad ni politica de uso antes de solicitar licencia.
 
-4. **Contenido de prueba sin DRM real**
-   - `origin-content/dash/minimal.mpd` referencia un MP4 local en claro.
-   - Esto sirve para probar pipeline, pero no representa el escenario de Widevine que quieres defender.
+4. **DRM sin defensa perimetral suficiente**
+   - `origin-content/dash-widevine/` permite introducir contenido CENC/Widevine desde la fase 0.
+   - Aun con DRM, el sistema base sigue permitiendo abuso si el endpoint de licencia y las rutas de contenido son publicas.
 
 ### Altas
 
 5. **CORS excesivamente permisivo**
-   - `infra/varnish/default.vcl` usa `Access-Control-Allow-Origin: *`.
+   - `fase0-basico/varnish/default.vcl` usa `Access-Control-Allow-Origin: *`.
    - Eso facilita consumo desde clientes no oficiales o herramientas de terceros.
 
 6. **Sin sesion de reproduccion ni control de concurrencia**
@@ -323,11 +323,11 @@ Y deja el watermark forense imperceptible como linea futura o trabajo complement
    - cadencia automatizada
 4. Crear panel basico de evidencia o logs.
 
-### Fase 3: aproximacion mas real a Widevine
+### Fase 3: aproximacion mas real a Widevine productivo
 
-1. Sustituir el DASH clear por contenido empaquetado CENC.
-2. Introducir PSSH/KID por asset.
-3. Simular politicas reales de licencia.
+1. Sustituir las claves raw de laboratorio por integracion con proveedor Widevine autorizado.
+2. Introducir PSSH/KID por asset gestionados por proveedor.
+3. Probar politicas reales de licencia.
 4. Probar con reproductor oficial y con cliente externo para demostrar la diferencia entre:
    - app sin protecciones de backend
    - app con defensa en profundidad

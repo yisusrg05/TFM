@@ -3,7 +3,6 @@ const express = require('express');
 const { createClient } = require('redis');
 
 const app = express();
-app.use(express.json({ limit: '2mb' }));
 
 const port = Number(process.env.PORT || 8080);
 const appOrigin = process.env.APP_ORIGIN || 'http://localhost:9400';
@@ -11,6 +10,7 @@ const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET || 'access-secret';
 const playbackTokenSecret = process.env.PLAYBACK_TOKEN_SECRET || 'playback-secret';
 const originBaseUrl = process.env.ORIGIN_BASE_URL || 'http://origin';
 const licenseServerUrl = process.env.LICENSE_SERVER_URL || 'http://license-server:8080';
+const widevineManifestUrl = process.env.WIDEVINE_MANIFEST_URL || 'https://storage.googleapis.com/shaka-demo-assets/sintel-widevine/dash.mpd';
 const redisUrl = process.env.REDIS_URL || 'redis://redis:6379';
 const accessTokenTtlSeconds = Number(process.env.ACCESS_TOKEN_TTL_SECONDS || 3600);
 const playbackTokenTtlSeconds = Number(process.env.PLAYBACK_TOKEN_TTL_SECONDS || 90);
@@ -20,12 +20,20 @@ const autoBanThreshold = Number(process.env.AUTO_BAN_THRESHOLD || 100);
 const eventRetention = Number(process.env.EVENT_RETENTION || 300);
 
 const users = new Map([
-  ['demo@tfm.local', {
-    accountId: 'acc-demo-001',
+  ['usuario-permitido@tfm.local', {
+    accountId: 'acc-allowed-001',
     password: 'demo123',
-    displayName: 'Demo Viewer',
+    displayName: 'Usuario con permiso',
     plan: 'student',
-    entitlements: ['minimal'],
+    entitlements: ['sintel-widevine'],
+    roles: ['user', 'admin']
+  }],
+  ['usuario-denegado@tfm.local', {
+    accountId: 'acc-denied-001',
+    password: 'demo123',
+    displayName: 'Usuario sin permiso',
+    plan: 'student',
+    entitlements: [],
     roles: ['user', 'admin']
   }]
 ]);
@@ -383,6 +391,14 @@ function requireAdmin(accessPayload) {
 }
 
 app.use((req, res, next) => {
+  if (req.method === 'POST' && req.path === '/license') {
+    return express.raw({ type: '*/*', limit: '2mb' })(req, res, next);
+  }
+
+  return express.json({ limit: '2mb' })(req, res, next);
+});
+
+app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', appOrigin);
   res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS, POST');
   res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type, Range, X-Playback-Session-Id, X-Device-Id');
@@ -408,7 +424,7 @@ app.post('/auth/login', async (req, res) => {
   if (!account || account.password !== password) {
     await applyAccountSignals({ accountId: account?.accountId, deviceId, ip, signal: 'auth.failure' });
     await pushEvent('auth.failure', { email, deviceId, ip });
-    return jsonError(res, 401, 'INVALID_CREDENTIALS', 'Use demo@tfm.local / demo123');
+    return jsonError(res, 401, 'INVALID_CREDENTIALS', 'Use usuario-permitido@tfm.local or usuario-denegado@tfm.local / demo123');
   }
 
   const resolvedDeviceId = deviceId || `web-${crypto.randomUUID()}`;
@@ -427,7 +443,7 @@ app.post('/auth/login', async (req, res) => {
     ok: true,
     user: {
       accountId: account.accountId,
-      email: 'demo@tfm.local',
+      email: (email || '').toLowerCase(),
       displayName: account.displayName,
       plan: account.plan,
       roles: account.roles
@@ -449,7 +465,7 @@ app.post('/playback/session', async (req, res) => {
     return jsonError(res, 401, 'UNAUTHORIZED', error.message);
   }
 
-  const { assetId = 'minimal' } = req.body || {};
+  const { assetId = 'sintel-widevine' } = req.body || {};
   if (!accessPayload.entitlements.includes(assetId)) {
     return jsonError(res, 403, 'ASSET_NOT_ALLOWED', `Asset ${assetId} is not in account entitlements`);
   }
@@ -486,7 +502,8 @@ app.post('/playback/session', async (req, res) => {
     },
     playbackToken: issuePlaybackToken(session),
     playbackTokenExpiresIn: playbackTokenTtlSeconds,
-    manifestUrl: 'http://localhost:9180/content/dash/minimal.mpd',
+    manifestUrl: widevineManifestUrl,
+    licenseUrl: 'http://localhost:9180/license',
     risk
   });
 });
@@ -602,26 +619,32 @@ app.post('/license', async (req, res) => {
     signal: 'license.request'
   });
 
-  const licenseRequest = {
-    challenge: req.body || {},
-    accountId: authContext.session.accountId,
-    deviceId: authContext.session.deviceId,
-    assetId: authContext.session.assetId,
-    sessionId: authContext.session.sessionId,
-    requestedAt: nowIso(),
-    ip: getRequestIp(req),
-    risk
-  };
+  const challenge = Buffer.isBuffer(req.body)
+    ? req.body
+    : Buffer.from(JSON.stringify(req.body || {}));
 
   try {
     const upstreamResponse = await fetch(`${licenseServerUrl}/internal/license`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(licenseRequest)
+      headers: {
+        'Content-Type': req.get('content-type') || 'application/octet-stream',
+        'X-Account-Id': authContext.session.accountId,
+        'X-Device-Id': authContext.session.deviceId,
+        'X-Asset-Id': authContext.session.assetId,
+        'X-Playback-Session-Id': authContext.session.sessionId,
+        'X-Requested-At': nowIso(),
+        'X-Request-Ip': getRequestIp(req),
+        'X-Risk-Score': String(risk.score)
+      },
+      body: challenge
     });
-    const payload = await upstreamResponse.json();
     await pushEvent('license.request', { sessionId: authContext.session.sessionId, accountId: authContext.session.accountId, risk });
-    return res.status(upstreamResponse.status).json(payload);
+    const responseBody = Buffer.from(await upstreamResponse.arrayBuffer());
+    res.status(upstreamResponse.status);
+    copyHeaders(upstreamResponse.headers, res, ['content-type', 'cache-control']);
+    res.setHeader('X-Playback-Session-Id', authContext.session.sessionId);
+    res.setHeader('X-Risk-Score', String(risk.score));
+    return res.end(responseBody);
   } catch (error) {
     return jsonError(res, 502, 'UPSTREAM_ERROR', error.message);
   }

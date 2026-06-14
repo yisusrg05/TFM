@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fase 0 - Reproductor externo</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.14.6/shaka-player.compiled.min.js"></script>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 2rem; background: #111827; color: #e5e7eb; }
+      main { max-width: 1000px; margin: 0 auto; }
+      input { width: 100%; box-sizing: border-box; padding: .55rem; margin: .25rem 0 .75rem; background: #020617; color: #93c5fd; border: 1px solid #374151; border-radius: 6px; }
+      button { padding: .6rem 1rem; cursor: pointer; }
+      video { width: 100%; background: #000; border-radius: 8px; margin-top: 1rem; }
+      pre { white-space: pre-wrap; background: #020617; padding: .75rem; border-radius: 6px; }
+      .ok { color: #86efac; }
+      .bad { color: #fca5a5; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Reproductor externo</h1>
+      <p>Este cliente no inicia sesion en la plataforma. Usa la URL del MPD y el endpoint de licencia no autenticado.</p>
+
+      <label>MPD obtenido inspeccionando red</label>
+      <input id="manifest" value="https://storage.googleapis.com/shaka-demo-assets/sintel-widevine/dash.mpd" />
+
+      <label>License server no_auth</label>
+      <input id="license" value="http://localhost:8080/license/no_auth" />
+
+      <button id="play">Reproducir fuera de la plataforma</button>
+      <p id="status"></p>
+      <video id="video" controls autoplay muted></video>
+      <pre id="log"></pre>
+    </main>
+
+    <script>
+      const player = new shaka.Player(document.getElementById('video'));
+      const statusEl = document.getElementById('status');
+      const logEl = document.getElementById('log');
+
+      function setStatus(message, ok = true) {
+        statusEl.textContent = message;
+        statusEl.className = ok ? 'ok' : 'bad';
+      }
+
+      function configure() {
+        const licenseUri = document.getElementById('license').value.trim();
+        player.configure({
+          drm: {
+            servers: {
+              'com.widevine.alpha': licenseUri
+            }
+          }
+        });
+      }
+
+      player.getNetworkingEngine().registerRequestFilter((type, request) => {
+        if (type === shaka.net.NetworkingEngine.RequestType.LICENSE) {
+          request.headers['Content-Type'] = 'application/octet-stream';
+          logEl.textContent = `LICENSE request -> ${request.uris.join(', ')}`;
+        }
+      });
+
+      document.getElementById('play').addEventListener('click', async () => {
+        try {
+          configure();
+          await player.unload();
+          await player.load(document.getElementById('manifest').value.trim());
+          setStatus('Reproduccion externa iniciada sin login en la plataforma.');
+        } catch (error) {
+          setStatus(`Error: ${error.message}`, false);
+          logEl.textContent = error.stack || error.message;
+        }
+      });
+
+      setStatus('Listo para reproducir usando no_auth.');
+    </script>
+  </body>
+</html>

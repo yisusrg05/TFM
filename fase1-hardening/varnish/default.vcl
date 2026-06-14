@@ -29,7 +29,7 @@ sub vcl_synth {
     set resp.http.Access-Control-Allow-Origin = "http://localhost:9300";
     set resp.http.Access-Control-Allow-Methods = "GET, HEAD, OPTIONS, POST";
     set resp.http.Access-Control-Allow-Headers = "Authorization, Content-Type, Range, X-Playback-Session-Id, X-Device-Id";
-    set resp.http.Access-Control-Expose-Headers = "Content-Length, Content-Range, Accept-Ranges, X-Request-Id";
+    set resp.http.Access-Control-Expose-Headers = "Content-Length, Content-Range, Accept-Ranges, X-Request-Id, X-Playback-Session-Id";
     set resp.http.Access-Control-Max-Age = "600";
     set resp.http.X-Request-Id = req.xid;
 
@@ -40,7 +40,7 @@ sub vcl_deliver {
     set resp.http.Access-Control-Allow-Origin = "http://localhost:9300";
     set resp.http.Access-Control-Allow-Methods = "GET, HEAD, OPTIONS, POST";
     set resp.http.Access-Control-Allow-Headers = "Authorization, Content-Type, Range, X-Playback-Session-Id, X-Device-Id";
-    set resp.http.Access-Control-Expose-Headers = "Content-Length, Content-Range, Accept-Ranges, X-Request-Id";
+    set resp.http.Access-Control-Expose-Headers = "Content-Length, Content-Range, Accept-Ranges, X-Request-Id, X-Playback-Session-Id";
     set resp.http.X-Request-Id = req.xid;
     set resp.http.Cache-Control = "no-store";
 }

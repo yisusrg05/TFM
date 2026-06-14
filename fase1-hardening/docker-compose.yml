@@ -25,6 +25,7 @@ services:
       - PLAYBACK_TOKEN_SECRET=phase1-playback-secret
       - ORIGIN_BASE_URL=http://origin
       - LICENSE_SERVER_URL=http://license-server:8080
+      - WIDEVINE_MANIFEST_URL=https://storage.googleapis.com/shaka-demo-assets/sintel-widevine/dash.mpd
       - MAX_CONCURRENT_STREAMS=1
       - ACCESS_TOKEN_TTL_SECONDS=3600
       - PLAYBACK_TOKEN_TTL_SECONDS=90
@@ -49,6 +50,8 @@ services:
     environment:
       - PORT=8080
       - NODE_ENV=production
+      - WIDEVINE_LICENSE_URL=${WIDEVINE_LICENSE_URL:-https://cwip-shaka-proxy.appspot.com/no_auth}
+      - WIDEVINE_LICENSE_HEADERS_JSON=${WIDEVINE_LICENSE_HEADERS_JSON:-{}}
     networks:
       - ott-fase1-net
     restart: unless-stopped

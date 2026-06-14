@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fase 0 - Plataforma OTT</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.14.6/shaka-player.compiled.min.js"></script>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 2rem; background: #0f172a; color: #e2e8f0; }
+      .layout { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 320px 1fr; gap: 1rem; }
+      .panel { padding: 1rem; border: 1px solid #334155; border-radius: 8px; background: #111827; }
+      video { width: 100%; background: #000; border-radius: 8px; margin-top: 1rem; }
+      code, input { color: #93c5fd; }
+      input { width: 100%; box-sizing: border-box; padding: .55rem; margin: .25rem 0 .75rem; background: #020617; border: 1px solid #334155; border-radius: 6px; }
+      button { margin-right: .5rem; margin-bottom: .5rem; padding: .6rem 1rem; cursor: pointer; }
+      pre { white-space: pre-wrap; background: #020617; padding: .75rem; border-radius: 6px; min-height: 90px; }
+      .ok { color: #86efac; }
+      .warn { color: #fcd34d; }
+      .bad { color: #fca5a5; }
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <section class="panel">
+        <h1>Plataforma OTT</h1>
+        <p>Fase 0 con Widevine funcional y control basico de permisos en el proxy de licencia.</p>
+
+        <label>Email</label>
+        <input id="email" value="usuario-permitido@tfm.local" />
+        <label>Password</label>
+        <input id="password" type="password" value="demo123" />
+
+        <button id="loginAllowed">Login con permiso</button>
+        <button id="loginDenied">Login sin permiso</button>
+        <button id="play">Reproducir desde plataforma</button>
+
+        <h3>Endpoints observables</h3>
+        <p>MPD: <code id="manifestText">-</code></p>
+        <p>Licencia plataforma: <code id="licenseText">-</code></p>
+        <p>Licencia no_auth: <code>http://localhost:8080/license/no_auth</code></p>
+      </section>
+
+      <section class="panel">
+        <p id="status" class="warn">Inicializando...</p>
+        <video id="video" controls autoplay muted></video>
+        <h3>Estado</h3>
+        <pre id="log"></pre>
+      </section>
+    </div>
+
+    <script>
+      const statusEl = document.getElementById('status');
+      const logEl = document.getElementById('log');
+      const video = document.getElementById('video');
+      const player = new shaka.Player(video);
+      const cdnBaseUrl = 'http://localhost:8080';
+
+      let accessToken = '';
+      let playback = {
+        manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/sintel-widevine/dash.mpd',
+        protectedLicenseUri: `${cdnBaseUrl}/platform/license`
+      };
+
+      function log(data) {
+        logEl.textContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+      }
+
+      function setStatus(text, className = 'ok') {
+        statusEl.textContent = text;
+        statusEl.className = className;
+      }
+
+      function configurePlayer() {
+        player.configure({
+          drm: {
+            servers: {
+              'com.widevine.alpha': playback.protectedLicenseUri
+            }
+          }
+        });
+      }
+
+      player.getNetworkingEngine().registerRequestFilter((type, request) => {
+        if (type === shaka.net.NetworkingEngine.RequestType.LICENSE) {
+          request.headers['Authorization'] = `Bearer ${accessToken}`;
+          request.headers['Content-Type'] = 'application/octet-stream';
+        }
+      });
+
+      async function login(email, password) {
+        const res = await fetch(`${cdnBaseUrl}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Login fallido');
+
+        accessToken = data.accessToken;
+        playback = data.playback;
+        document.getElementById('manifestText').textContent = playback.manifestUri;
+        document.getElementById('licenseText').textContent = playback.protectedLicenseUri;
+        configurePlayer();
+        setStatus(`Login correcto: ${data.user.displayName}`);
+        log(data);
+      }
+
+      async function playFromPlatform() {
+        if (!accessToken) throw new Error('Primero inicia sesion.');
+        await player.unload();
+        configurePlayer();
+        await player.load(playback.manifestUri);
+        setStatus('Reproduciendo desde la plataforma OTT.');
+      }
+
+      document.getElementById('loginAllowed').addEventListener('click', () => {
+        document.getElementById('email').value = 'usuario-permitido@tfm.local';
+        document.getElementById('password').value = 'demo123';
+        login('usuario-permitido@tfm.local', 'demo123').catch((e) => {
+          setStatus(e.message, 'bad');
+          log(e.stack || e.message);
+        });
+      });
+
+      document.getElementById('loginDenied').addEventListener('click', () => {
+        document.getElementById('email').value = 'usuario-denegado@tfm.local';
+        document.getElementById('password').value = 'demo123';
+        login('usuario-denegado@tfm.local', 'demo123').catch((e) => {
+          setStatus(e.message, 'bad');
+          log(e.stack || e.message);
+        });
+      });
+
+      document.getElementById('play').addEventListener('click', () => {
+        playFromPlatform().catch((e) => {
+          setStatus(`Error reproduccion: ${e.message}`, 'bad');
+          log(e.stack || e.message);
+        });
+      });
+
+      configurePlayer();
+      document.getElementById('manifestText').textContent = playback.manifestUri;
+      document.getElementById('licenseText').textContent = playback.protectedLicenseUri;
+      setStatus('Cliente listo. Prueba ambos usuarios.');
+    </script>
+  </body>
+</html>
