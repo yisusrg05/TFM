@@ -3,94 +3,147 @@
 \chapter{Fundamentos teóricos y estado del arte}
 
 \section{\textit{Streaming} OTT}
-\apartadoPendiente
+
+El modelo \textit{Over-The-Top} (OTT) designa la distribución de contenido audiovisual sobre redes IP abiertas, desacoplando el servicio de vídeo del operador de acceso y apoyándose en mecanismos de entrega adaptativa sobre HTTP. Desde un punto de vista técnico, su consolidación se explica por la convergencia entre segmentación del flujo, manifiestos de reproducción, escalado horizontal mediante CDN y soporte multiplataforma en navegadores, móviles, \textit{smart TV} y \textit{set-top boxes}. Esta combinación ha convertido a OTT en el paradigma dominante para la distribución de vídeo por Internet, tanto en directo como bajo demanda, y ha desplazado el foco de seguridad desde el simple transporte del contenido hacia la protección extremo a extremo del ecosistema de reproducción y autorización \cite{iso23009dash2022,dashif-about,rfc8216-hls}.
 
 \subsection{Arquitectura OTT}
-\apartadoPendiente
+
+Una arquitectura OTT típica separa claramente varias funciones. En origen, una cadena de ingestión y codificación genera múltiples representaciones del mismo contenido a distintos \textit{bitrates} y resoluciones. A continuación, un \textit{packager} segmenta esas representaciones, genera los manifiestos y, si procede, aplica cifrado y metadatos de protección. El servidor \textit{origin} publica dichos objetos, mientras que la CDN replica segmentos y manifiestos cerca del usuario final para reducir latencia y absorber carga. En el extremo cliente, un reproductor selecciona la calidad adecuada en función del estado de red, solicita licencias DRM y coordina el descifrado con el CDM correspondiente. Esta separación funcional aporta escalabilidad, pero también fragmenta los puntos de control de seguridad, ya que autenticación, autorización, expedición de licencias y entrega de segmentos pueden recaer en componentes distintos \cite{shaka-packager-docs,shaka-packager-drm,dashif-about,w3ceme2026}.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth,clip=true]{figuras/flujo_drm.png}
+  \caption{Flujo general de distribución OTT con DRM}
+  \label{fig:flujoOTT-DRM}
+\end{figure}
 
 \subsection{\textit{Live streaming}}
-\apartadoPendiente
+
+En \textit{live streaming}, el contenido no está completamente disponible en el instante de la solicitud, sino que los segmentos se producen y publican conforme avanza el evento. Este rasgo introduce un compromiso constante entre latencia, tamaño de segmento, estabilidad del \textit{buffer} y capacidad de recuperación ante pérdidas o variaciones de red. HLS define \textit{live playlists} capaces de añadir y retirar segmentos de la ventana activa, mientras que MPEG-DASH contempla perfiles y directrices de interoperabilidad específicas para directo. En consecuencia, los despliegues OTT en vivo son especialmente sensibles a la sincronización temporal, a la propagación de cachés y a la validez de tokens y sesiones, ya que cualquier desalineación afecta tanto a la experiencia de usuario como al cumplimiento de las políticas de acceso \cite{rfc8216-hls,iso23009dash2022,dashif-about}.
 
 \subsection{CDN}
-\apartadoPendiente
+
+La CDN es el subsistema encargado de distribuir manifiestos y segmentos desde ubicaciones cercanas al consumidor, reduciendo el recorrido de red y descargando al \textit{origin}. En OTT moderno, la CDN no solo mejora rendimiento y escalabilidad, sino que se convierte en una pieza crítica del perímetro de acceso, pues suele servir directamente los objetos multimedia que el reproductor necesita. DASH-IF destaca, entre otras ventajas, el soporte de múltiples CDN y cachés a partir del mismo manifiesto, mejorando flexibilidad y tolerancia a fallos. Sin embargo, desde la perspectiva de seguridad, el hecho de que un segmento viaje cifrado no implica que su entrega sea legítima: si URLs firmadas, tokens o manifiestos se comparten fuera de contexto, la CDN puede seguir sirviendo tráfico válido desde el punto de vista criptográfico pero abusivo desde el punto de vista del negocio \cite{dashif-about,rodrigues2024cdn,w3ceme2026}.
 
 \subsection{HLS y MPEG-DASH}
-\apartadoPendiente
+
+HLS y MPEG-DASH resuelven el mismo problema general —la entrega adaptativa de contenido segmentado sobre HTTP—, pero lo hacen con modelos de señalización distintos. HLS organiza la presentación mediante \textit{Master Playlists} y \textit{Media Playlists}, e identifica los segmentos y los parámetros de cifrado a través de etiquetas como \texttt{EXT-X-KEY}. MPEG-DASH, por su parte, define una \textit{Media Presentation Description} (MPD) como documento maestro que describe representaciones, alineamiento temporal y localización de segmentos. DASH se apoya de forma natural en CENC y en el ecosistema EME para entornos web y \textit{multi-DRM}, mientras que HLS constituye la base obligada en el ecosistema Apple y se integra de manera nativa con FairPlay Streaming. En la práctica, ambos protocolos conviven en arquitecturas OTT reales, y su elección responde menos a una superioridad técnica absoluta que a requisitos de compatibilidad, DRM y parque de dispositivos \cite{rfc8216-hls,iso23009dash2022,apple-fps,dashif-about}.
 
 \section{Sistemas DRM}
-\apartadoPendiente
+
+Los sistemas DRM (\textit{Digital Rights Management}) combinan cifrado del contenido, gestión de licencias y aplicación de reglas de negocio para limitar quién puede reproducir un activo digital, durante cuánto tiempo y bajo qué condiciones. En el ámbito OTT, su función principal no es impedir toda copia posible, sino elevar el coste de acceso no autorizado y condicionar el descifrado a la obtención de una licencia válida por parte de un módulo confiable del cliente. Esta precisión es importante, porque ni EME ni el propio DRM sustituyen a los mecanismos de autenticación, autorización contextual, control de concurrencia o monitorización del abuso; de hecho, la especificación EME deja expresamente esas funciones en manos de la aplicación \cite{w3ceme2026,rafi2023mobiledrm}.
 
 \subsection{Concepto de DRM}
-\apartadoPendiente
+
+En términos funcionales, un DRM introduce tres decisiones técnicas. La primera consiste en cifrar el contenido o partes del mismo con claves que no viajan en claro junto al flujo. La segunda es establecer un protocolo de licenciamiento por el que el cliente solicita y recibe, bajo ciertas condiciones, el material necesario para descifrar. La tercera es hacer cumplir en el extremo cliente restricciones de uso, calidad, persistencia o salida segura. Esta arquitectura protege razonablemente bien el camino criptográfico entre contenido cifrado y reproducción autorizada, pero deja fuera del núcleo DRM otras superficies de ataque relevantes, como el robo de tokens, el abuso de credenciales, la compartición de sesiones o la redistribución desde clientes comprometidos \cite{w3ceme2026,rafi2023mobiledrm,patat2022}.
 
 \subsection{PlayReady}
-\apartadoPendiente
+
+PlayReady es la solución DRM promovida por Microsoft para la entrega de contenido premium en múltiples dispositivos y entornos HTML5. La documentación oficial lo presenta como una \textit{suite} orientada a facilitar modelos de negocio flexibles y acceso multiplataforma, incluyendo soporte para estándares y componentes de protección reforzada. Desde la literatura académica reciente, PlayReady aparece, junto con FairPlay y Widevine, como uno de los tres grandes DRM comerciales desplegados de forma masiva en el ecosistema móvil y OTT. Su relevancia en este capítulo es comparativa: permite contextualizar que Widevine no es un caso aislado, sino parte de un conjunto de soluciones que comparten la misma lógica general de cifrado, licencias y robustez del cliente \cite{microsoft-playready,rafi2023mobiledrm}.
 
 \subsection{FairPlay}
-\apartadoPendiente
+
+FairPlay Streaming es la tecnología DRM de Apple para la entrega segura de medios sobre HLS en plataformas Apple. Apple la documenta como un mecanismo que permite cifrar contenido, intercambiar claves de forma segura y proteger la reproducción en iOS, tvOS, macOS y otros entornos del fabricante. La pieza de servidor clave es el \textit{Key Server Module} (KSM), para el que Apple distribuye un SDK con guías de implementación, claves de desarrollo y ejemplos de manejo de peticiones. Su principal fortaleza es la fuerte integración vertical con el ecosistema Apple, lo que simplifica la interoperabilidad y el control del camino de reproducción; su principal limitación, desde una perspectiva multiproveedor, es que ese mismo acoplamiento reduce su utilidad fuera del stack HLS + Apple \cite{apple-fps,rafi2023mobiledrm}.
 
 \subsection{Widevine}
-\apartadoPendiente
+
+Widevine es la solución DRM de Google para servicios OTT y CAS. Su documentación oficial destaca una aproximación basada en estándares, con capacidad para licenciar, distribuir de forma segura y proteger la reproducción de contenido sobre un gran número de dispositivos y plataformas. Además, remite explícitamente a CENC y EME como especificaciones abiertas sobre las que se construye parte de su ecosistema, y subraya la importancia de la raíz hardware de confianza mediante \textit{keyboxes} y procesos de descifrado y renderizado seguros cuando el dispositivo lo permite. Esta amplitud de despliegue, junto con su presencia en navegadores, Android y electrónica de consumo, explica que Widevine sea el foco principal del presente TFM \cite{widevine2024,widevine2024,patat2022}.
 
 \section{Arquitectura Widevine}
-\apartadoPendiente
+
+La arquitectura Widevine puede entenderse como la interacción coordinada entre interfaz web o aplicación, CDM, servidor de licencias, \textit{packager}, metadatos CENC y la infraestructura de distribución. Aunque muchos de sus detalles internos son propietarios, la combinación de documentación oficial, estándares abiertos y literatura académica permite reconstruir suficientemente bien su funcionamiento para fines de auditoría \cite{w3ceme2026,widevine2024,patat2022}.
 
 \subsection{EME}
-\apartadoPendiente
+
+Encrypted Media Extensions (EME) es la interfaz estandarizada por el W3C para controlar desde el navegador la reproducción de contenido cifrado. La especificación es especialmente relevante porque aclara dos cuestiones esenciales. En primer lugar, EME no define un sistema DRM, sino una API común para descubrir, seleccionar e interactuar con sistemas de protección de contenido. En segundo lugar, la propia especificación indica que funciones como autenticación y autorización quedan a cargo de los autores de la aplicación o de la página. Por tanto, EME habilita el canal técnico entre reproductor y CDM, pero no resuelve por sí sola los controles de acceso de negocio. Adicionalmente, EME exige contexto seguro y recomienda transporte seguro para todo el tráfico que involucre mensajes del CDM \cite{w3ceme2026}.
 
 \subsection{CDM}
-\apartadoPendiente
+
+El CDM (\textit{Content Decryption Module}) es el componente que procesa las peticiones de licencia, gestiona claves y participa en el descifrado del contenido. En Widevine, la robustez real del CDM depende del nivel de seguridad disponible en el dispositivo. Patat et al. describen que Widevine L1 sitúa criptografía y procesamiento de vídeo dentro del TEE, mientras que L3 desplaza ambas funciones fuera de dicho entorno, quedando implementadas totalmente en software. Este punto es capital para esta investigación: cuando el CDM es \textit{software-only}, el cliente deja de ser una base de confianza fuerte y pasa a ser un entorno potencialmente instrumentable desde software de terceros. La literatura ha mostrado que ese escenario permite estudiar y recuperar material criptográfico crítico del flujo de descifrado, de modo que L3 no debe considerarse equivalente a un perímetro de seguridad robusto para contenido de alto valor \cite{patat2022,rafi2023mobiledrm,widevine2024}.
 
 \subsection{\textit{License server}}
-\apartadoPendiente
+
+El servidor de licencias es el componente que responde a los mensajes generados por el CDM y decide, en última instancia, si se entrega o no el material de licencia necesario para descifrar. En entornos EME, la aplicación media explícitamente entre el navegador y el servidor, por lo que el flujo completo incluye una capa adicional de lógica del lado del servicio. La documentación de Shaka Packager muestra que el aprovisionamiento de Widevine se articula en torno a parámetros como \textit{key server URL}, \textit{content ID} y \textit{policy}, evidenciando que el \textit{license server} no actúa como mero contenedor de claves, sino como punto de aplicación de reglas de negocio. Esta observación es importante porque muchas debilidades prácticas de los sistemas OTT no residen en el cifrado, sino en cómo se autoriza el acceso a la licencia \cite{w3ceme2026,shaka-packager-drm,widevine2024}.
 
 \subsection{\textit{Packaging}}
-\apartadoPendiente
+
+El \textit{packaging} prepara el flujo ya codificado para su distribución OTT. Shaka Packager, como referencia ampliamente utilizada, documenta que puede empaquetar contenido para DASH y HLS, segmentar el flujo, generar manifiestos y aplicar cifrado sin realizar \textit{transcoding}, que debe haberse completado previamente. También soporta obtención de claves desde servidores Widevine y PlayReady, así como generación de contenido \textit{multi-DRM}. Por ello, el \textit{packager} es un punto de convergencia entre requisitos audiovisuales y de protección: asigna claves o identificadores de clave a pistas concretas, inserta metadatos necesarios para el cliente y condiciona la forma en que manifiestos, segmentos y licencias se relacionarán durante la reproducción \cite{shaka-packager-docs,shaka-packager-drm}.
 
 \subsection{CENC}
-\apartadoPendiente
+
+Common Encryption (CENC) es el estándar que permite describir y aplicar un esquema común de cifrado sobre contenedores ISO BMFF, facilitando que el mismo contenido protegido pueda ser consumido por diferentes DRM. El registro de formatos de EME para CENC define el uso de cajas \texttt{PSSH} y un \textit{Common SystemID}, mientras que DASH-IF destaca la ventaja operativa de cifrar una vez y reproducir en distintos entornos mediante múltiples tecnologías DRM. En otras palabras, CENC separa el problema del cifrado del problema del sistema concreto que entrega la licencia, y esa separación es una de las razones por las que Widevine, PlayReady y FairPlay pueden coexistir en flujos OTT complejos con una misma base de medios segmentados \cite{w3c-cenc-initdata,dashif-about,widevine2024}.
 
 \subsection{Flujo de intercambio de claves}
-\apartadoPendiente
+
+De forma simplificada, el flujo completo comienza cuando el reproductor detecta que el contenido está protegido y solicita acceso al sistema de claves apropiado mediante EME. Después, crea un objeto \texttt{MediaKeys} y una sesión de claves; el CDM genera un mensaje con los datos de inicialización relevantes, normalmente asociados a metadatos CENC y cajas \texttt{PSSH}. La aplicación envía dicho mensaje al servidor de licencias, que valida el contexto y responde con la licencia. Una vez procesada la respuesta por el CDM, el reproductor puede solicitar a la CDN los segmentos cifrados y reproducirlos a través del camino permitido por el nivel de seguridad disponible. Este flujo muestra que el acceso efectivo al contenido depende tanto de la validez criptográfica de la licencia como de las decisiones de control de acceso tomadas fuera del núcleo DRM \cite{w3ceme2026,w3c-cenc-initdata,patat2022,widevine2024}.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth,clip=true]{figuras/flujo_claves.png}
+  \caption{Flujo de reproducción y obtención de claves DRM en un entorno OTT}
+  \label{fig:flujo-claves}
+\end{figure}
 
 \section{Amenazas en ecosistemas DRM}
-\apartadoPendiente
+
+En ecosistemas OTT reales, buena parte de las amenazas más relevantes no consisten en romper el algoritmo de cifrado, sino en abusar del contexto de autorización que rodea al DRM. Precisamente por eso, un sistema puede mantener intacto Widevine y, aun así, sufrir robo de tokens, compartición de cuentas, secuestro de sesiones o consumo abusivo en CDN \cite{w3ceme2026,rodrigues2024cdn}.
 
 \subsection{\textit{Token theft}}
-\apartadoPendiente
+
+Muchos servicios OTT usan tokens, URLs firmadas o credenciales temporales para autorizar el acceso a manifiestos, segmentos o licencias. Si esos artefactos se filtran desde el cliente, desde un proxy intermedio o desde un entorno de depuración, el atacante no necesita romper el DRM para reutilizarlos. El problema se agrava cuando el token no está estrictamente ligado al dispositivo, a la IP, a la ventana temporal o al estado de la sesión. Rodrigues et al. analizan precisamente el impacto del uso compartido y abuso de tokens sobre la infraestructura CDN, mostrando que el control de acceso debe apoyarse en límites y patrones observables, no solo en la mera existencia del token \cite{rodrigues2024cdn,w3ceme2026}.
 
 \subsection{\textit{Replay}}
-\apartadoPendiente
+
+La reutilización de peticiones o credenciales válidas fuera de su contexto original es una amenaza natural en flujos de licencia y distribución. En OTT, el \textit{replay} suele materializarse no como una rotura del cifrado, sino como la repetición de tokens válidos, URLs firmadas o solicitudes emitidas dentro de una ventana temporal aceptada. Por ello, la defensa eficaz exige acotar la vida útil de los artefactos de autorización y vincularlos a contexto, dispositivo o sesión. Cuando esto no se hace, el sistema sigue viendo mensajes formalmente válidos, aunque su uso ya no responda al escenario autorizado \cite{rodrigues2024cdn,w3ceme2026}.
 
 \subsection{\textit{Credential sharing}}
-\apartadoPendiente
+
+En el contexto OTT, el abuso de credenciales incluye tanto la compartición voluntaria de cuentas como el uso automatizado de credenciales robadas. OWASP define \textit{credential stuffing} como la inyección automatizada de pares usuario-contraseña sustraídos en formularios de acceso, una técnica especialmente problemática cuando las credenciales se reutilizan entre servicios. Aunque este fenómeno no rompe el DRM en sentido estricto, sí invalida el supuesto comercial de un usuario legítimo por sesión o por hogar. Desde la perspectiva del proveedor, el problema real no es si el contenido está cifrado, sino si la identidad que activa la licencia coincide con el sujeto autorizado a consumirla \cite{owasp-credential-stuffing,rodrigues2024cdn}.
 
 \subsection{CDN \textit{leeching}}
-\apartadoPendiente
+
+El \textit{CDN leeching} describe situaciones en las que terceros consumen masivamente contenido servido por la CDN aprovechando artefactos de autorización reutilizables o insuficientemente ligados al contexto. El activo que se explota no es la clave de descifrado, sino la capacidad de la infraestructura para seguir entregando segmentos aparentemente legítimos. Rodrigues et al. estudian este problema desde el uso compartido de tokens y proponen contramedidas basadas en límites aceptables de peticiones, degradación de servicio y análisis estadístico de accesos. Es una amenaza especialmente relevante para este TFM, porque conecta directamente el plano de distribución con el plano económico del servicio \cite{rodrigues2024cdn}.
 
 \subsection{\textit{Session hijacking}}
-\apartadoPendiente
+
+OWASP describe el \textit{session hijacking} como el compromiso del token de sesión mediante robo o predicción, con el objetivo de obtener acceso no autorizado. Aplicado a OTT, este riesgo implica que un atacante puede heredar el contexto de una sesión ya autenticada y utilizarla para solicitar manifiestos, segmentos o incluso licencias sin poseer necesariamente las credenciales originales. Desde el punto de vista del servicio, esta amenaza demuestra que la robustez del DRM es insuficiente si el contexto de sesión que lo invoca puede ser suplantado o reutilizado \cite{owasp-session-hijacking}.
 
 \subsection{\textit{Proxying}}
-\apartadoPendiente
+
+El \textit{proxying} introduce un intermediario que reenvía peticiones entre el cliente legítimo y consumidores no autorizados. La importancia de este vector reside en que el servicio puede observar tráfico que sigue pareciendo originado por un cliente válido, mientras que en realidad actúa como \textit{relay} para terceros. En otras palabras, el DRM sigue funcionando desde el punto de vista del cliente original, pero el perímetro lógico del servicio queda desbordado. Este patrón se relaciona con escenarios de interposición y de secuestro de contexto, más cercanos al abuso operacional que a la criptanálisis del DRM \cite{owasp-session-hijacking,w3ceme2026}.
 
 \subsection{\textit{Abuse automation}}
-\apartadoPendiente
 
-\section{Estado del arte académico}
-\apartadoPendiente
+La automatización amplifica todos los vectores anteriores. OWASP enfatiza que el \textit{credential stuffing} se basa precisamente en herramientas automáticas capaces de probar credenciales a gran escala, mientras que Rodrigues et al. abordan el abuso de acceso a CDN desde patrones masivos y estadísticos. En OTT, la automatización permite probar credenciales, explotar tokens compartidos, multiplicar accesos concurrentes y simular poblaciones enteras de clientes. Por ello, la detección de abuso no puede limitarse a verificar si la licencia es válida, sino que debe incorporar ritmo de peticiones, correlación entre IPs, repetición de patrones y comportamiento concurrente \cite{owasp-credential-stuffing,rodrigues2024cdn}.
+
+\section{Estado del arte}
+
+La investigación reciente sobre DRM en sistemas OTT ha dejado de centrarse exclusivamente en el supuesto teórico de que el cifrado basta para frenar la redistribución. En su lugar, los trabajos más relevantes analizan tres dimensiones complementarias: la robustez real del cliente, las implicaciones de privacidad de los identificadores y el abuso operacional de la infraestructura de distribución \cite{patat2022,patat2023,rafi2023mobiledrm,rodrigues2024cdn}.
 
 \subsection{\textit{Exploring Widevine for Fun and Profit}}
-\apartadoPendiente
+
+El trabajo de Patat et al. supone, probablemente, la referencia más importante para cualquier estudio técnico contemporáneo sobre Widevine. Los autores presentan una ingeniería inversa detallada de sus componentes en Android, reconstruyen la \textit{key ladder}, diseccionan mensajes intercambiados en el ecosistema DRM y desarrollan la herramienta WideXtractor para inspeccionar la actividad interna de Widevine durante la reproducción. Su hallazgo más relevante para este TFM es que la comprensión profunda del sistema permite comprometer la variante Android \textit{software-only} L3 hasta recuperar su raíz de confianza. En términos de investigación, este resultado invalida la idea de que Widevine ofrece una garantía homogénea en todos los dispositivos: la seguridad efectiva depende críticamente de si el contenido se reproduce bajo L1 o bajo L3 \cite{patat2022}.
 
 \subsection{\textit{Your DRM Can Watch You Too}}
-\apartadoPendiente
+
+En un plano distinto, aunque complementario, Patat, Sabt y Fouque estudian las implicaciones de privacidad de las implementaciones de Widevine EME en navegadores. Su trabajo demuestra que varios navegadores exponen el \textit{Widevine Client ID} con poco o ningún consentimiento explícito y que las divergencias respecto a las guías de privacidad de EME pueden facilitar seguimiento de usuarios. Este enfoque amplía el estado del arte de forma decisiva: no solo importa si el DRM protege el contenido, sino también qué información del dispositivo y del usuario filtra en el proceso. Para el presente TFM, esta línea es valiosa porque muestra que el DRM puede introducir una tensión adicional entre robustez, control y privacidad \cite{patat2023,w3ceme2026}.
 
 \subsection{Otros trabajos sobre DRM y protección OTT}
-\apartadoPendiente
+
+Rafi, Shepherd y Markantonakis realizan una comparación sistemática entre Widevine, FairPlay y PlayReady como soluciones DRM móviles de referencia. Su aportación principal consiste en consolidar propiedades comunes y señalar debilidades de diseño compartidas, incluyendo exposición a ataques por canales laterales microarquitectónicos y ausencia de preparación \textit{post-quantum}. En paralelo, Rodrigues et al. abordan un problema menos tratado en la literatura clásica DRM: el abuso de acceso a CDN mediante compartición de tokens y patrones anómalos de consumo. Finalmente, propuestas como SecureRights exploran la combinación de blockchain, \textit{watermarking}, \textit{hashing} perceptual e IPFS para reforzar la protección y la atribución de derechos en contenidos digitales. En conjunto, estas líneas revelan que la protección OTT actual desborda ampliamente el perímetro tradicional del licenciamiento DRM \cite{rafi2023mobiledrm,rodrigues2024cdn,securerights2024}.
 
 \subsection{Comparativa de enfoques y limitaciones}
-\apartadoPendiente
+
+Comparados entre sí, estos trabajos se complementan, pero también muestran lagunas. La ingeniería inversa de Widevine aporta profundidad sobre el cliente y la obtención de claves, pero no diseña controles perimetrales de producción. El estudio de privacidad en EME descubre fugas de identificadores y riesgos de seguimiento, pero no evalúa control de concurrencia ni abuso de CDN. La comparativa global de DRM móviles ofrece una visión valiosa de fortalezas y debilidades de diseño, aunque permanece en un plano más panorámico que experimental. Por su parte, los trabajos centrados en tokens y CDN capturan muy bien el abuso operacional, pero abstraen los detalles internos del CDM y del flujo de licencias. Precisamente ahí se sitúa el hueco que justifica este TFM: analizar Widevine en un laboratorio OTT reproducible y, sobre esa base, proponer defensas en profundidad que unan licencias, contexto, concurrencia y monitorización \cite{patat2022,patat2023,rafi2023mobiledrm,rodrigues2024cdn,securerights2024}.
 
 \section{Limitaciones actuales de Widevine}
-\apartadoPendiente
+
+La primera limitación de Widevine es conceptual: protege principalmente el camino de distribución cifrada y reproducción autorizada, pero no gobierna por sí mismo todo el proceso de acceso al servicio. El propio W3C especifica que EME deja la autenticación y autorización a la aplicación, lo que significa que un despliegue con Widevine puede seguir siendo débil si los tokens, las sesiones o la lógica de acceso están mal diseñados. Dicho de otro modo, \enquote{tener DRM} no equivale a \enquote{tener control de acceso seguro} \cite{w3ceme2026,widevine2024}.
+
+La segunda limitación es la heterogeneidad del parque de dispositivos. Widevine no ofrece el mismo nivel de protección en todos los entornos: mientras L1 aprovecha TEE y una raíz hardware de confianza, L3 ejecuta el CDM fuera de ese entorno y reduce sensiblemente la robustez del extremo cliente. La literatura académica ha demostrado que esta diferencia no es meramente teórica, sino explotable en la práctica para estudiar, instrumentar y comprometer variantes \textit{software-only}. Por tanto, un servicio OTT que permita la reproducción en L3 debe asumir que el DRM se encuentra mucho más cerca de una barrera de coste que de una frontera de seguridad fuerte \cite{patat2022,rafi2023mobiledrm,widevine2024}.
+
+La tercera limitación es operativa. Aun cuando el flujo audiovisual permanezca cifrado, persisten amenazas como compartición de credenciales, secuestro de sesión, reutilización de tokens y \textit{CDN leeching}. Estas amenazas explotan el ecosistema que rodea al DRM y muestran que la seguridad real de OTT depende tanto del control contextual como de la criptografía. De ahí que la literatura reciente sobre abuso en CDN y automatización resulte especialmente pertinente para un TFM orientado a defensa en profundidad \cite{rodrigues2024cdn,owasp-session-hijacking,owasp-credential-stuffing}.
+
+La cuarta limitación es la tensión entre robustez y privacidad. EME y los sistemas DRM admiten el uso de identificadores distintivos, y los trabajos recientes sobre Widevine en navegadores han evidenciado que dichos identificadores pueden derivar en capacidades de seguimiento superiores a las esperadas por el usuario. Esta característica no invalida el DRM como mecanismo de protección, pero sí obliga a tratarlo como un componente con implicaciones de seguridad y privacidad simultáneamente \cite{w3ceme2026,patat2023}.
+
+En consecuencia, el estado del arte converge en una idea central: Widevine es una pieza importante del ecosistema OTT, pero no una solución autosuficiente frente al abuso real de distribución. Su eficacia depende del nivel de seguridad del dispositivo, de la calidad de la implementación, de la arquitectura de licencias y del conjunto de controles externos que envuelven al flujo de reproducción. Esta conclusión justifica la orientación del presente TFM hacia la auditoría experimental del ecosistema Widevine y el diseño posterior de mecanismos adicionales de autenticación, autorización contextual, control de concurrencia y detección de anomalías \cite{w3ceme2026,patat2022,rafi2023mobiledrm,rodrigues2024cdn}.

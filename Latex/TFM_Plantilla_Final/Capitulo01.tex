@@ -3,52 +3,68 @@
 \chapter{Introducción}
 
 \section{Contexto y motivación}
-\apartadoPendiente
+
+La distribución de contenidos audiovisuales a través de servicios OTT (\textit{Over-The-Top}) se ha consolidado como uno de los principales modelos de consumo digital. El crecimiento sostenido de las suscripciones a servicios de vídeo en línea, el desplazamiento progresivo del visionado lineal hacia modelos bajo demanda y la expansión del consumo multipantalla evidencian que el \textit{streaming} ya no constituye un canal complementario, sino una infraestructura central para la difusión de contenidos de alto valor \cite{mpa2021theme,ofcom2025,ericsson2025}. En este escenario, la protección del contenido deja de ser una cuestión puramente técnica para convertirse también en un requisito de negocio, de cumplimiento contractual y de sostenibilidad operativa.
 
 \subsection{Crecimiento del \textit{streaming} OTT}
-\apartadoPendiente
+
+La transformación del mercado audiovisual en la última década se explica por la convergencia entre conectividad ubicua, consumo bajo demanda y distribución sobre infraestructuras IP de propósito general. Informes sectoriales recientes muestran no solo un aumento del número de suscripciones, sino también un cambio estructural en los hábitos de consumo y en la forma en que las audiencias acceden a contenidos premium \cite{mpa2021theme,ofcom2025}. A ello se suma el incremento del tráfico móvil y el peso creciente de 5G en la distribución de datos, factores que amplían el alcance del \textit{streaming} a más contextos de movilidad y a una mayor diversidad de dispositivos \cite{ericsson2025}.
+
+Desde el punto de vista técnico, este crecimiento se apoya en arquitecturas basadas en entrega segmentada, reproducción adaptativa y uso intensivo de redes de distribución de contenidos (CDN). Esta modularidad facilita la escalabilidad del servicio, pero introduce también múltiples puntos de control y de fallo: la aplicación del lado del cliente, reproductor, CDN, sistema de empaquetado y compresión del contenido, servidor de origen, mecanismos de autenticación y servidores de licencias. Por ello, la seguridad efectiva del ecosistema depende de la coordinación de todos estos elementos, y no exclusivamente del mecanismo DRM empleado.
 
 \subsection{Importancia del DRM}
-\apartadoPendiente
+
+En un servicio OTT, el DRM (\textit{Digital Rights Management}) aporta un mecanismo estandarizado para cifrar el contenido, entregar licencias de uso y habilitar la descodificación únicamente en entornos de reproducción autorizados \cite{w3ceme2026,widevine2024}. En el ámbito web, EME (\textit{Encrypted Media Extensions}) proporciona la interfaz de interacción con los sistemas de protección, mientras que el CDM (\textit{Content Decryption Module}) materializa, en el lado del cliente, la lógica de descifrado y de aplicación de las restricciones asociadas a la licencia \cite{w3ceme2026,delaune2024}. Por tanto, el DRM sigue siendo una pieza imprescindible para la distribución de contenido de pago, aunque su función debe entenderse como una capa concreta dentro de un sistema mucho más amplio.
 
 \subsection{Widevine como estándar dominante}
-\apartadoPendiente
+
+Dentro del ecosistema actual, Widevine se ha consolidado como la solución DRM de referencia en un amplio conjunto de despliegues OTT. La documentación oficial de Google lo sitúa como sistema utilizado por grandes plataformas internacionales y soportado en un conjunto muy amplio de navegadores, dispositivos y sistemas operativos \cite{widevine2024}. Esta presencia se refuerza por su integración en Android y por el soporte del CDM de Google Widevine en navegadores de escritorio como Chrome o Firefox \cite{androiddrm2026,firefoxwidevine2022}. La literatura académica reciente también lo identifica como una de las soluciones más extendidas o desplegadas dentro del ecosistema EME, lo que convierte a Widevine en un objeto de estudio especialmente relevante \cite{patat2022,delaune2024}.
 
 \subsection{Limitaciones de asumir que tener DRM implica seguridad}
-\apartadoPendiente
+
+La hipótesis implícita de que ``tener DRM'' equivale a ``tener el servicio protegido'' resulta técnicamente insuficiente. La especificación EME deja fuera de su alcance funciones como la autenticación y la autorización, que recaen en la lógica de la aplicación \cite{w3ceme2026}. Del mismo modo, el análisis formal reciente de Widevine subraya que las cuestiones de confianza entre proveedor de contenido, servidor de licencias y CDN quedan fuera de su modelo base \cite{delaune2024}. A ello se añaden trabajos que han mostrado la viabilidad de analizar internamente Widevine, interceptar mensajes o comprometer escenarios \textit{software-only} como Widevine L3, así como problemas de privacidad asociados a determinadas implementaciones del navegador \cite{patat2022,patat2023}. En otras palabras, el DRM es necesario, pero no basta por sí solo para cerrar todos los vectores de abuso relevantes en una plataforma OTT real.
 
 \section{Problema de investigación}
-\apartadoPendiente
+
+El problema que aborda este TFM surge de una brecha entre dos planos distintos de seguridad. Por un lado, Widevine protege el contenido cifrado y regula la obtención y el uso de claves de descifrado. Por otro, la explotación abusiva de un servicio OTT real suele producirse en capas diferentes: acceso a la CDN, emisión o reutilización de tokens, compartición de credenciales, uso simultáneo no autorizado o \textit{bypass} de controles perimetrales. En consecuencia, la pregunta que guía este trabajo puede formularse del siguiente modo: \textit{¿hasta qué punto el despliegue aislado de Widevine DRM aporta seguridad suficiente frente al abuso de distribución de contenido en servicios OTT reales?}
 
 \subsection{Qué protege realmente Widevine}
-\apartadoPendiente
+
+Desde una perspectiva funcional, Widevine protege el contenido en tránsito y en reproducción mediante cifrado, licencias y ejecución controlada dentro del CDM. La literatura formal sobre Widevine a través de EME identifica como propiedades centrales la confidencialidad de la clave de descifrado, la integridad y autenticidad de las licencias y de los derechos de uso, así como la cadencia de refresco de determinadas licencias para evitar reutilizaciones incompatibles con el protocolo \cite{delaune2024}. En términos prácticos, esto significa que Widevine está diseñado para dificultar que un atacante obtenga la clave de contenido fuera del entorno previsto y para evitar alteraciones arbitrarias de los derechos asociados a dicha clave.
 
 \subsection{Qué no protege Widevine}
-\apartadoPendiente
+
+Que Widevine controle la entrega de licencias no significa que resuelva por sí solo el problema completo de autorización. La propia especificación EME señala expresamente que la autenticación y la autorización quedan del lado de la aplicación, no del estándar DRM \cite{w3ceme2026}. Además, la documentación oficial de Widevine describe un flujo en el que las peticiones del cliente deben pasar por un \textit{proxy} operado por el proveedor, encargado de validar la solicitud y añadir reglas de negocio antes de que intervenga el servicio de licencias \cite{widevine2024}. Esto evidencia que la legitimidad del acceso, la vigencia de la suscripción, la coherencia del contexto de uso o la política de sesión pertenecen a capas complementarias al DRM.
 
 \subsection{Amenazas persistentes en ecosistemas OTT}
-\apartadoPendiente
+
+Las amenazas más relevantes en un entorno OTT moderno no siempre adoptan la forma de una ruptura directa de la criptografía. Con frecuencia aparecen como abusos que explotan credenciales válidas, configuraciones permisivas o debilidades en la correlación entre identidad, sesión, dispositivo y entrega del contenido \cite{googlemediacdn2026,awscloudfront2026,akamai2026,adobe2026,deloitte2024}.
 
 \subsubsection{CDN \textit{leeching}}
-\apartadoPendiente
+
+El \textit{CDN leeching} consiste en el uso ilegítimo de la infraestructura de distribución del servicio para servir contenido a terceros no autorizados. En estos casos, el atacante no necesita romper el DRM: basta con simular mediante software un CDM, reutilizar mecanismos válidos de acceso a la CDN, como enlaces, tokens o rutas expuestas indebidamente, trasladando además el coste de ancho de banda al operador legítimo \cite{simon2024cdn,googlemediacdn2026,awscloudfront2026}.
 
 \subsubsection{Reutilización de tokens}
-\apartadoPendiente
+
+La reutilización de tokens es un problema de sesión y de control de acceso, no de descifrado del contenido. Si un token se emite con una validez excesiva, sin vinculación contextual suficiente o sin mecanismos que dificulten su \textit{replay}, un tercero puede reutilizarlo para solicitar manifiestos, segmentos o incluso licencias dentro de una ventana temporal indebida \cite{akamai2026,rfc7519}.
 
 \subsubsection{\textit{Credential sharing}}
-\apartadoPendiente
+
+El \textit{credential sharing} consiste en el acceso de múltiples personas a un servicio mediante una misma cuenta o identidad digital. En el contexto OTT, este fenómeno erosiona el modelo de suscripción y altera las métricas reales de uso, aun cuando las reproducciones sigan utilizando licencias válidas emitidas por el DRM \cite{deloitte2024}. Por ello, constituye un problema de control de acceso y de política de servicio, no de cifrado del contenido.
 
 \subsubsection{Accesos concurrentes}
-\apartadoPendiente
+
+El abuso de concurrencia aparece cuando una misma identidad mantiene más sesiones activas de las previstas por la política de servicio, ya sea en múltiples dispositivos, ubicaciones o contextos de red. La experiencia industrial aborda este problema mediante servicios específicos de monitorización de sesiones activas y evaluación de políticas en tiempo real, lo que confirma que el control de concurrencia pertenece a una capa de gobierno del acceso que complementa, pero no sustituye, al DRM \cite{adobe2026}.
 
 \subsubsection{\textit{Bypass} de controles perimetrales}
-\apartadoPendiente
+
+Un servicio OTT puede ser vulnerable aunque sus flujos estén protegidos con DRM si sus controles perimetrales son eludibles. La documentación de grandes proveedores de CDN advierte expresamente del riesgo de acceso directo al origen o de \textit{bypass} de restricciones cuando las firmas no se validan de extremo a extremo o cuando existen rutas alternativas no protegidas \cite{googlemediacdn2026,awscloudfront2026}. Este tipo de fallo revela que la seguridad del servicio depende también de la coherencia entre CDN, origen, tokenización y políticas de acceso.
 
 \section{Hipótesis de trabajo}
-\apartadoPendiente
+
+La hipótesis central de este TFM es que el uso aislado de Widevine DRM mejora de forma significativa la protección criptográfica del contenido, pero no proporciona por sí solo seguridad suficiente frente al abuso de distribución en entornos OTT reales. En particular, se plantea que, sin mecanismos adicionales de autenticación contextual, autorización dinámica, control de concurrencia y validación de acceso a la CDN, siguen existiendo vectores viables de explotación que permiten consumo no autorizado, redistribución y uso abusivo de la infraestructura.
 
 \section{Objetivos}
-\apartadoPendiente
 
 \subsection{Objetivo general}
 
@@ -58,25 +74,33 @@ El objetivo principal de este TFM es diseñar, implementar y auditar un entorno 
 
 \begin{enumerate}
     \item Desplegar una infraestructura completa de distribución OTT (\textit{Over-The-Top}) mediante contenedores, simulando la cadena completa de vídeo, incluyendo el empaquetado con cifrado Common Encryption (CENC), un servidor de origen y una red de distribución de contenidos (CDN).
-    \item Realizar una auditoría de seguridad del ecosistema DRM Widevine, analizando el flujo de intercambio de licencias entre el cliente, el Content Decryption Module (CDM) y el servidor de licencias, e identificando vectores de ataque críticos.
-    \item Desarrollar un proxy para gestionar las licencias del contenido con lógica de autorización dinámica, interceptando las peticiones de licencia y validando en tiempo real la identidad del usuario mediante tokens JWT, su ubicación geográfica y el estado de su suscripción antes de permitir la comunicación con el servidor de licencias.
-    \item Implementar mecanismos adicionales de seguridad que limiten el abuso, como controles de concurrencia y detección de anomalías capaces de bloquear automáticamente sesiones o direcciones IP al detectar patrones de uso compartido de cuentas o intentos de acceso masivo.
+    \item Realizar una auditoría de seguridad del ecosistema DRM Widevine, analizando el flujo de intercambio de licencias entre el cliente, el \textit{Content Decryption Module} (CDM) y el servidor de licencias, e identificando vectores de ataque críticos.
+    \item Desarrollar un \textit{proxy} para gestionar las licencias del contenido con lógica de autorización dinámica, interceptando las peticiones de licencia y validando en tiempo real la identidad del usuario mediante tokens JWT, su ubicación geográfica y el estado de su suscripción antes de permitir la entrega efectiva de la licencia.
+    \item Implementar mecanismos adicionales de seguridad que limiten el abuso, como controles de concurrencia y detección de anomalías capaces de bloquear automáticamente sesiones o direcciones IP al detectar patrones compatibles con uso compartido de cuentas, reutilización indebida de sesiones o intentos de acceso masivo.
 \end{enumerate}
 
 \section{Metodología}
-\apartadoPendiente
+
+La metodología del trabajo se plantea como un proceso incremental e iterativo, con una orientación experimental. Esta elección responde a la necesidad de construir primero un entorno base funcional, observar su comportamiento, identificar debilidades verificables y, a partir de ellas, diseñar e implementar contramedidas evaluables.
 
 \subsection{Metodología incremental}
-\apartadoPendiente
+
+En una primera etapa se construirá un entorno OTT mínimo, pero representativo, que permita distribuir contenido cifrado y gestionar licencias Widevine de manera reproducible. Sobre esa base se irán añadiendo progresivamente instrumentación, mecanismos de captura, lógica de autorización y controles defensivos. Cada iteración deberá producir un resultado verificable: primero el funcionamiento del sistema base, después la identificación de amenazas reproducibles y, finalmente, la evaluación comparativa del sistema reforzado.
 
 \subsection{Laboratorio experimental}
-\apartadoPendiente
+
+El núcleo práctico del TFM será un laboratorio experimental desplegado sobre tecnologías reproducibles y fácilmente instrumentables. Este laboratorio incluirá, al menos, los elementos necesarios para representar la cadena OTT completa: empaquetado del contenido, distribución segmentada, servidor de origen, punto de entrega mediante CDN o componente equivalente, cliente de reproducción y lógica de licencias. Su finalidad no es replicar exhaustivamente una plataforma comercial, sino disponer de un entorno suficientemente realista para observar interacciones, dependencias y puntos de abuso.
 
 \subsection{Auditoría técnica}
-\apartadoPendiente
+
+Sobre el entorno base se llevará a cabo una auditoría técnica con enfoque mixto de caja negra y caja gris. En la dimensión de caja negra se analizará el comportamiento observable del sistema desde la perspectiva de un usuario o atacante con acceso limitado. En la dimensión de caja gris se aprovechará el conocimiento del laboratorio para inspeccionar el flujo de licencias, la gestión de tokens, la relación entre cliente y CDN y las validaciones aplicadas en cada punto del proceso.
 
 \subsection{Diseño iterativo de defensas}
-\apartadoPendiente
+
+A partir de los resultados de la auditoría se definirá una arquitectura de defensa en profundidad orientada a endurecer el control de acceso sin alterar el papel central del DRM. Esta arquitectura se implementará de forma iterativa, introduciendo medidas como validación contextual de tokens, control de sesiones activas, restricciones adicionales de acceso y mecanismos básicos de detección de anomalías. Cada defensa será evaluada tanto por su capacidad de mitigación como por su impacto operativo, ya que en entornos OTT la seguridad no puede desligarse ni del rendimiento ni de la experiencia de usuario.
 
 \section{Estructura de la memoria}
-\apartadoPendiente
+
+La memoria se organiza en ocho capítulos. Tras esta introducción, el Capítulo 2 desarrolla los fundamentos teóricos y el estado del arte, con especial atención a la arquitectura OTT, los sistemas DRM y las limitaciones actuales de Widevine. El Capítulo 3 presenta el diseño del entorno experimental y describe los componentes que permiten reproducir una cadena OTT funcional sobre la que realizar pruebas y capturas.
+
+El Capítulo 4 recoge la auditoría de seguridad del ecosistema Widevine y estructura los hallazgos por escenarios de amenaza. El Capítulo 5 propone una arquitectura de defensa en profundidad orientada a complementar Widevine con validaciones contextuales, control de concurrencia y mecanismos básicos de mitigación. El Capítulo 6 describe la implementación concreta de dicha arquitectura. El Capítulo 7 evalúa comparativamente el sistema base y el sistema reforzado mediante métricas objetivas. Finalmente, el Capítulo 8 resume las conclusiones principales del trabajo y valora el alcance real de la contribución realizada.
