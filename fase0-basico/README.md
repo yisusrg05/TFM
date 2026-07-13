@@ -72,10 +72,17 @@ La plataforma oficial tiene dos usuarios:
 
 | Usuario | Password | Permiso |
 |---|---|---|
-| `usuario-permitido@tfm.local` | `demo123` | Puede solicitar licencia por `/platform/license` |
-| `usuario-denegado@tfm.local` | `demo123` | Login correcto, pero licencia denegada |
+| `usuario-permitido@tfm.local` | `demo123` | Puede reproducir `shaka-widevine` y `local-cenc-clearkey` |
+| `usuario-denegado@tfm.local` | `demo123` | Login correcto, pero sin permiso para ningun activo |
 
-Esto permite probar que el proxy de licencia puede aplicar autorizacion cuando el usuario entra por la plataforma.
+Esto permite probar que la plataforma aplica autorizacion antes de entregar la configuracion de reproduccion y que el proxy de licencia vuelve a validar el activo en cada challenge Widevine.
+
+## Activos de la plataforma
+
+| Activo | Tipo | URL |
+|---|---|---|
+| `shaka-widevine` | Widevine real de pruebas | `https://storage.googleapis.com/shaka-demo-assets/sintel-widevine/dash.mpd` |
+| `local-cenc-clearkey` | CENC local con clave de laboratorio | `http://localhost:8080/content/dash-known-key/stream.mpd` |
 
 ## Arranque rapido
 
@@ -156,11 +163,13 @@ Si `WIDEVINE_LICENSE_URL` se deja vacio manualmente, `/license` devuelve `501` i
 ## Pruebas manuales
 
 1. Abre `http://localhost:3000`.
-2. Inicia sesion con `usuario-permitido@tfm.local` y reproduce. Debe funcionar.
-3. Inicia sesion con `usuario-denegado@tfm.local` y reproduce. Debe fallar en `/platform/license`.
-4. Abre `http://localhost:3001` y reproduce usando el MPD publico y `http://localhost:8080/license/no_auth`. Debe funcionar sin login.
-5. Abre `http://localhost:3002` para registrar evidencias de MPD/licencia/reproduccion externa.
-6. Genera el contenido con clave conocida y abre `http://localhost:3003` para demostrar reproduccion con MPD + KEY sin license server.
+2. Inicia sesion con `usuario-permitido@tfm.local`. Deben aparecer dos activos reproducibles.
+3. Reproduce el activo Widevine publico.
+4. Reproduce el activo CENC local con clave de laboratorio.
+5. Inicia sesion con `usuario-denegado@tfm.local`. Deben aparecer los dos activos como denegados y no debe cargarse ningun MPD.
+6. Abre `http://localhost:3001` y reproduce usando el MPD publico y `http://localhost:8080/license/no_auth`. Debe funcionar sin login.
+7. Abre `http://localhost:3002` para registrar evidencias de MPD/licencia/reproduccion externa.
+8. Genera el contenido con clave conocida y abre `http://localhost:3003` para demostrar reproduccion con MPD + KEY sin license server.
 
 Comprobacion por terminal:
 
@@ -174,7 +183,8 @@ curl -X POST http://localhost:8080/license --data-binary @origin-content/dash-wi
 Esta fase debe usarse como baseline vulnerable:
 
 - Existe DRM/CENC/Widevine funcional usando el contenido publico de Shaka.
-- La plataforma puede denegar licencia a un usuario sin permiso.
+- La plataforma puede denegar la configuracion de reproduccion completa a un usuario sin permiso.
+- El proxy de licencia tambien valida el permiso del activo en cada challenge Widevine.
 - La licencia tambien se expone por una ruta publica `no_auth`, que permite reproducir fuera de la plataforma.
 - Si una clave de contenido se filtra, se puede reproducir un activo CENC de laboratorio con MPD + KID + KEY sin contactar con el license server.
 - No hay autenticacion de usuario.

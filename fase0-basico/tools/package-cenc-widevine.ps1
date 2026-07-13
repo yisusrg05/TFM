@@ -54,16 +54,18 @@ if ($Mode -eq "widevine-service") {
   $key = "00112233445566778899aabbccddeeff"
   $drmArgs = @(
     "--enable_raw_key_encryption",
-    "--keys", "label=:key_id=$keyId:key=$key",
+    "--keys", "label=:key_id=${keyId}:key=${key}",
     "--protection_systems", "Widevine"
   )
 }
 
+$packagerArgs = @($commonArgs + $drmArgs)
+
 docker run --rm `
   -v "${contentRoot}:/media" `
   google/shaka-packager:latest `
-  @commonArgs `
-  @drmArgs
+  packager `
+  @packagerArgs
 
 if ($LASTEXITCODE -ne 0) {
   throw "Shaka Packager fallo con codigo $LASTEXITCODE. Comprueba que Docker Desktop esta arrancado."

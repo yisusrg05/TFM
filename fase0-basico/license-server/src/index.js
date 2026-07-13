@@ -6,18 +6,40 @@ const port = process.env.PORT || 8080;
 const widevineLicenseUrl = process.env.WIDEVINE_LICENSE_URL || '';
 const sessions = new Map();
 
+const assets = new Map([
+  ['shaka-widevine', {
+    assetId: 'shaka-widevine',
+    title: 'Sintel Widevine publico',
+    description: 'Contenido Widevine de pruebas publicado por Shaka.',
+    drm: 'widevine',
+    manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/sintel-widevine/dash.mpd',
+    protectedLicenseUri: 'http://localhost:8080/platform/license',
+    publicNoAuthLicenseUri: 'http://localhost:8080/license/no_auth'
+  }],
+  ['local-cenc-clearkey', {
+    assetId: 'local-cenc-clearkey',
+    title: 'CENC local con clave de laboratorio',
+    description: 'Contenido empaquetado localmente con Shaka Packager y reproducible con KID/KEY conocidos.',
+    drm: 'clearkey',
+    manifestUri: 'http://localhost:8080/content/dash-known-key/stream.mpd',
+    clearKeys: {
+      '1e5d4f9f3a2b4c7d8e9f001122334455': '00112233445566778899aabbccddeeff'
+    }
+  }]
+]);
+
 const users = new Map([
   ['usuario-permitido@tfm.local', {
     password: 'demo123',
     accountId: 'acc-allowed-001',
     displayName: 'Usuario con permiso',
-    canWatch: true
+    entitlements: ['shaka-widevine', 'local-cenc-clearkey']
   }],
   ['usuario-denegado@tfm.local', {
     password: 'demo123',
     accountId: 'acc-denied-001',
     displayName: 'Usuario sin permiso',
-    canWatch: false
+    entitlements: []
   }]
 ]);
 
@@ -50,6 +72,38 @@ function getAuthenticatedUser(req) {
   if (!session) return null;
   const user = users.get(session.email);
   return user ? { ...user, email: session.email, token } : null;
+}
+
+function serializeAssetForUser(asset, user) {
+  const allowed = user.entitlements.includes(asset.assetId);
+  return {
+    assetId: asset.assetId,
+    title: asset.title,
+    description: asset.description,
+    drm: asset.drm,
+    allowed
+  };
+}
+
+function getAllowedAssetOrReject(req, res, user, assetId) {
+  const asset = assets.get(assetId);
+  if (!asset) {
+    res.status(404).json({ ok: false, message: 'Activo no encontrado', assetId });
+    return null;
+  }
+
+  if (!user.entitlements.includes(assetId)) {
+    res.status(403).json({
+      ok: false,
+      mode: 'playback-denied',
+      message: 'El usuario autenticado no tiene permisos para este contenido.',
+      accountId: user.accountId,
+      assetId
+    });
+    return null;
+  }
+
+  return asset;
 }
 
 async function proxyWidevineLicense(challenge, req, res) {
@@ -131,13 +185,9 @@ app.post('/auth/login', (req, res) => {
       email,
       accountId: user.accountId,
       displayName: user.displayName,
-      canWatch: user.canWatch
+      entitlements: user.entitlements
     },
-    playback: {
-      manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/sintel-widevine/dash.mpd',
-      protectedLicenseUri: 'http://localhost:8080/platform/license',
-      publicNoAuthLicenseUri: 'http://localhost:8080/license/no_auth'
-    }
+    catalog: [...assets.values()].map((asset) => serializeAssetForUser(asset, user))
   });
 });
 
@@ -153,13 +203,48 @@ app.get('/auth/me', (req, res) => {
       email: user.email,
       accountId: user.accountId,
       displayName: user.displayName,
-      canWatch: user.canWatch
+      entitlements: user.entitlements
     }
+  });
+});
+
+app.get('/catalog', (req, res) => {
+  const user = getAuthenticatedUser(req);
+  if (!user) {
+    return res.status(401).json({ ok: false, message: 'No autenticado' });
+  }
+
+  return res.json({
+    ok: true,
+    catalog: [...assets.values()].map((asset) => serializeAssetForUser(asset, user))
+  });
+});
+
+app.post('/playback/config', (req, res) => {
+  const user = getAuthenticatedUser(req);
+  if (!user) {
+    return res.status(401).json({ ok: false, message: 'No autenticado' });
+  }
+
+  const { assetId } = req.body || {};
+  const asset = getAllowedAssetOrReject(req, res, user, assetId);
+  if (!asset) return null;
+
+  return res.json({
+    ok: true,
+    assetId: asset.assetId,
+    title: asset.title,
+    drm: asset.drm,
+    manifestUri: asset.manifestUri,
+    protectedLicenseUri: asset.protectedLicenseUri,
+    publicNoAuthLicenseUri: asset.publicNoAuthLicenseUri,
+    clearKeys: asset.clearKeys
   });
 });
 
 app.post('/platform/license', async (req, res) => {
   const user = getAuthenticatedUser(req);
+  const assetId = req.get('x-asset-id') || 'shaka-widevine';
   const challenge = Buffer.isBuffer(req.body)
     ? req.body
     : Buffer.from(JSON.stringify(req.body || {}));
@@ -173,17 +258,14 @@ app.post('/platform/license', async (req, res) => {
     });
   }
 
-  if (!user.canWatch) {
-    return res.status(403).json({
-      ok: false,
-      mode: 'platform-license-denied',
-      message: 'El usuario autenticado no tiene permisos para este contenido.',
-      accountId: user.accountId,
-      challengeSize: challenge.length
-    });
+  const asset = getAllowedAssetOrReject(req, res, user, assetId);
+  if (!asset) return null;
+  if (asset.drm !== 'widevine') {
+    return res.status(400).json({ ok: false, message: 'Este activo no usa licencia Widevine.', assetId });
   }
 
   res.set('X-Platform-User', user.accountId);
+  res.set('X-Asset-Id', asset.assetId);
   return proxyWidevineLicense(challenge, req, res);
 });
 

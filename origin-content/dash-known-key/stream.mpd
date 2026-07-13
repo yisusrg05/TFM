@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Generated with https://github.com/shaka-project/shaka-packager version v3.7.2-64a6a6c-debug-->
+<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:mpeg:dash:schema:mpd:2011 DASH-MPD.xsd" xmlns:cenc="urn:mpeg:cenc:2013" profiles="urn:mpeg:dash:profile:isoff-live:2011" minBufferTime="PT2S" type="dynamic" publishTime="2026-06-14T16:28:06Z" availabilityStartTime="2026-06-14T16:28:06Z" minimumUpdatePeriod="PT5S" timeShiftBufferDepth="PT1800S">
+  <Period id="0" start="PT0S">
+    <AdaptationSet id="0" contentType="video" width="180" height="144" frameRate="12800/512" segmentAlignment="true" par="5:4">
+      <ContentProtection value="cenc" schemeIdUri="urn:mpeg:dash:mp4protection:2011" cenc:default_KID="1e5d4f9f-3a2b-4c7d-8e9f-001122334455"/>
+      <ContentProtection schemeIdUri="urn:uuid:1077efec-c0b2-4d02-ace3-3c1e52e2fb4b">
+        <cenc:pssh>AAAANHBzc2gBAAAAEHfv7MCyTQKs4zweUuL7SwAAAAEeXU+fOitMfY6fABEiM0RVAAAAAA==</cenc:pssh>
+      </ContentProtection>
+      <Representation id="0" bandwidth="142795" codecs="avc1.4d400c" mimeType="video/mp4" sar="1:1">
+        <SegmentTemplate timescale="12800" initialization="video_init.mp4" media="video_$Number$.m4s" startNumber="1">
+          <SegmentTimeline>
+            <S t="0" d="102400"/>
+            <S t="102400" d="99328"/>
+            <S t="201728" d="51200"/>
+            <S t="252928" d="102400"/>
+            <S t="355328" d="51200"/>
+            <S t="406528" d="102400"/>
+            <S t="508928" d="37888"/>
+            <S t="546816" d="100864"/>
+            <S t="647680" d="78336"/>
+            <S t="726016" d="41984"/>
+          </SegmentTimeline>
+        </SegmentTemplate>
+      </Representation>
+    </AdaptationSet>
+  </Period>
+</MPD>

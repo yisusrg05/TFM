@@ -7,23 +7,27 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.14.6/shaka-player.compiled.min.js"></script>
     <style>
       body { font-family: Arial, sans-serif; margin: 2rem; background: #0f172a; color: #e2e8f0; }
-      .layout { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 320px 1fr; gap: 1rem; }
-      .panel { padding: 1rem; border: 1px solid #334155; border-radius: 8px; background: #111827; }
-      video { width: 100%; background: #000; border-radius: 8px; margin-top: 1rem; }
-      code, input { color: #93c5fd; }
+      .layout { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: 340px 1fr; gap: 1rem; }
+      .panel, .asset { padding: 1rem; border: 1px solid #334155; border-radius: 8px; background: #111827; }
+      .assets { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; margin: 1rem 0; }
+      video { width: 100%; background: #000; border-radius: 8px; margin-top: 1rem; min-height: 300px; }
+      code, input { color: #93c5fd; overflow-wrap: anywhere; }
       input { width: 100%; box-sizing: border-box; padding: .55rem; margin: .25rem 0 .75rem; background: #020617; border: 1px solid #334155; border-radius: 6px; }
       button { margin-right: .5rem; margin-bottom: .5rem; padding: .6rem 1rem; cursor: pointer; }
-      pre { white-space: pre-wrap; background: #020617; padding: .75rem; border-radius: 6px; min-height: 90px; }
+      button:disabled { opacity: .5; cursor: not-allowed; }
+      pre { white-space: pre-wrap; background: #020617; padding: .75rem; border-radius: 6px; min-height: 120px; }
       .ok { color: #86efac; }
       .warn { color: #fcd34d; }
       .bad { color: #fca5a5; }
+      .muted { color: #94a3b8; }
+      @media (max-width: 980px) { .layout, .assets { grid-template-columns: 1fr; } }
     </style>
   </head>
   <body>
     <div class="layout">
       <section class="panel">
         <h1>Plataforma OTT</h1>
-        <p>Fase 0 con Widevine funcional y control basico de permisos en el proxy de licencia.</p>
+        <p>Fase 0 con dos activos: Widevine publico y CENC local empaquetado.</p>
 
         <label>Email</label>
         <input id="email" value="usuario-permitido@tfm.local" />
@@ -32,16 +36,16 @@
 
         <button id="loginAllowed">Login con permiso</button>
         <button id="loginDenied">Login sin permiso</button>
-        <button id="play">Reproducir desde plataforma</button>
 
         <h3>Endpoints observables</h3>
-        <p>MPD: <code id="manifestText">-</code></p>
-        <p>Licencia plataforma: <code id="licenseText">-</code></p>
+        <p>Licencia plataforma: <code>http://localhost:8080/platform/license</code></p>
         <p>Licencia no_auth: <code>http://localhost:8080/license/no_auth</code></p>
+        <p class="muted">El usuario sin permiso no recibe configuracion de reproduccion para ningun activo.</p>
       </section>
 
       <section class="panel">
         <p id="status" class="warn">Inicializando...</p>
+        <div id="assets" class="assets"></div>
         <video id="video" controls autoplay muted></video>
         <h3>Estado</h3>
         <pre id="log"></pre>
@@ -49,17 +53,15 @@
     </div>
 
     <script>
+      const cdnBaseUrl = 'http://localhost:8080';
       const statusEl = document.getElementById('status');
       const logEl = document.getElementById('log');
+      const assetsEl = document.getElementById('assets');
       const video = document.getElementById('video');
       const player = new shaka.Player(video);
-      const cdnBaseUrl = 'http://localhost:8080';
 
       let accessToken = '';
-      let playback = {
-        manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/sintel-widevine/dash.mpd',
-        protectedLicenseUri: `${cdnBaseUrl}/platform/license`
-      };
+      let currentAssetId = '';
 
       function log(data) {
         logEl.textContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
@@ -70,24 +72,45 @@
         statusEl.className = className;
       }
 
-      function configurePlayer() {
-        player.configure({
-          drm: {
-            servers: {
-              'com.widevine.alpha': playback.protectedLicenseUri
-            }
-          }
-        });
+      async function stopPlayback() {
+        try {
+          await player.unload();
+          video.removeAttribute('src');
+          video.load();
+        } catch (_error) {
+          // No-op: unloading before first load can fail in some browsers.
+        }
       }
 
-      player.getNetworkingEngine().registerRequestFilter((type, request) => {
-        if (type === shaka.net.NetworkingEngine.RequestType.LICENSE) {
-          request.headers['Authorization'] = `Bearer ${accessToken}`;
-          request.headers['Content-Type'] = 'application/octet-stream';
+      function renderCatalog(catalog) {
+        assetsEl.innerHTML = '';
+
+        for (const asset of catalog) {
+          const card = document.createElement('article');
+          card.className = 'asset';
+          card.innerHTML = `
+            <h3>${asset.title}</h3>
+            <p>${asset.description}</p>
+            <p><strong>DRM:</strong> <code>${asset.drm}</code></p>
+            <p><strong>Permiso:</strong> <span class="${asset.allowed ? 'ok' : 'bad'}">${asset.allowed ? 'permitido' : 'denegado'}</span></p>
+            <button ${asset.allowed ? '' : 'disabled'} data-asset-id="${asset.assetId}">Reproducir</button>
+          `;
+
+          card.querySelector('button').addEventListener('click', () => {
+            playAsset(asset.assetId).catch((error) => {
+              setStatus(`Error reproduccion: ${error.message}`, 'bad');
+              log(error.stack || error.message);
+            });
+          });
+
+          assetsEl.appendChild(card);
         }
-      });
+      }
 
       async function login(email, password) {
+        await stopPlayback();
+        currentAssetId = '';
+
         const res = await fetch(`${cdnBaseUrl}/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -97,20 +120,71 @@
         if (!res.ok) throw new Error(data.message || 'Login fallido');
 
         accessToken = data.accessToken;
-        playback = data.playback;
-        document.getElementById('manifestText').textContent = playback.manifestUri;
-        document.getElementById('licenseText').textContent = playback.protectedLicenseUri;
-        configurePlayer();
+        renderCatalog(data.catalog);
         setStatus(`Login correcto: ${data.user.displayName}`);
         log(data);
       }
 
-      async function playFromPlatform() {
+      async function getPlaybackConfig(assetId) {
+        const res = await fetch(`${cdnBaseUrl}/playback/config`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ assetId })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Playback no autorizado');
+        return data;
+      }
+
+      function configureWidevine(config) {
+        player.configure({
+          drm: {
+            clearKeys: {},
+            servers: {
+              'com.widevine.alpha': config.protectedLicenseUri
+            }
+          }
+        });
+      }
+
+      function configureClearKey(config) {
+        player.configure({
+          drm: {
+            servers: {},
+            clearKeys: config.clearKeys || {}
+          }
+        });
+      }
+
+      player.getNetworkingEngine().registerRequestFilter((type, request) => {
+        if (type === shaka.net.NetworkingEngine.RequestType.LICENSE) {
+          request.headers['Authorization'] = `Bearer ${accessToken}`;
+          request.headers['Content-Type'] = 'application/octet-stream';
+          request.headers['X-Asset-Id'] = currentAssetId;
+        }
+      });
+
+      async function playAsset(assetId) {
         if (!accessToken) throw new Error('Primero inicia sesion.');
-        await player.unload();
-        configurePlayer();
-        await player.load(playback.manifestUri);
-        setStatus('Reproduciendo desde la plataforma OTT.');
+
+        await stopPlayback();
+        const config = await getPlaybackConfig(assetId);
+        currentAssetId = config.assetId;
+
+        if (config.drm === 'widevine') {
+          configureWidevine(config);
+        } else if (config.drm === 'clearkey') {
+          configureClearKey(config);
+        } else {
+          throw new Error(`DRM no soportado: ${config.drm}`);
+        }
+
+        await player.load(config.manifestUri);
+        setStatus(`Reproduciendo: ${config.title}`);
+        log(config);
       }
 
       document.getElementById('loginAllowed').addEventListener('click', () => {
@@ -131,17 +205,8 @@
         });
       });
 
-      document.getElementById('play').addEventListener('click', () => {
-        playFromPlatform().catch((e) => {
-          setStatus(`Error reproduccion: ${e.message}`, 'bad');
-          log(e.stack || e.message);
-        });
-      });
-
-      configurePlayer();
-      document.getElementById('manifestText').textContent = playback.manifestUri;
-      document.getElementById('licenseText').textContent = playback.protectedLicenseUri;
-      setStatus('Cliente listo. Prueba ambos usuarios.');
+      renderCatalog([]);
+      setStatus('Cliente listo. Inicia sesion para ver el catalogo.');
     </script>
   </body>
 </html>
