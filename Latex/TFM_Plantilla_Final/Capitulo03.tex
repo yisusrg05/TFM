@@ -2,92 +2,196 @@
 
 \chapter{Diseño del entorno experimental}
 
+Este capítulo describe el laboratorio diseñado para estudiar la seguridad de un sistema OTT que usa proteccción mediante DRM. El objetivo no es reproducir una plataforma comercial completa ni proporcionar un sistema de producción, sino construir un entorno controlado, reproducible e instrumentable en el que sea posible comparar un estado base deliberadamente permisivo con iteraciones progresivamente endurecidas. De este modo, las conclusiones de los capítulos posteriores pueden apoyarse en flujos observables de autenticación, entrega de licencias, distribución de contenido y gestión de sesiones.
+
+El laboratorio se articula en tres fases. La Fase~0 representa el punto de partida: incorpora reproducción Widevine y contenido CENC local, pero mantiene una ruta de licencia sin autenticación para hacer reproducible el problema de investigación. La Fase~1 introduce un plano de control que vincula identidad, activo, dispositivo y sesión de reproducción. Finalmente, la Fase~2 añade persistencia de estado, telemetría y mecanismos de respuesta ante comportamiento anómalo. La separación permite evaluar no solo si un contenido puede reproducirse, sino bajo qué contexto se permite su reproducción y qué evidencias deja cada solicitud.
+
+Aunque el título general del trabajo se refiere al \textit{streaming} en directo, el banco de pruebas emplea activos de vídeo bajo demanda de corta duración. Esta elección reduce la complejidad asociada a la ingesta, codificación en tiempo real y gestión de un evento en directo, y permite aislar los controles de acceso que constituyen el objeto principal del estudio. Los mecanismos evaluados (licencias, tokens, concurrencia, CDN y monitorización) son aplicables igualmente a flujos en directo, si bien su validación sobre producción de segmentos en tiempo real queda fuera del alcance de esta primera implementación.
+
 \section{Objetivos del laboratorio}
-\apartadoPendiente
+
+El diseño del laboratorio persigue cinco objetivos. En primer lugar, debe simulir un sistema OTT práctico: cliente, manifiesto DASH, segmentos de vídeo, servidor de origen, CDN, empaquetado CENC y flujo de licencia. En segundo lugar, debe permitir separar el plano criptográfico del plano de autorización. Es decir, el sistema debe poder demostrar que una licencia Widevine válida no implica, por sí sola, que el acceso al servicio sea legítimo.
+
+En tercer lugar, el entorno debe hacer repetibles escenarios de abuso sin utilizar contenido comercial ni credenciales reales. Para ello se emplea un activo Widevine público de pruebas proporcionado por el ecosistema Shaka y un segundo activo CENC generado localmente con claves de laboratorio. El primero permite observar un flujo EME/Widevine funcional; el segundo permite mostrar, de forma controlada, que la disponibilidad conjunta de un MPD y de una clave de contenido conocida evita la necesidad de solicitar una licencia. Esta segunda demostración no pretende extraer claves de Widevine ni modificar un CDM, sino aislar la consecuencia de una hipotética filtración de claves sobre un activo CENC propio.
+
+En cuarto lugar, el laboratorio debe permitir introducir controles de manera incremental. Las mejoras de las fases posteriores no sustituyen al DRM, sino que lo rodean de validaciones: autenticación, autorización por activo, token de sesión de corta duración, control de concurrencia, correlación de peticiones y respuesta ante anomalías. Por último, la solución debe ser portable y repetible. El despliegue mediante contenedores reduce las dependencias del equipo anfitrión y permite reiniciar cada fase en un estado conocido \cite{docker-docs2026}.
 
 \section{Arquitectura general}
-\apartadoPendiente
+
+La arquitectura se organiza alrededor de dos planos complementarios. El plano de medios contiene los manifiestos MPD, los segmentos CENC y los componentes encargados de servirlos. El plano de control gobierna quién puede obtener configuración de reproducción, iniciar una sesión, solicitar una licencia o mantener el acceso. Esta separación es relevante porque permite evidenciar el problema central del TFM: un contenido puede estar correctamente cifrado y, aun así, distribuirse de manera abusiva si el plano de control es demasiado permisivo.
+
+La Tabla~\ref{tab:componentes-laboratorio} resume los componentes principales y su papel. En Fase~0, algunos servicios se publican de forma deliberadamente amplia para facilitar la auditoría. En Fase~1 y Fase~2, el \textit{control-plane} pasa a ser el único intermediario público hacia el origen y el servidor de licencias. Así se puede comparar la exposición inicial con una arquitectura en la que las llamadas sensibles se condicionan a un contexto de sesión.
+
+\begin{table}[H]
+\centering
+\caption{Componentes del entorno experimental}
+\label{tab:componentes-laboratorio}
+\begin{tabularx}{\textwidth}{p{0.22\textwidth}Yp{0.18\textwidth}}
+\toprule
+\textbf{Componente} & \textbf{Responsabilidad} & \textbf{Fases} \\
+\midrule
+Cliente OTT con Shaka Player & Autenticación, selección de activo, carga del MPD y coordinación con EME/CDM. & 0, 1 y 2 \\
+Varnish & Punto de entrada HTTP; en Fase~0 actúa como CDN básica y en fases posteriores como frontal del plano de control. & 0, 1 y 2 \\
+\textit{Origin} Nginx & Publicación de manifiestos, segmentos e inicializaciones locales. & 0, 1 y 2 \\
+Shaka Packager & Segmentación y empaquetado CENC de los activos de laboratorio. & 0 \\
+Servidor de licencias / \textit{proxy} & Reenvío de \textit{challenges} Widevine al servicio de pruebas y aplicación de política local. & 0, 1 y 2 \\
+\textit{Control-plane} & Gestión de identidad, sesiones, tokens, autorización y acceso protegido a contenido/licencias. & 1 y 2 \\
+Redis & Persistencia de sesiones, eventos, puntuación de riesgo y bloqueos temporales. & 2 \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
 \subsection{Cliente}
-\apartadoPendiente
+
+El cliente oficial se implementa como una aplicación web estática servida por Nginx y utiliza Shaka Player como reproductor DASH. Shaka Player se apoya en EME para descubrir el sistema de claves disponible en el navegador y coordinar los mensajes generados por el CDM. En el laboratorio, el cliente puede configurar un servidor para el sistema \texttt{com.widevine.alpha} y enviar al mismo los \textit{challenges} binarios generados durante la reproducción \cite{w3ceme2026,shaka-packager-docs}.
+
+La Fase~0 incorpora una pequeña plataforma OTT con dos usuarios de demostración. El usuario autorizado dispone de dos activos en su catálogo: un contenido Widevine público de pruebas y un contenido CENC generado localmente con una clave de laboratorio conocida. El usuario sin permisos puede autenticarse, pero el servidor no le devuelve la configuración de reproducción de ninguno de los activos. Esta distinción evita que la aplicación oficial cargue el MPD antes de verificar el \textit{entitlement}; no obstante, la misma fase conserva de forma intencionada un reproductor externo y un endpoint \texttt{no\_auth}, que se emplean para demostrar el \textit{bypass} fuera de la plataforma.
+
+En las fases posteriores, el cliente obtiene primero un \textit{access token} y solicita después una sesión de reproducción. Solo tras recibir un \textit{playback token} efímero puede pedir la licencia protegida. El cliente añade dicho token, el identificador de sesión y un identificador de dispositivo a las solicitudes relevantes. Además, incluye un \textit{watermark} visible con información de usuario y sesión, cuya finalidad es aportar atribución durante la demostración, no impedir por sí mismo la captura de la señal.
 
 \subsection{CDN}
-\apartadoPendiente
+
+Varnish representa la capa CDN y el frontal HTTP de cada fase. En el estado base enruta las peticiones \texttt{/content/*} hacia el origen y las peticiones de licencia hacia el servidor correspondiente. Los objetos multimedia locales pueden ser cacheados, mientras que las licencias se marcan como no cacheables. Esta separación permite analizar el valor de la CDN como acelerador de contenido y, simultáneamente, como perímetro de acceso.
+
+La configuración de Fase~0 admite CORS amplio y conserva la ruta \texttt{/license/no\_auth}. El objetivo es disponer de una evidencia reproducible de que un cliente ajeno a la plataforma puede emplear el MPD y la ruta de licencia observados durante la reproducción. En Fase~1 y Fase~2, Varnish limita las rutas expuestas a las operaciones de negocio necesarias, exige cabecera \texttt{Authorization} para contenido, licencia y operaciones sensibles, restringe el origen CORS al cliente correspondiente y añade un identificador de petición. Estas medidas no convierten a Varnish en el componente que toma las decisiones de autorización; su papel es reducir superficie de exposición y derivar las solicitudes al \textit{control-plane}.
 
 \subsection{\textit{Origin server}}
-\apartadoPendiente
+
+El servidor de origen se implementa con Nginx y publica el árbol compartido \texttt{origin-content}. Este directorio contiene un ejemplo DASH sin cifrar para validar la cadena básica, los activos CENC generados localmente y sus segmentos MP4 fragmentados. El origen se mantiene como un servicio simple porque su función en el laboratorio es servir objetos, no aplicar reglas de negocio.
+
+Esta decisión facilita la auditoría de un fallo habitual en entornos OTT: cuando el origen queda expuesto o accesible mediante una ruta alternativa, las restricciones implementadas en la CDN pierden eficacia. Por ello, Fase~0 publica el origen en el anfitrión como parte del escenario vulnerable, mientras que Fase~1 y Fase~2 lo mantienen únicamente dentro de la red Docker. La comparación permite comprobar que el ocultamiento de la topología no sustituye a la autorización, pero sí elimina un camino directo que de otro modo puede eludir el frontal de seguridad.
 
 \subsection{\textit{Packager}}
-\apartadoPendiente
+
+El empaquetado local se realiza con Shaka Packager en un contenedor. A partir de un MP4 de entrada, los scripts del laboratorio generan una inicialización MP4, segmentos \texttt{m4s} y un MPD DASH. El empaquetado no realiza \textit{transcoding}; el activo de entrada ya se encuentra codificado. Esta separación entre codificación y empaquetado coincide con el modelo de Shaka Packager \cite{shaka-packager-docs}.
+
+Se contemplan dos modos. El primero genera contenido CENC con señalización Widevine y claves en texto plano de laboratorio. El segundo genera un activo CENC con un KID y una clave conocidos, destinado exclusivamente a la demostración de \textit{key leak}. Este último activo se reproduce mediante ClearKey desde Shaka Player y no llama al servidor de licencias. La prueba ilustra que, si la clave de contenido de un activo CENC se filtra, el servidor de licencias deja de ser necesario para consumir ese activo; no constituye una técnica de extracción de claves Widevine ni una emulación de su CDM.
 
 \subsection{\textit{License server}}
-\apartadoPendiente
+
+El servidor de licencias del laboratorio no implementa Widevine desde cero ni emite licencias de producción. Su función es recibir los mensajes binarios procedentes del cliente y actuar como \textit{proxy} hacia el servicio público de pruebas utilizado por Shaka. Este enfoque permite observar un flujo Widevine funcional sin almacenar claves de servicio, certificados de producción ni material criptográfico de terceros.
+
+La diferencia entre fases está en quién puede llegar a ese \textit{proxy}. En Fase~0 existe una ruta pública sin autenticación, conservada deliberadamente como vulnerabilidad. También existe una ruta de plataforma que comprueba identidad y autorización por activo antes de reenviar el \textit{challenge}. En Fase~1 y Fase~2 el servidor de licencias deja de exponerse al anfitrión y solo acepta llamadas internas del \textit{control-plane}. La solicitud interna incluye contexto de cuenta, dispositivo, activo y sesión; en Fase~2 se incorpora adicionalmente la puntuación de riesgo calculada para esa identidad. Esta estructura sigue el principio de que el DRM maneja el material de licencia, mientras que las reglas de acceso deben residir en la lógica de la aplicación \cite{w3ceme2026,widevine2024}.
 
 \subsection{Proxy de seguridad}
-\apartadoPendiente
+
+El \textit{proxy} de seguridad se materializa progresivamente. En Fase~0, el servicio de licencias contiene una comprobación mínima de catálogo y permisos para la interfaz oficial, pero coexiste con la ruta vulnerable necesaria para el experimento. Por tanto, no debe considerarse una defensa completa.
+
+En Fase~1 se incorpora un \textit{control-plane} dedicado. Este componente autentica al usuario, emite un token de acceso firmado mediante HMAC, crea una sesión de reproducción y genera un token de reproducción de vida corta. Antes de servir contenido o reenviar una licencia, verifica que el token corresponde a una sesión activa, al dispositivo declarado y al activo solicitado. También limita el número de sesiones activas por cuenta, renueva el token mediante \textit{heartbeat} y permite detener la sesión de forma explícita.
+
+Fase~2 conserva estas validaciones y añade Redis para guardar sesiones, eventos, riesgos y bloqueos. El \textit{control-plane} registra señales tales como intentos de autenticación, creación de sesión, solicitudes de contenido, \textit{heartbeats}, solicitudes de licencia y operaciones administrativas. A partir de estas señales, aplica reglas sencillas sobre actividad desde múltiples IP, ráfagas de licencias, exceso de concurrencia y cadencia anómala. El resultado es un laboratorio capaz de comparar una autorización puntual con una decisión de acceso que evoluciona según el comportamiento observado.
 
 \section{Tecnologías utilizadas}
-\apartadoPendiente
 
 \subsection{Docker}
-\apartadoPendiente
+
+Docker se emplea para desplegar cada fase como un conjunto de servicios aislados y conectados mediante redes internas. La plataforma permite empaquetar una aplicación y sus dependencias en contenedores, facilitando que el mismo escenario se ejecute de manera consistente en distintos equipos \cite{docker-docs2026}. En este trabajo, Docker Compose define imágenes, puertos, variables de entorno, volúmenes y redes de cada topología.
+
+La contenerización resulta especialmente útil en una evaluación de seguridad porque permite separar las fases sin modificar una instalación compartida. Por ejemplo, Fase~0 expone los puertos de origen y licencia para representar una superficie amplia, mientras que Fase~1 y Fase~2 los mantienen en redes internas. La misma base de contenido se monta como volumen de solo lectura, lo que evita duplicar activos y mantiene comparables los escenarios.
 
 \subsection{Python}
-\apartadoPendiente
+
+Python se considera una herramienta auxiliar para el tratamiento posterior de evidencias y métricas. Su biblioteca estándar y su ecosistema facilitan automatizar la lectura de registros estructurados, normalizar marcas temporales, agrupar peticiones por cuenta o sesión y generar tablas de resultados \cite{python-docs2026}. No forma parte del camino crítico de reproducción implementado en los contenedores actuales, que se apoya principalmente en Node.js y JavaScript; su papel previsto es apoyar el análisis reproducible de PCAP, logs y métricas obtenidos durante la evaluación.
 
 \subsection{Widevine}
-\apartadoPendiente
+
+Widevine aporta el flujo DRM real utilizado en las pruebas de reproducción protegida. El cliente carga un activo DASH de demostración con señalización Widevine, el navegador selecciona el CDM compatible a través de EME y Shaka Player reenvía el mensaje de licencia al endpoint configurado. Dicho endpoint es local al laboratorio y actúa como intermediario antes de llegar al servidor de pruebas.
+
+Esta integración es suficiente para observar las peticiones de licencia y evaluar la política que las rodea, pero no pretende sustituir un acuerdo de producción con Widevine. La generación y operación de licencias comerciales requieren credenciales y procesos de aprovisionamiento ajenos al alcance del laboratorio. La documentación de Widevine y de Shaka Packager sitúa precisamente el servidor de claves, el identificador de contenido y la política de licencia como piezas externas a la mera reproducción del cliente \cite{widevine2024,shaka-packager-drm}.
 
 \subsection{HTTP}
-\apartadoPendiente
+
+Todo el intercambio del laboratorio se produce sobre HTTP en la red local de Docker. Las rutas de autenticación y control transportan JSON, mientras que las solicitudes Widevine se reenvían como cuerpos binarios. Los manifiestos, inicializaciones y segmentos se entregan como objetos HTTP, respetando las cabeceras \texttt{Range} cuando procede. Esta homogeneidad permite relacionar la observación de red con las decisiones de aplicación: una misma captura puede mostrar el login, la creación de sesión, la solicitud de licencia y la descarga de segmentos.
+
+En un despliegue de producción, estos flujos deben emplear HTTPS, y EME exige contexto seguro para la interacción con contenido cifrado \cite{w3ceme2026}. El uso de HTTP y puertos locales responde a la necesidad de simplificar el laboratorio y facilitar la inspección; no debe interpretarse como una configuración de producción.
 
 \subsection{Linux}
-\apartadoPendiente
+
+Los contenedores del laboratorio utilizan imágenes Linux ligeras. Nginx y Varnish se ejecutan como servicios de distribución, mientras que los servicios de aplicación se construyen sobre imágenes Node.js. Este modelo permite reproducir una topología de red interna, resolver los servicios por nombre y limitar qué puertos se publican hacia el anfitrión.
+
+Linux también aporta un contexto natural para la instrumentación de red y la inspección de procesos de los contenedores. Sin embargo, el análisis se centra en las interfaces y registros del laboratorio, no en evaluar la seguridad del núcleo del sistema operativo ni en endurecer exhaustivamente cada imagen de contenedor.
 
 \subsection{Wireshark}
-\apartadoPendiente
+
+Wireshark se selecciona como herramienta de inspección visual de tráfico para revisar intercambios HTTP, cabeceras, secuencias temporales y posibles rutas alternativas de acceso. Su documentación incluye guías de usuario, filtros de visualización y herramientas de línea de comandos asociadas, lo que lo hace adecuado para documentar capturas de laboratorio \cite{wireshark-docs2026}.
+
+En este TFM, Wireshark se empleará para contrastar el flujo observable desde el cliente oficial con el flujo generado por los clientes externos de Fase~0. El objetivo no es inspeccionar material criptográfico interno del CDM, sino identificar qué URLs, cabeceras, tokens, MPD y endpoints de licencia quedan expuestos para un usuario que observa sus propias comunicaciones.
 
 \subsection{\textit{tcpdump}}
-\apartadoPendiente
+
+\textit{tcpdump} complementa a Wireshark como mecanismo de captura no interactiva. Se utilizará para obtener ficheros PCAP en puntos concretos de la red del laboratorio y conservar evidencia que pueda revisarse posteriormente. La captura se acotará a los puertos y contenedores de interés, evitando recoger tráfico ajeno al experimento.
+
+La combinación de \textit{tcpdump} para la adquisición y Wireshark para la exploración permite separar el momento de la prueba del análisis posterior. Los PCAP se tratarán como evidencia de los escenarios reproducidos y no como fuente de claves DRM: el contenido de licencia Widevine puede viajar cifrado o en formato propietario y las claves no son exportadas por EME al código de la aplicación.
 
 \subsection{JWT}
-\apartadoPendiente
+
+JWT se utiliza como referencia conceptual para los tokens de acceso y de reproducción de las fases endurecidas \cite{rfc7519}. La implementación actual emplea tokens firmados mediante HMAC con una carga codificada que incluye tipo de token, cuenta, dispositivo, activo, identificador de sesión, ámbito y expiración. Su estructura es deliberadamente reducida para el laboratorio; no pretende ser un proveedor de identidad completo ni incorporar todas las extensiones de un despliegue OAuth u OpenID Connect.
+
+La distinción entre \textit{access token} y \textit{playback token} permite reducir el privilegio de cada credencial. El primero autentica al usuario frente al \textit{control-plane}; el segundo queda ligado a una sesión concreta y solo autoriza la lectura de contenido, la solicitud de licencia y el envío de \textit{heartbeats}. Este diseño permite estudiar el efecto de la expiración, la revocación y el control de concurrencia sobre una operación especialmente sensible: el acceso a contenido protegido.
 
 \section{Diseño de la infraestructura OTT}
-\apartadoPendiente
 
 \subsection{Segmentación}
-\apartadoPendiente
+
+El laboratorio usa MPEG-DASH, abreviado MPD, como formato de entrega. El MPD describe una representación de vídeo, su inicialización y la plantilla de segmentos que debe recuperar el reproductor. Para los activos empaquetados localmente, Shaka Packager genera un fichero de inicialización y segmentos \texttt{m4s}; el cliente obtiene estos objetos según el MPD. Esta organización reproduce la estructura básica de una distribución adaptativa, aunque el activo de laboratorio se limita a una representación de baja resolución y no persigue evaluar algoritmos de adaptación de bitrate.
+
+La segmentación permite observar una cuestión esencial para la seguridad OTT: una reproducción no es una única descarga. Una sesión genera una sucesión de solicitudes al manifiesto, a la inicialización y a los segmentos. Por ello, autorizar solo la primera petición no basta para controlar el acceso. Las fases endurecidas tratan la sesión de reproducción como contexto persistente y la renuevan mediante \textit{heartbeat}, mientras que Fase~0 ilustra las consecuencias de mantener rutas de distribución o licencia excesivamente abiertas.
 
 \subsection{Flujo de vídeo}
-\apartadoPendiente
+
+El flujo base comienza en el cliente, que autentica al usuario cuando la fase lo requiere y solicita la configuración del activo. Para el activo Widevine, Shaka Player descarga el MPD, detecta la señalización DRM y crea una sesión EME. El CDM genera el mensaje de licencia; el cliente lo entrega al endpoint del laboratorio y, si la política de acceso lo permite, el \textit{proxy} lo reenvía al servicio de pruebas. Tras procesar la licencia, el cliente consume los segmentos cifrados descritos por el MPD.
+
+El activo CENC local sigue el mismo principio de entrega segmentada, aunque utiliza una clave de laboratorio configurada expresamente en el reproductor. Su función es separar dos cuestiones: el flujo normal de licencia y el impacto de disponer ya del material de descifrado. De este modo, el laboratorio no atribuye a Widevine una capacidad que no tiene, que sería la de controlar claves ya comprometidas fuera del flujo de licencia, y permite documentar ese límite de forma segura.
 
 \subsection{\textit{Packaging}}
-\apartadoPendiente
+
+Los scripts de empaquetado reciben un MP4 local y ejecutan Shaka Packager dentro de un contenedor. En el modo CENC/Widevine de laboratorio se especifican un KID, una clave de prueba, el esquema \texttt{cenc} y la señalización Widevine. El MPD resultante contiene elementos \texttt{ContentProtection}, el KID por defecto y datos PSSH, que permiten al reproductor reconocer que el activo requiere un sistema de claves compatible.
+
+El modo de clave conocida genera un activo independiente con el mismo esquema de cifrado CENC y metadatos de sistema común. El KID y la clave forman parte explícita del experimento y se almacenan solo como valores de laboratorio. Esta separación evita confundir la prueba de impacto de una clave expuesta con la integración Widevine de demostración, cuya licencia es proporcionada por un servicio externo de pruebas.
 
 \subsection{Distribución}
-\apartadoPendiente
+
+El contenido local se monta en el contenedor de origen como volumen de solo lectura. En Fase~0, Varnish reescribe las rutas \texttt{/content/*} hacia el origen y puede cachear objetos multimedia. La misma fase deja visibles los puertos del origen y del servicio de licencias para mostrar que una CDN sin controles de negocio no constituye una barrera suficiente.
+
+En Fase~1 y Fase~2, Varnish entrega las solicitudes al \textit{control-plane}. Este valida el token de reproducción y, para el contenido local, obtiene el objeto desde el origen interno. Aunque el activo Widevine público se entrega desde su ubicación de pruebas y no atraviesa el origen local, mantener el flujo local de contenido permite evaluar el patrón de acceso que seguiría una CDN privada. La convivencia de ambos activos es deliberada: uno aporta un flujo Widevine funcional y el otro permite controlar completamente la cadena CENC dentro del laboratorio.
 
 \section{Integración de Widevine}
-\apartadoPendiente
 
 \subsection{Configuración}
-\apartadoPendiente
+
+La configuración Widevine del cliente asocia el sistema \texttt{com.widevine.alpha} con el endpoint de licencia de la fase activa. En Fase~0, la plataforma oficial usa \texttt{/platform/license}, mientras que la ruta \texttt{/license/no\_auth} se conserva para el cliente externo y la auditoría. En Fase~1 y Fase~2, el endpoint público siempre corresponde al \textit{control-plane}; el servidor que contacta con el servicio de pruebas solo es accesible desde la red Docker.
 
 \subsection{Flujo de licencias}
-\apartadoPendiente
 
-\subsection{Interacción con el CDM}
-\apartadoPendiente
+El flujo de licencia se resume en los siguientes pasos:
+
+\begin{enumerate}
+    \item El reproductor descarga el MPD y detecta el contenido protegido mediante los metadatos CENC.
+    \item EME y el CDM generan un \textit{challenge} asociado a la sesión de claves.
+    \item El cliente envía el \textit{challenge} binario al endpoint de licencia configurado.
+    \item El componente de control valida el contexto de acceso. En Fase~0, esta comprobación puede coexistir con una ruta deliberadamente sin autenticación; en Fase~1 y Fase~2 exige token y sesión activos.
+    \item Si la política lo permite, el \textit{proxy} interno reenvía el mensaje al servicio Widevine de pruebas y devuelve su respuesta binaria al cliente.
+    \item El CDM procesa la licencia y el reproductor continúa la reproducción de segmentos cifrados.
+\end{enumerate}
+
+La propiedad importante no es solo que el paso quinto ocurra, sino que la decisión de permitirlo esté ligada a información de negocio. La Fase~0 demuestra que una ruta de licencia no autenticada elimina esa ligadura. Las fases siguientes añaden progresivamente identidad, activo, dispositivo, sesión, expiración y riesgo, que son los elementos evaluados en la propuesta de defensa en profundidad.
 
 \section{Configuración del entorno de captura y monitorización}
-\apartadoPendiente
 
 \subsection{PCAP}
-\apartadoPendiente
+
+La adquisición de tráfico se plantea en dos niveles. El primero consiste en observar la comunicación desde el navegador durante una reproducción oficial y durante una reproducción externa de Fase~0. El segundo consiste en capturar el tráfico asociado a los contenedores o a los puertos publicados, acotando las capturas a HTTP, DASH y licencias. Esta estrategia permite conservar PCAP comparables para cada escenario, con marcas temporales que relacionen solicitud de manifiesto, emisión de licencia y descarga de segmentos.
+
+El análisis de las capturas buscará evidencias de superficie expuesta: URL de MPD, endpoint de licencia, cabeceras de autorización, redirecciones, respuestas de error y secuencia de solicitudes. No se interpretará un PCAP como mecanismo para obtener claves de Widevine, ya que el alcance se limita al comportamiento observable del sistema y a los datos de control transmitidos por la aplicación.
 
 \subsection{\textit{Logging}}
-\apartadoPendiente
+
+El registro se incrementa por fases. Fase~0 conserva principalmente los logs de los contenedores y las respuestas HTTP necesarias para explicar el flujo base. Fase~1 añade trazabilidad de peticiones mediante identificadores de solicitud en Varnish y mantiene en memoria las sesiones de reproducción, sus \textit{heartbeats} y su estado. Fase~2 formaliza la observabilidad mediante eventos JSON almacenados en Redis, incluyendo autenticación, creación y caducidad de sesión, solicitudes de licencia, solicitudes de contenido, cambios de riesgo y bloqueos.
+
+Este esquema proporciona dos clases de evidencia. La primera permite reconstruir un incidente concreto: qué cuenta, dispositivo y sesión solicitaron una licencia o un objeto. La segunda permite observar tendencias: número de sesiones activas, frecuencia de licencias, fallos de concurrencia o actividad desde múltiples IP. La retención de eventos del laboratorio se mantiene deliberadamente acotada para simplificar el despliegue; un sistema de producción requeriría rotación, almacenamiento duradero, acceso restringido y políticas de privacidad.
 
 \subsection{Métricas}
-\apartadoPendiente
+
+Las métricas se seleccionan para responder a la hipótesis del trabajo y para permitir una comparación entre fases. Se registrarán, como mínimo, el resultado de la autorización de licencia, el número de sesiones activas por cuenta, el número de solicitudes de contenido y licencia, el tiempo de respuesta de los endpoints críticos y el número de accesos bloqueados. En Fase~2 se añadirá la evolución de la puntuación de riesgo, las razones que la componen y el número de bloqueos automáticos o manuales.
+
+Además de métricas de seguridad, se observará el impacto operativo de las defensas: latencia adicional de la obtención de licencia, errores de reproducción atribuibles a expiración de token y comportamiento ante una sesión detenida o bloqueada. La evaluación posterior comparará el sistema base, donde un cliente externo puede reutilizar una ruta sin autenticación, con los sistemas endurecidos, donde la licencia queda condicionada al contexto de reproducción. Esta comparativa permitirá distinguir de manera cuantitativa entre disponer de DRM y gobernar efectivamente el acceso al servicio.
