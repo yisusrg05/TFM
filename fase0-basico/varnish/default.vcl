@@ -15,7 +15,7 @@ sub vcl_recv {
         return (synth(204));
     }
 
-    if (req.url ~ "^/license" || req.url ~ "^/platform/license" || req.url ~ "^/auth") {
+    if (req.url ~ "^/license" || req.url ~ "^/platform/license" || req.url ~ "^/auth" || req.url ~ "^/playback") {
         set req.backend_hint = license;
         return (pass);
     }
@@ -26,11 +26,11 @@ sub vcl_recv {
         return (hash);
     }
 
-    return (synth(404, "Use /content, /license, /auth or /platform/license"));
+    return (synth(404, "Use /content, /license, /auth, /playback or /platform/license"));
 }
 
 sub vcl_backend_response {
-    if (bereq.url ~ "^/license" || bereq.url ~ "^/platform/license" || bereq.url ~ "^/auth") {
+    if (bereq.url ~ "^/license" || bereq.url ~ "^/platform/license" || bereq.url ~ "^/auth" || bereq.url ~ "^/playback") {
         set beresp.uncacheable = true;
         set beresp.ttl = 0s;
         set beresp.http.Cache-Control = "no-store";
@@ -43,7 +43,7 @@ sub vcl_backend_response {
 sub vcl_synth {
     set resp.http.Access-Control-Allow-Origin = "*";
     set resp.http.Access-Control-Allow-Methods = "GET, HEAD, OPTIONS, POST";
-    set resp.http.Access-Control-Allow-Headers = "Authorization, Content-Type, Range";
+    set resp.http.Access-Control-Allow-Headers = "Authorization, Content-Type, Range, X-Asset-Id";
     set resp.http.Access-Control-Expose-Headers = "Content-Length, Content-Range, Accept-Ranges, X-Cache, X-Phase0-Weakness, X-Upstream-License-Server";
     set resp.http.Access-Control-Max-Age = "86400";
 
@@ -53,7 +53,7 @@ sub vcl_synth {
 sub vcl_deliver {
     set resp.http.Access-Control-Allow-Origin = "*";
     set resp.http.Access-Control-Allow-Methods = "GET, HEAD, OPTIONS, POST";
-    set resp.http.Access-Control-Allow-Headers = "Authorization, Content-Type, Range";
+    set resp.http.Access-Control-Allow-Headers = "Authorization, Content-Type, Range, X-Asset-Id";
     set resp.http.Access-Control-Expose-Headers = "Content-Length, Content-Range, Accept-Ranges, X-Cache, X-Phase0-Weakness, X-Upstream-License-Server";
 
     if (obj.hits > 0) {
