@@ -18,6 +18,9 @@ const heartbeatGraceSeconds = Number(process.env.HEARTBEAT_GRACE_SECONDS || 45);
 const maxConcurrentStreams = Number(process.env.MAX_CONCURRENT_STREAMS || 1);
 const autoBanThreshold = Number(process.env.AUTO_BAN_THRESHOLD || 100);
 const eventRetention = Number(process.env.EVENT_RETENTION || 300);
+const localContentPrefixes = new Map([
+  ['local-cenc-clearkey', 'dash-known-key']
+]);
 
 const users = new Map([
   ['usuario-permitido@tfm.local', {
@@ -34,7 +37,7 @@ const users = new Map([
     displayName: 'Usuario sin permiso',
     plan: 'student',
     entitlements: [],
-    roles: ['user', 'admin']
+    roles: ['user']
   }]
 ]);
 
@@ -118,7 +121,7 @@ async function getJson(key, fallback = null) {
 }
 
 async function pushEvent(type, payload) {
-  const event = { id: crypto.randomUUID(), type, timestamp: nowIso(), ...payload };
+  const event = { ...payload, id: crypto.randomUUID(), type, timestamp: nowIso() };
   await redis.lPush('events', JSON.stringify(event));
   await redis.lTrim('events', 0, eventRetention - 1);
   return event;
@@ -155,7 +158,15 @@ async function createBan({ type, subjectId, reason, createdBy, ttlSeconds = 1800
     expiresAt: new Date(Date.now() + ttlSeconds * 1000).toISOString()
   };
   await setJson(`ban:${type}:${subjectId}`, ban, ttlSeconds);
-  await pushEvent('ban.created', ban);
+  await pushEvent('ban.created', {
+    banId: ban.id,
+    subjectType: ban.type,
+    subjectId: ban.subjectId,
+    reason: ban.reason,
+    createdBy: ban.createdBy,
+    createdAt: ban.createdAt,
+    expiresAt: ban.expiresAt
+  });
   return ban;
 }
 
@@ -165,7 +176,7 @@ async function getBan(type, subjectId) {
 
 async function clearBan(type, subjectId) {
   await redis.del(`ban:${type}:${subjectId}`);
-  await pushEvent('ban.cleared', { type, subjectId });
+  await pushEvent('ban.cleared', { subjectType: type, subjectId });
 }
 
 async function ensureNotBanned({ accountId, deviceId }) {
@@ -384,10 +395,24 @@ function copyHeaders(sourceHeaders, target, names) {
   }
 }
 
+function isLocalContentPathAllowed(assetId, contentPath) {
+  const prefix = localContentPrefixes.get(assetId);
+  return Boolean(prefix && (contentPath === prefix || contentPath.startsWith(`${prefix}/`)));
+}
+
 function requireAdmin(accessPayload) {
   if (!accessPayload.roles || !accessPayload.roles.includes('admin')) {
     throw new Error('Admin role required');
   }
+}
+
+function requireAdminAccess(req) {
+  const payload = verifyToken(getBearerToken(req), accessTokenSecret);
+  if (payload.typ !== 'access') {
+    throw new Error('Unexpected token type');
+  }
+  requireAdmin(payload);
+  return payload;
 }
 
 app.use((req, res, next) => {
@@ -568,6 +593,15 @@ app.use('/content/*', async (req, res) => {
     return jsonError(res, 401, 'UNAUTHORIZED', error.message);
   }
 
+  if (req.headers['x-playback-session-id'] && req.headers['x-playback-session-id'] !== authContext.payload.sessionId) {
+    return jsonError(res, 409, 'SESSION_MISMATCH', 'Header session id does not match the playback token');
+  }
+
+  const contentPath = req.params[0];
+  if (!isLocalContentPathAllowed(authContext.payload.assetId, contentPath)) {
+    return jsonError(res, 403, 'CONTENT_NOT_ALLOWED_FOR_ASSET', `Content path is not assigned to asset ${authContext.payload.assetId}`);
+  }
+
   authContext.session.lastHeartbeatAt = Date.now();
   await storeSession(authContext.session);
   const risk = await applyAccountSignals({
@@ -577,7 +611,7 @@ app.use('/content/*', async (req, res) => {
     signal: 'content.request'
   });
 
-  const upstreamUrl = `${originBaseUrl}/${req.params[0]}`;
+  const upstreamUrl = `${originBaseUrl}/${contentPath}`;
   const upstreamHeaders = {};
   if (req.headers.range) {
     upstreamHeaders.Range = req.headers.range;
@@ -589,7 +623,7 @@ app.use('/content/*', async (req, res) => {
     copyHeaders(upstreamResponse.headers, res, ['content-type', 'content-length', 'content-range', 'accept-ranges', 'etag', 'last-modified']);
     res.setHeader('X-Playback-Session-Id', authContext.session.sessionId);
     res.setHeader('X-Risk-Score', String(risk.score));
-    await pushEvent('content.request', { sessionId: authContext.session.sessionId, accountId: authContext.session.accountId, path: req.params[0], risk });
+    await pushEvent('content.request', { sessionId: authContext.session.sessionId, accountId: authContext.session.accountId, path: contentPath, risk });
 
     if (req.method === 'HEAD') {
       return res.end();
@@ -653,8 +687,7 @@ app.post('/license', async (req, res) => {
 app.get('/admin/overview', async (req, res) => {
   let accessPayload;
   try {
-    accessPayload = await requireAccessToken(req);
-    requireAdmin(accessPayload);
+    accessPayload = requireAdminAccess(req);
   } catch (error) {
     return jsonError(res, 403, 'FORBIDDEN', error.message);
   }
@@ -682,8 +715,7 @@ app.get('/admin/overview', async (req, res) => {
 app.get('/admin/events', async (req, res) => {
   let accessPayload;
   try {
-    accessPayload = await requireAccessToken(req);
-    requireAdmin(accessPayload);
+    accessPayload = requireAdminAccess(req);
   } catch (error) {
     return jsonError(res, 403, 'FORBIDDEN', error.message);
   }
@@ -695,8 +727,7 @@ app.get('/admin/events', async (req, res) => {
 app.post('/admin/bans', async (req, res) => {
   let accessPayload;
   try {
-    accessPayload = await requireAccessToken(req);
-    requireAdmin(accessPayload);
+    accessPayload = requireAdminAccess(req);
   } catch (error) {
     return jsonError(res, 403, 'FORBIDDEN', error.message);
   }
@@ -713,8 +744,7 @@ app.post('/admin/bans', async (req, res) => {
 app.post('/admin/bans/clear', async (req, res) => {
   let accessPayload;
   try {
-    accessPayload = await requireAccessToken(req);
-    requireAdmin(accessPayload);
+    accessPayload = requireAdminAccess(req);
   } catch (error) {
     return jsonError(res, 403, 'FORBIDDEN', error.message);
   }

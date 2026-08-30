@@ -74,4 +74,6 @@ Esta fase corresponde a la primera defensa en profundidad:
 - El servidor de licencias de pruebas sigue existiendo aguas arriba.
 - La diferencia es que ya no se expone una ruta `no_auth`.
 - El control-plane ata licencia a usuario, dispositivo, activo y sesion.
+- Las rutas del origen local se validan contra el activo incluido en el `playbackToken`; un token de otro activo recibe `403`.
 - El bypass de reproductor externo deja de funcionar salvo que se robe un `playbackToken` valido y vigente.
+- La interfaz conserva solo metadatos de las operaciones y no imprime los tokens de acceso o reproduccion.

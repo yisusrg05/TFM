@@ -102,9 +102,12 @@
       }
 
       function setButtons() {
+        const hasActiveSession = Boolean(state.sessionId);
+        document.getElementById('btnAllowed').disabled = hasActiveSession;
+        document.getElementById('btnDenied').disabled = hasActiveSession;
         document.getElementById('btnSession').disabled = !state.accessToken;
         document.getElementById('btnPlay').disabled = !state.playbackToken;
-        document.getElementById('btnStop').disabled = !state.sessionId;
+        document.getElementById('btnStop').disabled = !hasActiveSession;
       }
 
       function configurePlayer() {
@@ -153,7 +156,13 @@
         setButtons();
         updateWatermark();
         setStatus(`Login correcto: ${data.user.email}`, 'ok');
-        log(data);
+        log({
+          type: 'LOGIN_OK',
+          user: data.user,
+          deviceId: data.deviceId,
+          accessTokenExpiresIn: data.accessTokenExpiresIn,
+          allowedAssets: data.allowedAssets
+        });
       }
 
       async function createSession() {
@@ -178,7 +187,13 @@
         setButtons();
         updateWatermark();
         setStatus('Playback session creada.', 'ok');
-        log(data);
+        log({
+          type: 'PLAYBACK_SESSION_CREATED',
+          session: data.session,
+          playbackTokenExpiresIn: data.playbackTokenExpiresIn,
+          manifestUrl: data.manifestUrl,
+          licenseUrl: data.licenseUrl
+        });
       }
 
       async function heartbeat() {

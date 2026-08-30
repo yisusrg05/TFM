@@ -18,6 +18,9 @@ sub vcl_recv {
         return (synth(401, "Missing Authorization header"));
     }
 
+    # La IP observada por el control-plane debe ser la del cliente de Varnish y no
+    # la del contenedor proxy. Se sobrescribe la cabecera para impedir suplantacion.
+    set req.http.X-Forwarded-For = client.ip;
     set req.backend_hint = control;
     set req.http.X-Forwarded-Proto = "http";
     set req.http.X-Request-Id = req.xid;

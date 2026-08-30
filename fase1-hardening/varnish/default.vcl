@@ -18,6 +18,9 @@ sub vcl_recv {
         return (synth(401, "Missing Authorization header"));
     }
 
+    # Varnish es el unico proxy de entrada del laboratorio. Se reemplaza cualquier
+    # valor aportado por el cliente para que el control-plane reciba una IP fiable.
+    set req.http.X-Forwarded-For = client.ip;
     set req.backend_hint = control;
     set req.http.X-Forwarded-Proto = "http";
     set req.http.X-Request-Id = req.xid;

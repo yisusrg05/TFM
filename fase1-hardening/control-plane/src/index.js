@@ -14,6 +14,9 @@ const accessTokenTtlSeconds = Number(process.env.ACCESS_TOKEN_TTL_SECONDS || 360
 const playbackTokenTtlSeconds = Number(process.env.PLAYBACK_TOKEN_TTL_SECONDS || 90);
 const heartbeatGraceSeconds = Number(process.env.HEARTBEAT_GRACE_SECONDS || 45);
 const maxConcurrentStreams = Number(process.env.MAX_CONCURRENT_STREAMS || 1);
+const localContentPrefixes = new Map([
+  ['local-cenc-clearkey', 'dash-known-key']
+]);
 
 const users = new Map([
   ['usuario-permitido@tfm.local', {
@@ -207,6 +210,11 @@ function copyHeaders(sourceHeaders, target, names) {
   }
 }
 
+function isLocalContentPathAllowed(assetId, contentPath) {
+  const prefix = localContentPrefixes.get(assetId);
+  return Boolean(prefix && (contentPath === prefix || contentPath.startsWith(`${prefix}/`)));
+}
+
 app.use((req, res, next) => {
   if (req.method === 'POST' && req.path === '/license') {
     return express.raw({ type: '*/*', limit: '2mb' })(req, res, next);
@@ -391,9 +399,14 @@ app.use('/content/*', async (req, res) => {
     return jsonError(res, 409, 'SESSION_MISMATCH', 'Header session id does not match the playback token');
   }
 
+  const contentPath = req.params[0];
+  if (!isLocalContentPathAllowed(authContext.payload.assetId, contentPath)) {
+    return jsonError(res, 403, 'CONTENT_NOT_ALLOWED_FOR_ASSET', `Content path is not assigned to asset ${authContext.payload.assetId}`);
+  }
+
   updateSessionHeartbeat(authContext.session);
 
-  const upstreamUrl = `${originBaseUrl}/${req.params[0]}`;
+  const upstreamUrl = `${originBaseUrl}/${contentPath}`;
   const upstreamHeaders = {};
   if (req.headers.range) {
     upstreamHeaders.Range = req.headers.range;

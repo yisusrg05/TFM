@@ -118,12 +118,16 @@
       }
 
       function setButtons() {
+        const hasActiveSession = Boolean(state.sessionId);
+        const isAdmin = Boolean(state.user?.roles?.includes('admin'));
+        document.getElementById('btnAllowed').disabled = hasActiveSession;
+        document.getElementById('btnDenied').disabled = hasActiveSession;
         document.getElementById('btnSession').disabled = !state.accessToken;
         document.getElementById('btnPlay').disabled = !state.playbackToken;
-        document.getElementById('btnRefresh').disabled = !state.accessToken;
-        document.getElementById('btnBanDevice').disabled = !state.accessToken;
-        document.getElementById('btnClearDeviceBan').disabled = !state.accessToken;
-        document.getElementById('btnStop').disabled = !state.sessionId;
+        document.getElementById('btnRefresh').disabled = !state.accessToken || !isAdmin;
+        document.getElementById('btnBanDevice').disabled = !state.accessToken || !isAdmin;
+        document.getElementById('btnClearDeviceBan').disabled = !state.accessToken || !isAdmin;
+        document.getElementById('btnStop').disabled = !hasActiveSession;
       }
 
       function configurePlayer() {
@@ -180,7 +184,14 @@
         setButtons();
         updateWatermark();
         setStatus(`Login correcto. Riesgo actual: ${state.risk.score}.`, 'ok');
-        await refreshOverview();
+        if (state.user.roles.includes('admin')) {
+          await refreshOverview();
+        } else {
+          summaryEl.textContent = 'El usuario no dispone del rol de observabilidad.';
+          eventsEl.replaceChildren();
+          bansEl.textContent = 'No disponible para este usuario.';
+          riskReasonsEl.textContent = 'No disponible para este usuario.';
+        }
       }
 
       async function createSession() {
@@ -254,7 +265,19 @@
         summaryEl.textContent = `Cuenta ${overview.accountId} | sesiones registradas: ${overview.sessions.length} | score: ${overview.risk.score}`;
         riskReasonsEl.textContent = overview.risk.reasons.length ? overview.risk.reasons.join(', ') : 'Sin razones activas.';
         bansEl.textContent = overview.bans.length ? overview.bans.map((ban) => `${ban.type}:${ban.subjectId} hasta ${ban.expiresAt} (${ban.reason})`).join(' | ') : 'Sin bans activos.';
-        eventsEl.innerHTML = overview.recentEvents.map((event) => `<div class="event"><strong>${event.type}</strong><small>${event.timestamp}</small><div>${JSON.stringify(event)}</div></div>`).join('');
+        const eventNodes = overview.recentEvents.map((event) => {
+          const wrapper = document.createElement('div');
+          wrapper.className = 'event';
+          const type = document.createElement('strong');
+          type.textContent = event.type;
+          const timestamp = document.createElement('small');
+          timestamp.textContent = event.timestamp;
+          const payload = document.createElement('div');
+          payload.textContent = JSON.stringify(event);
+          wrapper.append(type, timestamp, payload);
+          return wrapper;
+        });
+        eventsEl.replaceChildren(...eventNodes);
         updateWatermark();
       }
 

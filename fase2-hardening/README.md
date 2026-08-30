@@ -31,7 +31,7 @@ Esta fase mantiene la proteccion de fase 1 y anade persistencia, eventos, riesgo
 | Usuario | Password | Resultado esperado |
 |---|---|---|
 | `usuario-permitido@tfm.local` | `demo123` | Puede crear sesion, reproducir y ver observabilidad |
-| `usuario-denegado@tfm.local` | `demo123` | Login correcto, pero sin entitlement del activo |
+| `usuario-denegado@tfm.local` | `demo123` | Login correcto, pero sin entitlement del activo ni rol administrativo |
 
 ## Puertos
 
@@ -61,5 +61,7 @@ Esta fase corresponde a la arquitectura defensiva completa:
 
 - Widevine no se usa de forma aislada.
 - La licencia esta condicionada a sesion, identidad, dispositivo, activo y riesgo.
+- El acceso al origen local conserva el binding entre la ruta solicitada y el activo del `playbackToken`.
 - El sistema produce evidencias medibles para el capitulo de evaluacion.
 - La respuesta activa permite bloquear cuenta/dispositivo ante abuso.
+- El plano administrativo valida un rol independiente y permanece disponible para observar y retirar un ban; el ban sigue bloqueando login, contenido, heartbeat y licencia.
