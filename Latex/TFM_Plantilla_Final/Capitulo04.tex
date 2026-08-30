@@ -201,6 +201,33 @@ Las evidencias principales obtenidas fueron las siguientes:
     \item Evento \texttt{KEY\_EXTRACTION\_BLOCKED}, coherente con la imposibilidad de exportar claves Widevine mediante EME.
 \end{itemize}
 
+La Figura~\ref{fig:fase0-flujo-oficial} documenta el comportamiento de referencia del sistema. El usuario autorizado aparece identificado en el cliente oficial, los dos activos figuran como permitidos y el reproductor muestra el contenido Widevine en curso. Esta prueba establece la línea base frente a la que se compara el acceso no autorizado.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.96\textwidth]{figuras/fase0-flujo-oficial-widevine.png}
+    \caption{Reproducción del activo Widevine desde el cliente oficial con un usuario autorizado.}
+    \label{fig:fase0-flujo-oficial}
+\end{figure}
+
+La evidencia central de la auditoría se muestra en la Figura~\ref{fig:fase0-bypass-no-auth}. El laboratorio externo utiliza directamente el endpoint \texttt{/license/no\_auth}, obtiene dos respuestas binarias de licencia y alcanza el evento \texttt{PLAYBACK\_STARTED} sin que exista una sesión de usuario. La imagen conserva simultáneamente la reproducción y el registro de eventos, por lo que permite relacionar el resultado visible con la ruta empleada.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.82\textwidth]{figuras/fase0-bypass-widevine-no-auth.png}
+    \caption{Reproducción Widevine desde el laboratorio externo mediante el endpoint de licencia sin autenticación.}
+    \label{fig:fase0-bypass-no-auth}
+\end{figure}
+
+Por último, la Figura~\ref{fig:fase0-clearkey} recoge la prueba ClearKey. El reproductor utiliza el MPD, el KID y una clave generada exclusivamente para el laboratorio, e inicia el vídeo sin configurar un servidor de licencias. Esta demostración no representa una extracción de claves Widevine; ilustra el impacto que tendría una clave ya conocida fuera del perímetro del DRM.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.90\textwidth]{figuras/fase0-clearkey-sin-licencia.png}
+    \caption{Reproducción del activo CENC local con una clave ClearKey conocida y sin servidor de licencias.}
+    \label{fig:fase0-clearkey}
+\end{figure}
+
 Para asegurar la trazabilidad, las pruebas principales se conservaron en el directorio \texttt{evidencias/fase0}. Este conjunto incluye capturas visuales de los tres escenarios, PCAP independientes para el flujo oficial, el bypass mediante \texttt{/license/no\_auth} y la entrega del activo ClearKey, además de un PCAPNG agregado. Un inventario describe el alcance de cada fichero, los filtros de Wireshark recomendados y las huellas SHA-256 empleadas para verificar su integridad. En particular, la captura oficial registra la secuencia \texttt{/auth/login}, \texttt{/playback/config} y dos peticiones a \texttt{/platform/license}; la captura del bypass contiene dos peticiones de licencia sin las llamadas previas de autenticación y autorización; y la captura ClearKey contiene el MPD, los ficheros de inicialización y los primeros segmentos sin ninguna URI de licencia.
 
 La evidencia también mostró aspectos secundarios de endurecimiento: uso de HTTP, CORS global, ausencia de cabeceras como CSP y publicación del token en el bloque de estado. Estos elementos no son necesarios para reproducir el bypass principal, pero amplían la superficie de exposición y deben corregirse en una arquitectura destinada a producción.
