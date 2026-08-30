@@ -21,6 +21,8 @@ services:
       - PORT=8080
       - NODE_ENV=production
       - APP_ORIGIN=http://localhost:9300
+      - LAB_ORIGIN=http://localhost:9301
+      - PUBLIC_BASE_URL=http://localhost:9080
       - ACCESS_TOKEN_SECRET=phase1-access-secret
       - PLAYBACK_TOKEN_SECRET=phase1-playback-secret
       - ORIGIN_BASE_URL=http://origin
@@ -63,6 +65,17 @@ services:
       - "9300:80"
     volumes:
       - ./client:/usr/share/nginx/html:ro
+    networks:
+      - ott-fase1-net
+    restart: unless-stopped
+
+  audit-lab:
+    image: nginx:1.27-alpine
+    container_name: tfm-fase1-audit-lab
+    ports:
+      - "9301:80"
+    volumes:
+      - ./audit-lab:/usr/share/nginx/html:ro
     networks:
       - ott-fase1-net
     restart: unless-stopped

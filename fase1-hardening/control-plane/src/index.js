@@ -5,6 +5,8 @@ const app = express();
 
 const port = Number(process.env.PORT || 8080);
 const appOrigin = process.env.APP_ORIGIN || 'http://localhost:9300';
+const labOrigin = process.env.LAB_ORIGIN || 'http://localhost:9301';
+const publicBaseUrl = process.env.PUBLIC_BASE_URL || 'http://localhost:9080';
 const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET || 'access-secret';
 const playbackTokenSecret = process.env.PLAYBACK_TOKEN_SECRET || 'playback-secret';
 const originBaseUrl = process.env.ORIGIN_BASE_URL || 'http://origin';
@@ -17,6 +19,7 @@ const maxConcurrentStreams = Number(process.env.MAX_CONCURRENT_STREAMS || 1);
 const localContentPrefixes = new Map([
   ['local-cenc-clearkey', 'dash-known-key']
 ]);
+const allowedOrigins = new Set([appOrigin, labOrigin]);
 
 const users = new Map([
   ['usuario-permitido@tfm.local', {
@@ -129,7 +132,7 @@ function issuePlaybackToken(session) {
     deviceId: session.deviceId,
     assetId: session.assetId,
     sessionId: session.sessionId,
-    scope: ['content:read', 'license:request', 'heartbeat:write'],
+    scope: ['manifest:read', 'content:read', 'license:request', 'heartbeat:write'],
     jti: crypto.randomUUID(),
     exp: Math.floor(Date.now() / 1000) + playbackTokenTtlSeconds
   }, playbackTokenSecret);
@@ -215,6 +218,25 @@ function isLocalContentPathAllowed(assetId, contentPath) {
   return Boolean(prefix && (contentPath === prefix || contentPath.startsWith(`${prefix}/`)));
 }
 
+function escapeXml(value) {
+  return value.replace(/[<>&'\"]/g, (character) => ({
+    '<': '&lt;',
+    '>': '&gt;',
+    '&': '&amp;',
+    "'": '&apos;',
+    '"': '&quot;'
+  }[character]));
+}
+
+function addManifestBaseUrl(manifest) {
+  const mediaBaseUrl = new URL('.', widevineManifestUrl).toString();
+  const rewritten = manifest.replace(/<MPD\b[^>]*>/, (tag) => `${tag}\n  <BaseURL>${escapeXml(mediaBaseUrl)}</BaseURL>`);
+  if (rewritten === manifest) {
+    throw new Error('Upstream response is not a DASH manifest');
+  }
+  return rewritten;
+}
+
 app.use((req, res, next) => {
   if (req.method === 'POST' && req.path === '/license') {
     return express.raw({ type: '*/*', limit: '2mb' })(req, res, next);
@@ -224,7 +246,8 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', appOrigin);
+  const requestOrigin = req.get('origin');
+  res.setHeader('Access-Control-Allow-Origin', allowedOrigins.has(requestOrigin) ? requestOrigin : appOrigin);
   res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS, POST');
   res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type, Range, X-Playback-Session-Id, X-Device-Id');
   res.setHeader('Access-Control-Expose-Headers', 'Content-Length, Content-Range, Accept-Ranges, X-Request-Id');
@@ -324,9 +347,46 @@ app.post('/playback/session', (req, res) => {
     },
     playbackToken: issuePlaybackToken(session),
     playbackTokenExpiresIn: playbackTokenTtlSeconds,
-    manifestUrl: widevineManifestUrl,
+    manifestUrl: `${publicBaseUrl}/manifest/${encodeURIComponent(assetId)}`,
     licenseUrl: 'http://localhost:9080/license'
   });
+});
+
+app.get('/manifest/:assetId', async (req, res) => {
+  const ip = getRequestIp(req);
+  if (!rateLimit('manifest', ip, 120, 60_000)) {
+    return jsonError(res, 429, 'RATE_LIMITED', 'Too many manifest requests');
+  }
+
+  let authContext;
+  try {
+    authContext = requirePlaybackToken(req);
+  } catch (error) {
+    return jsonError(res, 401, 'UNAUTHORIZED', error.message);
+  }
+
+  if (req.params.assetId !== authContext.payload.assetId) {
+    return jsonError(res, 403, 'ASSET_MISMATCH', 'Manifest asset does not match the playback token');
+  }
+  if (req.headers['x-playback-session-id'] && req.headers['x-playback-session-id'] !== authContext.payload.sessionId) {
+    return jsonError(res, 409, 'SESSION_MISMATCH', 'Manifest session id does not match the token');
+  }
+
+  updateSessionHeartbeat(authContext.session);
+
+  try {
+    const upstreamResponse = await fetch(widevineManifestUrl, { headers: { Accept: 'application/dash+xml, application/xml' } });
+    if (!upstreamResponse.ok) {
+      return jsonError(res, 502, 'UPSTREAM_MANIFEST_ERROR', `Upstream returned HTTP ${upstreamResponse.status}`);
+    }
+    const manifest = addManifestBaseUrl(await upstreamResponse.text());
+    res.setHeader('Content-Type', 'application/dash+xml; charset=utf-8');
+    res.setHeader('X-Playback-Session-Id', authContext.session.sessionId);
+    res.setHeader('X-Asset-Id', authContext.session.assetId);
+    return res.send(manifest);
+  } catch (error) {
+    return jsonError(res, 502, 'UPSTREAM_MANIFEST_ERROR', error.message);
+  }
 });
 
 app.post('/playback/heartbeat', (req, res) => {

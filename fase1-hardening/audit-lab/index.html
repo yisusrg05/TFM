@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="data:," />
+    <title>Laboratorio de tokens - Fase 1</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.14.6/shaka-player.compiled.min.js"></script>
+    <style>
+      body { margin: 0; min-height: 100vh; font-family: "Segoe UI", sans-serif; color: #e6edf7; background: #08111d; }
+      .shell { width: min(1240px, calc(100% - 32px)); margin: 24px auto; display: grid; gap: 18px; }
+      .panel { background: #101c2d; border: 1px solid rgba(124,198,254,.24); border-radius: 12px; padding: 20px 24px; }
+      .layout { display: grid; grid-template-columns: 360px 1fr; gap: 18px; }
+      .grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+      label { display: block; margin-bottom: 6px; color: #9db0c8; }
+      input { width: 100%; box-sizing: border-box; margin-bottom: 14px; padding: 11px 13px; border-radius: 8px; border: 1px solid rgba(124,198,254,.2); background: #06101b; color: #e6edf7; }
+      button { width: 100%; margin-bottom: 10px; padding: 11px 14px; border: 0; border-radius: 8px; cursor: pointer; font-weight: 650; background: #7cc6fe; color: #07101b; }
+      button.secondary { color: #e6edf7; background: rgba(124,198,254,.12); border: 1px solid rgba(124,198,254,.22); }
+      button.danger { color: #ffd9d6; background: rgba(255,123,114,.12); border: 1px solid rgba(255,123,114,.25); }
+      button:disabled { opacity: .5; cursor: not-allowed; }
+      .status, .box { padding: 12px 14px; border-radius: 8px; background: #06101b; overflow-wrap: anywhere; }
+      .status { margin-top: 8px; } .ok { color: #78e3a4; } .warn { color: #ffd36e; } .bad { color: #ff857d; }
+      video { width: 100%; min-height: 330px; border-radius: 10px; background: #000; }
+      pre { min-height: 230px; max-height: 420px; overflow: auto; white-space: pre-wrap; margin: 0; color: #c9d7e8; }
+      code { color: #8ed0ff; }
+      @media (max-width: 950px) { .layout, .grid { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="panel">
+        <h1>Laboratorio de manifest y playbackToken — Fase 1</h1>
+        <p>Las credenciales generan automáticamente el access token, la sesión y el playback token. El manifest y la licencia exigen ese token; las claves Widevine permanecen dentro del CDM.</p>
+      </section>
+
+      <section class="layout">
+        <aside class="panel">
+          <label for="email">Usuario</label>
+          <input id="email" value="usuario-permitido@tfm.local" autocomplete="username" />
+          <label for="password">Contraseña</label>
+          <input id="password" type="password" value="demo123" autocomplete="current-password" />
+
+          <button id="btnPrepare">1. Autenticar y generar token</button>
+          <button id="btnPlay" class="secondary" disabled>2. Reproducir con token válido</button>
+          <button id="btnNegative" class="secondary" disabled>3. Ejecutar pruebas negativas</button>
+          <button id="btnStop" class="danger" disabled>Detener sesión</button>
+          <div id="status" class="status warn">Esperando credenciales.</div>
+        </aside>
+
+        <section class="panel">
+          <video id="video" controls autoplay muted></video>
+          <div class="grid" style="margin-top:14px;">
+            <div class="box"><strong>Device</strong><div id="deviceId">-</div></div>
+            <div class="box"><strong>Sesión</strong><div id="sessionId">-</div></div>
+            <div class="box"><strong>Manifest protegido</strong><div id="manifestUrl">-</div></div>
+            <div class="box"><strong>Claims del token</strong><div id="claims">-</div></div>
+          </div>
+        </section>
+      </section>
+
+      <section class="panel">
+        <h2>Registro de evidencias</h2>
+        <pre id="log">[]</pre>
+      </section>
+    </main>
+
+    <script>
+      const API_BASE = 'http://localhost:9080';
+      const state = {
+        accessToken: null,
+        playbackToken: null,
+        sessionId: null,
+        manifestUrl: null,
+        heartbeatTimer: null,
+        deviceId: `lab-f1-${crypto.randomUUID()}`,
+        events: []
+      };
+
+      const player = new shaka.Player(document.getElementById('video'));
+      const statusEl = document.getElementById('status');
+      const logEl = document.getElementById('log');
+      document.getElementById('deviceId').textContent = state.deviceId;
+
+      function setStatus(message, tone = 'warn') {
+        statusEl.textContent = message;
+        statusEl.className = `status ${tone}`;
+      }
+
+      function addEvent(type, details = {}) {
+        state.events.unshift({ time: new Date().toISOString(), type, ...details });
+        state.events = state.events.slice(0, 30);
+        logEl.textContent = JSON.stringify(state.events, null, 2);
+      }
+
+      function decodeClaims(token) {
+        const body = token.split('.')[0].replace(/-/g, '+').replace(/_/g, '/');
+        return JSON.parse(atob(body.padEnd(Math.ceil(body.length / 4) * 4, '=')));
+      }
+
+      function setButtons() {
+        const ready = Boolean(state.playbackToken && state.sessionId);
+        document.getElementById('btnPrepare').disabled = ready;
+        document.getElementById('btnPlay').disabled = !ready;
+        document.getElementById('btnNegative').disabled = !ready;
+        document.getElementById('btnStop').disabled = !ready;
+      }
+
+      async function requestJson(path, options = {}) {
+        const response = await fetch(`${API_BASE}${path}`, options);
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.details || data.error || `HTTP ${response.status}`);
+        return data;
+      }
+
+      function configurePlayer() {
+        player.configure({ drm: { servers: { 'com.widevine.alpha': `${API_BASE}/license` } } });
+      }
+
+      player.getNetworkingEngine().registerRequestFilter((type, request) => {
+        const requestType = shaka.net.NetworkingEngine.RequestType;
+        if (type === requestType.LICENSE) request.headers['Content-Type'] = 'application/octet-stream';
+        if (state.playbackToken && (type === requestType.MANIFEST || type === requestType.LICENSE)) {
+          request.headers.Authorization = `Bearer ${state.playbackToken}`;
+          request.headers['X-Playback-Session-Id'] = state.sessionId;
+          request.headers['X-Device-Id'] = state.deviceId;
+          addEvent(type === requestType.MANIFEST ? 'MANIFEST_REQUEST_WITH_TOKEN' : 'LICENSE_REQUEST_WITH_TOKEN', { uri: request.uris[0] });
+        }
+      });
+
+      async function prepare() {
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const login = await requestJson('/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, deviceId: state.deviceId })
+        });
+        state.accessToken = login.accessToken;
+        addEvent('AUTH_OK', { accountId: login.user.accountId, deviceId: login.deviceId, expiresIn: login.accessTokenExpiresIn });
+
+        const playback = await requestJson('/playback/session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${state.accessToken}` },
+          body: JSON.stringify({ assetId: 'sintel-widevine' })
+        });
+        state.playbackToken = playback.playbackToken;
+        state.sessionId = playback.session.sessionId;
+        state.manifestUrl = playback.manifestUrl;
+        const claims = decodeClaims(state.playbackToken);
+        document.getElementById('sessionId').textContent = state.sessionId;
+        document.getElementById('manifestUrl').textContent = state.manifestUrl;
+        document.getElementById('claims').textContent = `${claims.typ} | ${claims.assetId} | exp ${new Date(claims.exp * 1000).toISOString()} | ${claims.scope.join(', ')}`;
+        addEvent('PLAYBACK_TOKEN_ISSUED', { sessionId: state.sessionId, assetId: claims.assetId, scopes: claims.scope, expiresAt: new Date(claims.exp * 1000).toISOString() });
+        setButtons();
+        startHeartbeat();
+        setStatus('Token generado. Manifest y licencia preparados.', 'ok');
+      }
+
+      async function heartbeat() {
+        const data = await requestJson('/playback/heartbeat', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${state.playbackToken}`, 'X-Playback-Session-Id': state.sessionId }
+        });
+        state.playbackToken = data.playbackToken;
+      }
+
+      function startHeartbeat() {
+        clearInterval(state.heartbeatTimer);
+        state.heartbeatTimer = setInterval(() => heartbeat().catch((error) => addEvent('HEARTBEAT_REJECTED', { error: error.message })), 20000);
+      }
+
+      async function play() {
+        await player.unload();
+        configurePlayer();
+        await player.load(state.manifestUrl);
+        addEvent('PLAYBACK_STARTED', { manifestUrl: state.manifestUrl });
+        setStatus('Widevine reproduciendo con manifest y licencia protegidos.', 'ok');
+      }
+
+      async function probe(path, headers = {}) {
+        const response = await fetch(path, { headers });
+        let error = null;
+        try { error = (await response.json()).error; } catch (_error) {}
+        return { status: response.status, error };
+      }
+
+      async function negativeTests() {
+        const noToken = await probe(state.manifestUrl);
+        const altered = await probe(state.manifestUrl, { Authorization: `Bearer ${state.playbackToken}x`, 'X-Playback-Session-Id': state.sessionId });
+        const wrongSession = await probe(state.manifestUrl, { Authorization: `Bearer ${state.playbackToken}`, 'X-Playback-Session-Id': 'wrong-session' });
+        const wrongAssetUrl = state.manifestUrl.replace('sintel-widevine', 'otro-activo');
+        const wrongAsset = await probe(wrongAssetUrl, { Authorization: `Bearer ${state.playbackToken}`, 'X-Playback-Session-Id': state.sessionId });
+        addEvent('NEGATIVE_TESTS', { noToken, alteredToken: altered, wrongSession, wrongAsset });
+        const passed = noToken.status === 401 && altered.status === 401 && wrongSession.status === 409 && wrongAsset.status === 403;
+        setStatus(passed ? 'Pruebas negativas superadas: 401, 401, 409 y 403.' : 'Alguna prueba negativa no produjo el resultado esperado.', passed ? 'ok' : 'bad');
+      }
+
+      async function stop() {
+        if (state.playbackToken) {
+          await requestJson('/playback/stop', { method: 'POST', headers: { Authorization: `Bearer ${state.playbackToken}`, 'X-Playback-Session-Id': state.sessionId } });
+        }
+        clearInterval(state.heartbeatTimer);
+        await player.unload();
+        addEvent('SESSION_STOPPED', { sessionId: state.sessionId });
+        state.playbackToken = null;
+        state.sessionId = null;
+        state.manifestUrl = null;
+        document.getElementById('sessionId').textContent = '-';
+        document.getElementById('manifestUrl').textContent = '-';
+        document.getElementById('claims').textContent = '-';
+        setButtons();
+        setStatus('Sesión detenida.', 'warn');
+      }
+
+      document.getElementById('btnPrepare').addEventListener('click', () => prepare().catch((error) => setStatus(error.message, 'bad')));
+      document.getElementById('btnPlay').addEventListener('click', () => play().catch((error) => setStatus(error.message, 'bad')));
+      document.getElementById('btnNegative').addEventListener('click', () => negativeTests().catch((error) => setStatus(error.message, 'bad')));
+      document.getElementById('btnStop').addEventListener('click', () => stop().catch((error) => setStatus(error.message, 'bad')));
+
+      configurePlayer();
+      setButtons();
+    </script>
+  </body>
+</html>

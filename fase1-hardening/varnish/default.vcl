@@ -10,11 +10,11 @@ sub vcl_recv {
         return (synth(204));
     }
 
-    if (req.url !~ "^/(health|auth|playback|content|license)") {
-        return (synth(404, "Use /auth, /playback, /content, /license or /health"));
+    if (req.url !~ "^/(health|auth|playback|manifest|content|license)") {
+        return (synth(404, "Use /auth, /playback, /manifest, /content, /license or /health"));
     }
 
-    if ((req.url ~ "^/content" || req.url ~ "^/license" || req.url ~ "^/playback/(heartbeat|stop)") && !req.http.Authorization) {
+    if ((req.url ~ "^/manifest" || req.url ~ "^/content" || req.url ~ "^/license" || req.url ~ "^/playback/(heartbeat|stop)") && !req.http.Authorization) {
         return (synth(401, "Missing Authorization header"));
     }
 
@@ -29,7 +29,11 @@ sub vcl_recv {
 }
 
 sub vcl_synth {
-    set resp.http.Access-Control-Allow-Origin = "http://localhost:9300";
+    if (req.http.Origin == "http://localhost:9300" || req.http.Origin == "http://localhost:9301") {
+        set resp.http.Access-Control-Allow-Origin = req.http.Origin;
+    } else {
+        set resp.http.Access-Control-Allow-Origin = "http://localhost:9300";
+    }
     set resp.http.Access-Control-Allow-Methods = "GET, HEAD, OPTIONS, POST";
     set resp.http.Access-Control-Allow-Headers = "Authorization, Content-Type, Range, X-Playback-Session-Id, X-Device-Id";
     set resp.http.Access-Control-Expose-Headers = "Content-Length, Content-Range, Accept-Ranges, X-Request-Id, X-Playback-Session-Id";
@@ -40,7 +44,11 @@ sub vcl_synth {
 }
 
 sub vcl_deliver {
-    set resp.http.Access-Control-Allow-Origin = "http://localhost:9300";
+    if (req.http.Origin == "http://localhost:9300" || req.http.Origin == "http://localhost:9301") {
+        set resp.http.Access-Control-Allow-Origin = req.http.Origin;
+    } else {
+        set resp.http.Access-Control-Allow-Origin = "http://localhost:9300";
+    }
     set resp.http.Access-Control-Allow-Methods = "GET, HEAD, OPTIONS, POST";
     set resp.http.Access-Control-Allow-Headers = "Authorization, Content-Type, Range, X-Playback-Session-Id, X-Device-Id";
     set resp.http.Access-Control-Expose-Headers = "Content-Length, Content-Range, Accept-Ranges, X-Request-Id, X-Playback-Session-Id";

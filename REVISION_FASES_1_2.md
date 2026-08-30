@@ -6,10 +6,10 @@ Fecha de revisión: 30 de agosto de 2026.
 
 Las dos fases se encuentran levantadas y operativas de forma simultánea con la fase 0:
 
-| Entorno | Cliente | CDN/control-plane | Estado |
-|---|---:|---:|---|
-| Fase 1 | `http://localhost:9300` | `http://localhost:9080` | Operativo |
-| Fase 2 | `http://localhost:9400` | `http://localhost:9180` | Operativo |
+| Entorno | Cliente | CDN/control-plane | Laboratorio | Estado |
+|---|---:|---:|---:|---|
+| Fase 1 | `http://localhost:9300` | `http://localhost:9080` | `http://localhost:9301` | Operativo |
+| Fase 2 | `http://localhost:9400` | `http://localhost:9180` | `http://localhost:9401` | Operativo |
 
 Todos los contenedores de ambas fases están en estado `running`, con cero reinicios inesperados. Los clientes, los endpoints de salud, los orígenes internos y los servidores internos de licencia responden con HTTP 200. No se observaron errores de aplicación en los registros después de la regresión final.
 
@@ -22,12 +22,14 @@ Todos los contenedores de ambas fases están en estado `running`, con cero reini
 - Creación de la primera playback session: HTTP 201.
 - Segunda sesión concurrente para la misma cuenta: HTTP 409 `CONCURRENCY_LIMIT`.
 - Contenido y licencia sin token: HTTP 401.
+- Manifest sin token: HTTP 401; con token valido: HTTP 200 y tipo `application/dash+xml`.
 - Uso de un access token donde se exige playback token: HTTP 401.
 - Ruta heredada `/license/no_auth`: HTTP 404 con token y HTTP 401 sin token.
 - Cabecera de sesión distinta a la incluida en el token: HTTP 409 `SESSION_MISMATCH`.
 - Acceso a contenido de otro activo con un token de `sintel-widevine`: HTTP 403 `CONTENT_NOT_ALLOWED_FOR_ASSET`.
 - Token de reproducción después de detener la sesión: rechazado.
 - Reproducción Widevine real: vídeo no pausado, `readyState=4`, duración aproximada de 888 segundos y tiempo creciente.
+- El laboratorio `http://localhost:9301` genera el token desde usuario y contraseña, registra las peticiones protegidas de manifest/licencia y supera los casos negativos 401/401/409/403.
 - La interfaz no imprime `accessToken` ni `playbackToken`.
 
 ### Correcciones aplicadas
@@ -42,6 +44,7 @@ Todos los contenedores de ambas fases están en estado `running`, con cero reini
 ### Comprobaciones superadas
 
 - Conserva todos los controles de sesión, entitlement, licencia y concurrencia de la fase 1.
+- El manifest protegido responde HTTP 200 con token valido y 401/409/403 en los casos sin token, sesion distinta y activo distinto.
 - El usuario denegado solo tiene rol `user`; el acceso a `/admin/overview` devuelve HTTP 403.
 - El usuario autorizado con rol administrativo obtiene observabilidad y eventos.
 - Varnish sustituye un `X-Forwarded-For` aportado por el cliente; la IP falsa de prueba no llega al control-plane.
@@ -56,6 +59,9 @@ Todos los contenedores de ambas fases están en estado `running`, con cero reini
 - La representación de eventos usa nodos de texto: una cadena con apariencia de HTML permanece como texto y no crea elementos en el DOM.
 - El binding de contenido devuelve HTTP 403 si el activo del token no corresponde con la ruta local y HTTP 409 si la cabecera de sesión no coincide.
 - Reproducción Widevine real: vídeo no pausado, `readyState=4`, duración aproximada de 888 segundos y tiempo creciente.
+- El laboratorio `http://localhost:9401` genera el token automaticamente desde las credenciales y reproduce con manifest y licencia protegidos.
+- Ocho autenticaciones fallidas desde el mismo dispositivo crean un ban `AUTH_FAILURE_BURST`; el manifest posterior devuelve HTTP 401 y la interfaz impide iniciar otra reproducción.
+- Al retirar el ban desde el plano administrativo, el manifest y la reproducción vuelven a funcionar.
 
 ### Correcciones aplicadas
 

@@ -154,7 +154,7 @@
         if (type === requestType.LICENSE) {
           request.headers['Content-Type'] = 'application/octet-stream';
         }
-        if (state.playbackToken && type === requestType.LICENSE) {
+        if (state.playbackToken && (type === requestType.MANIFEST || type === requestType.LICENSE)) {
           request.headers.Authorization = `Bearer ${state.playbackToken}`;
           request.headers['X-Playback-Session-Id'] = state.sessionId;
           request.headers['X-Device-Id'] = state.deviceId;
