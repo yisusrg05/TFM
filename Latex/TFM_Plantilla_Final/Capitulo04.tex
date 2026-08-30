@@ -201,6 +201,8 @@ Las evidencias principales obtenidas fueron las siguientes:
     \item Evento \texttt{KEY\_EXTRACTION\_BLOCKED}, coherente con la imposibilidad de exportar claves Widevine mediante EME.
 \end{itemize}
 
+Para asegurar la trazabilidad, las pruebas principales se conservaron en el directorio \texttt{evidencias/fase0}. Este conjunto incluye capturas visuales de los tres escenarios, PCAP independientes para el flujo oficial, el bypass mediante \texttt{/license/no\_auth} y la entrega del activo ClearKey, además de un PCAPNG agregado. Un inventario describe el alcance de cada fichero, los filtros de Wireshark recomendados y las huellas SHA-256 empleadas para verificar su integridad. En particular, la captura oficial registra la secuencia \texttt{/auth/login}, \texttt{/playback/config} y dos peticiones a \texttt{/platform/license}; la captura del bypass contiene dos peticiones de licencia sin las llamadas previas de autenticación y autorización; y la captura ClearKey contiene el MPD, los ficheros de inicialización y los primeros segmentos sin ninguna URI de licencia.
+
 La evidencia también mostró aspectos secundarios de endurecimiento: uso de HTTP, CORS global, ausencia de cabeceras como CSP y publicación del token en el bloque de estado. Estos elementos no son necesarios para reproducir el bypass principal, pero amplían la superficie de exposición y deben corregirse en una arquitectura destinada a producción.
 
 \section{Limitaciones del modelo DRM tradicional}
