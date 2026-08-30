@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="920" viewBox="0 0 1600 920">
+  <defs>
+    <linearGradient id="bg2" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#07111d"/><stop offset="1" stop-color="#10263b"/></linearGradient>
+    <marker id="arr2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#8bd7ff"/></marker>
+    <style>
+      .title{font:700 42px 'Segoe UI',sans-serif;fill:#f4f8fc}.sub{font:400 20px 'Segoe UI',sans-serif;fill:#a8bfd4}
+      .lane{stroke:#45647e;stroke-width:2;stroke-dasharray:8 8}.head{font:700 23px 'Segoe UI',sans-serif;fill:#f6fbff}
+      .step{font:700 19px 'Segoe UI',sans-serif;fill:#f6fbff}.desc{font:400 18px 'Segoe UI',sans-serif;fill:#d8e7f4}.num{font:700 18px 'Segoe UI',sans-serif;fill:#07111d}
+    </style>
+  </defs>
+  <rect width="1600" height="920" fill="url(#bg2)"/>
+  <text x="800" y="60" text-anchor="middle" class="title">Flujo de reproducción protegido</text>
+  <text x="800" y="96" text-anchor="middle" class="sub">Separación entre identidad, sesión efímera, entrega del MPD y licencia Widevine</text>
+
+  <g>
+    <rect x="70" y="125" width="210" height="58" rx="15" fill="#1a4a6e" stroke="#7ed2ff"/><text x="175" y="161" text-anchor="middle" class="head">Cliente OTT</text>
+    <rect x="360" y="125" width="210" height="58" rx="15" fill="#1a4a6e" stroke="#7ed2ff"/><text x="465" y="161" text-anchor="middle" class="head">Varnish</text>
+    <rect x="660" y="125" width="230" height="58" rx="15" fill="#24544f" stroke="#66dfc2"/><text x="775" y="161" text-anchor="middle" class="head">Control-plane</text>
+    <rect x="980" y="125" width="220" height="58" rx="15" fill="#503f67" stroke="#c8acff"/><text x="1090" y="161" text-anchor="middle" class="head">Proxy licencia</text>
+    <rect x="1300" y="125" width="220" height="58" rx="15" fill="#59412e" stroke="#ffc988"/><text x="1410" y="161" text-anchor="middle" class="head">Widevine / CDM</text>
+    <line x1="175" y1="183" x2="175" y2="850" class="lane"/><line x1="465" y1="183" x2="465" y2="850" class="lane"/>
+    <line x1="775" y1="183" x2="775" y2="850" class="lane"/><line x1="1090" y1="183" x2="1090" y2="850" class="lane"/>
+    <line x1="1410" y1="183" x2="1410" y2="850" class="lane"/>
+  </g>
+
+  <g fill="none" stroke="#8bd7ff" stroke-width="3" marker-end="url(#arr2)">
+    <line x1="175" y1="235" x2="765" y2="235"/><line x1="775" y1="295" x2="185" y2="295"/>
+    <line x1="175" y1="365" x2="765" y2="365"/><line x1="775" y1="425" x2="185" y2="425"/>
+    <line x1="175" y1="500" x2="765" y2="500"/><line x1="775" y1="560" x2="185" y2="560"/>
+    <line x1="175" y1="635" x2="1080" y2="635"/><line x1="1090" y1="695" x2="1400" y2="695"/>
+    <line x1="1410" y1="755" x2="1100" y2="755"/><line x1="1090" y1="815" x2="185" y2="815"/>
+  </g>
+  <g>
+    <circle cx="112" cy="235" r="20" fill="#7ed2ff"/><text x="112" y="242" text-anchor="middle" class="num">1</text><text x="310" y="224" class="step">POST /auth/login</text><text x="310" y="251" class="desc">correo, contraseña y deviceId</text>
+    <text x="320" y="286" class="step">Access token (3600 s)</text><text x="320" y="313" class="desc">identidad, dispositivo, entitlement y rol en Fase 2</text>
+    <circle cx="112" cy="365" r="20" fill="#66dfc2"/><text x="112" y="372" text-anchor="middle" class="num">2</text><text x="310" y="354" class="step">POST /playback/session</text><text x="310" y="381" class="desc">access token + assetId</text>
+    <text x="310" y="416" class="step">Playback token (90 s)</text><text x="310" y="443" class="desc">sessionId, assetId, deviceId y scopes</text>
+    <circle cx="112" cy="500" r="20" fill="#c8acff"/><text x="112" y="507" text-anchor="middle" class="num">3</text><text x="310" y="489" class="step">GET /manifest/:assetId</text><text x="310" y="516" class="desc">Bearer + X-Playback-Session-Id + X-Device-Id</text>
+    <text x="310" y="551" class="step">MPD DASH autorizado</text><text x="310" y="578" class="desc">binding de sesión y activo; BaseURL del medio</text>
+    <circle cx="112" cy="635" r="20" fill="#ffc988"/><text x="112" y="642" text-anchor="middle" class="num">4</text><text x="350" y="624" class="step">POST /license</text><text x="350" y="651" class="desc">challenge binario con el mismo contexto de reproducción</text>
+    <text x="1145" y="684" class="step">/internal/license</text><text x="1145" y="711" class="desc">solo red Docker</text>
+    <text x="1135" y="744" class="step">licencia binaria</text><text x="1135" y="771" class="desc">procesada dentro del CDM</text>
+    <text x="340" y="804" class="step">Reproducción autorizada</text><text x="340" y="831" class="desc">heartbeat cada 20 s renueva el token y mantiene la sesión</text>
+  </g>
+</svg>

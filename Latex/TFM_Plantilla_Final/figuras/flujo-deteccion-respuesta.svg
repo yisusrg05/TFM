@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <defs>
+    <linearGradient id="bg3" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#07111d"/><stop offset="1" stop-color="#10263b"/></linearGradient>
+    <marker id="arr3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#8bd7ff"/></marker>
+    <filter id="sh3"><feDropShadow dx="0" dy="8" stdDeviation="9" flood-opacity=".25"/></filter>
+    <style>.title{font:700 42px 'Segoe UI',sans-serif;fill:#f4f8fc}.sub{font:400 20px 'Segoe UI',sans-serif;fill:#a8bfd4}.box{rx:20;stroke-width:2;filter:url(#sh3)}.h{font:700 25px 'Segoe UI',sans-serif;fill:#f6fbff}.t{font:400 18px 'Segoe UI',sans-serif;fill:#d9e8f5}.small{font:600 17px 'Segoe UI',sans-serif;fill:#b8cede}.arrow{stroke:#8bd7ff;stroke-width:4;fill:none;marker-end:url(#arr3)}</style>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg3)"/>
+  <text x="800" y="62" text-anchor="middle" class="title">Detección y respuesta de la Fase 2</text>
+  <text x="800" y="99" text-anchor="middle" class="sub">La telemetría no sustituye a la autorización: añade memoria, correlación y capacidad de revocación</text>
+
+  <rect x="70" y="185" width="290" height="240" class="box" fill="#173b59" stroke="#7ed2ff"/>
+  <text x="215" y="230" text-anchor="middle" class="h">Señales</text>
+  <text x="105" y="275" class="t">• login correcto o fallido</text><text x="105" y="310" class="t">• rechazo de concurrencia</text>
+    <text x="105" y="345" class="t">• manifest, contenido y licencia</text><text x="105" y="380" class="t">• heartbeat y eventos admin</text>
+
+  <rect x="470" y="185" width="290" height="240" class="box" fill="#45395d" stroke="#c8acff"/>
+  <text x="615" y="230" text-anchor="middle" class="h">Estado en Redis</text>
+  <text x="505" y="275" class="t">• sesiones y cuenta → sesiones</text><text x="505" y="310" class="t">• lista de 300 eventos</text>
+  <text x="505" y="345" class="t">• contadores con TTL</text><text x="505" y="380" class="t">• score, razones y bans</text>
+
+  <rect x="870" y="140" width="300" height="330" class="box" fill="#17463f" stroke="#66dfc2"/>
+  <text x="1020" y="185" text-anchor="middle" class="h">Reglas</text>
+  <text x="905" y="230" class="t">3 IP / 10 min → +30</text><text x="905" y="265" class="t">2 rechazos concurrencia → +25</text>
+  <text x="905" y="300" class="t">6 licencias / 5 min → +20</text><text x="905" y="335" class="t">40 contenidos / min → +15</text>
+  <text x="905" y="370" class="t">8 heartbeat / min → +10</text><text x="905" y="405" class="t">8 fallos auth / 5 min → ban device</text>
+  <text x="1020" y="445" text-anchor="middle" class="small">score ≥ 100 → ban de cuenta</text>
+
+  <rect x="1270" y="185" width="260" height="240" class="box" fill="#5a352e" stroke="#ff9b83"/>
+  <text x="1400" y="230" text-anchor="middle" class="h">Respuesta</text>
+  <text x="1305" y="275" class="t">• rechazo de login</text><text x="1305" y="310" class="t">• manifest bloqueado</text>
+  <text x="1305" y="345" class="t">• heartbeat y licencia</text><text x="1305" y="380" class="t">• contenido denegado</text>
+
+  <path d="M360 305 H465" class="arrow"/><path d="M760 305 H865" class="arrow"/><path d="M1170 305 H1265" class="arrow"/>
+
+  <rect x="315" y="570" width="970" height="150" class="box" fill="#263248" stroke="#8ca9c3"/>
+  <text x="800" y="615" text-anchor="middle" class="h">Plano administrativo separado</text>
+  <text x="800" y="655" text-anchor="middle" class="t">Consulta eventos, sesiones, riesgo y bans con un access token que incluya el rol admin</text>
+  <text x="800" y="690" text-anchor="middle" class="t">Puede crear o retirar bans aunque el dispositivo ya no tenga acceso al plano de reproducción</text>
+  <path d="M1400 425 C1400 520 1190 540 1120 565" class="arrow"/><path d="M480 570 C350 535 215 500 215 430" class="arrow"/>
+  <text x="800" y="815" text-anchor="middle" class="sub">Los umbrales son reglas de laboratorio orientadas a reproducibilidad, no un modelo antifraude calibrado en producción</text>
+</svg>

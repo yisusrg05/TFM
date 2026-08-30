@@ -1,0 +1,106 @@
+{
+  "generatedAt": "2026-08-30T19:09:24.423789Z",
+  "source": "evidencias/fase0/pcap/fase0_01_flujo_oficial_widevine.pcap",
+  "bytes": 14144,
+  "sha256": "41658DCE879D8AACDF7549B07D4594D66611973F723FDB64AC934DF7C06B5413",
+  "httpRequestCount": 4,
+  "httpResponseCount": 4,
+  "requestCounts": {
+    "POST /auth/login": 1,
+    "POST /platform/license": 2,
+    "POST /playback/config": 1
+  },
+  "responseCounts": {
+    "200": 4
+  },
+  "packets": [
+    {
+      "frame.number": "5",
+      "frame.time_epoch": "1787745716.139313000",
+      "ip.src": "172.18.0.1",
+      "ip.dst": "172.18.0.5",
+      "http.request.method": "POST",
+      "http.host": "localhost:8080",
+      "http.request.uri": "/auth/login",
+      "http.response.code": "",
+      "http.content_length": "60"
+    },
+    {
+      "frame.number": "7",
+      "frame.time_epoch": "1787745716.146601000",
+      "ip.src": "172.18.0.5",
+      "ip.dst": "172.18.0.1",
+      "http.request.method": "",
+      "http.host": "",
+      "http.request.uri": "/auth/login",
+      "http.response.code": "200",
+      "http.content_length": "625"
+    },
+    {
+      "frame.number": "9",
+      "frame.time_epoch": "1787745716.952142000",
+      "ip.src": "172.18.0.1",
+      "ip.dst": "172.18.0.5",
+      "http.request.method": "POST",
+      "http.host": "localhost:8080",
+      "http.request.uri": "/playback/config",
+      "http.response.code": "",
+      "http.content_length": "28"
+    },
+    {
+      "frame.number": "10",
+      "frame.time_epoch": "1787745716.953962000",
+      "ip.src": "172.18.0.5",
+      "ip.dst": "172.18.0.1",
+      "http.request.method": "",
+      "http.host": "",
+      "http.request.uri": "/playback/config",
+      "http.response.code": "200",
+      "http.content_length": "307"
+    },
+    {
+      "frame.number": "12",
+      "frame.time_epoch": "1787745717.250544000",
+      "ip.src": "172.18.0.1",
+      "ip.dst": "172.18.0.5",
+      "http.request.method": "POST",
+      "http.host": "localhost:8080",
+      "http.request.uri": "/platform/license",
+      "http.response.code": "",
+      "http.content_length": "2"
+    },
+    {
+      "frame.number": "14",
+      "frame.time_epoch": "1787745717.532070000",
+      "ip.src": "172.18.0.5",
+      "ip.dst": "172.18.0.1",
+      "http.request.method": "",
+      "http.host": "",
+      "http.request.uri": "/platform/license",
+      "http.response.code": "200",
+      "http.content_length": "714"
+    },
+    {
+      "frame.number": "16",
+      "frame.time_epoch": "1787745717.567490000",
+      "ip.src": "172.18.0.1",
+      "ip.dst": "172.18.0.5",
+      "http.request.method": "POST",
+      "http.host": "localhost:8080",
+      "http.request.uri": "/platform/license",
+      "http.response.code": "",
+      "http.content_length": "3824"
+    },
+    {
+      "frame.number": "18",
+      "frame.time_epoch": "1787745717.730835000",
+      "ip.src": "172.18.0.5",
+      "ip.dst": "172.18.0.1",
+      "http.request.method": "",
+      "http.host": "",
+      "http.request.uri": "/platform/license",
+      "http.response.code": "200",
+      "http.content_length": "1229"
+    }
+  ]
+}

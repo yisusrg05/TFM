@@ -703,6 +703,10 @@ app.post('/license', async (req, res) => {
     return jsonError(res, 401, 'UNAUTHORIZED', error.message);
   }
 
+  if (req.headers['x-playback-session-id'] && req.headers['x-playback-session-id'] !== authContext.payload.sessionId) {
+    return jsonError(res, 409, 'SESSION_MISMATCH', 'Header session id does not match the playback token');
+  }
+
   authContext.session.lastHeartbeatAt = Date.now();
   await storeSession(authContext.session);
   const risk = await applyAccountSignals({

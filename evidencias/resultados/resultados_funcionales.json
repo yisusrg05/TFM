@@ -1,0 +1,1542 @@
+{
+  "generatedAt": "2026-08-30T19:03:23.212559Z",
+  "host": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "python": "3.11.3"
+  },
+  "summary": {
+    "total": 65,
+    "passed": 65,
+    "failed": 0
+  },
+  "results": [
+    {
+      "id": "F0-HEALTH",
+      "phase": "fase0",
+      "category": "disponibilidad",
+      "description": "Health del servicio base",
+      "expected": "HTTP 200",
+      "passed": true,
+      "observed": {
+        "status": 200,
+        "durationMs": 27.314,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "status": "ok",
+          "service": "license-server",
+          "drm": "widevine",
+          "mode": "proxy",
+          "activeSessions": 0
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F0-AUTH-OK",
+      "phase": "fase0",
+      "category": "autenticacion",
+      "description": "Login del usuario autorizado",
+      "expected": "HTTP 200",
+      "passed": true,
+      "observed": {
+        "status": 200,
+        "durationMs": 16.632,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": true,
+          "accessToken": "<redacted>",
+          "user": {
+            "email": "usuario-permitido@tfm.local",
+            "accountId": "acc-allowed-001",
+            "displayName": "Usuario con permiso",
+            "entitlements": [
+              "shaka-widevine",
+              "local-cenc-clearkey"
+            ]
+          },
+          "catalog": [
+            {
+              "assetId": "shaka-widevine",
+              "title": "Sintel Widevine publico",
+              "description": "Contenido Widevine de pruebas publicado por Shaka.",
+              "drm": "widevine",
+              "allowed": true
+            },
+            {
+              "assetId": "local-cenc-clearkey",
+              "title": "CENC local con clave de laboratorio",
+              "description": "Contenido empaquetado localmente con Shaka Packager y reproducible con KID/KEY conocidos.",
+              "drm": "clearkey",
+              "allowed": true
+            }
+          ]
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F0-AUTH-BAD",
+      "phase": "fase0",
+      "category": "autenticacion",
+      "description": "Credenciales incorrectas",
+      "expected": "HTTP 401",
+      "passed": true,
+      "observed": {
+        "status": 401,
+        "durationMs": 17.679,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": false,
+          "message": "Credenciales invalidas"
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F0-AUTH-DENIED-LOGIN",
+      "phase": "fase0",
+      "category": "autenticacion",
+      "description": "Login del usuario sin entitlement",
+      "expected": "HTTP 200",
+      "passed": true,
+      "observed": {
+        "status": 200,
+        "durationMs": 5.87,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": true,
+          "accessToken": "<redacted>",
+          "user": {
+            "email": "usuario-denegado@tfm.local",
+            "accountId": "acc-denied-001",
+            "displayName": "Usuario sin permiso",
+            "entitlements": []
+          },
+          "catalog": [
+            {
+              "assetId": "shaka-widevine",
+              "title": "Sintel Widevine publico",
+              "description": "Contenido Widevine de pruebas publicado por Shaka.",
+              "drm": "widevine",
+              "allowed": false
+            },
+            {
+              "assetId": "local-cenc-clearkey",
+              "title": "CENC local con clave de laboratorio",
+              "description": "Contenido empaquetado localmente con Shaka Packager y reproducible con KID/KEY conocidos.",
+              "drm": "clearkey",
+              "allowed": false
+            }
+          ]
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F0-CONFIG-OK",
+      "phase": "fase0",
+      "category": "reproduccion",
+      "description": "Configuración Widevine autorizada",
+      "expected": "HTTP 200",
+      "passed": true,
+      "observed": {
+        "status": 200,
+        "durationMs": 25.846,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": true,
+          "assetId": "shaka-widevine",
+          "title": "Sintel Widevine publico",
+          "drm": "widevine",
+          "manifestUri": "https://storage.googleapis.com/shaka-demo-assets/sintel-widevine/dash.mpd",
+          "protectedLicenseUri": "http://localhost:8080/platform/license",
+          "publicNoAuthLicenseUri": "http://localhost:8080/license/no_auth"
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F0-CONFIG-DENIED",
+      "phase": "fase0",
+      "category": "autorizacion",
+      "description": "Usuario sin entitlement solicita configuración",
+      "expected": "HTTP 403",
+      "passed": true,
+      "observed": {
+        "status": 403,
+        "durationMs": 6.256,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": false,
+          "mode": "playback-denied",
+          "message": "El usuario autenticado no tiene permisos para este contenido.",
+          "accountId": "acc-denied-001",
+          "assetId": "shaka-widevine"
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F0-LICENSE-PROTECTED",
+      "phase": "fase0",
+      "category": "licencia",
+      "description": "Ruta oficial de licencia sin token",
+      "expected": "HTTP 401",
+      "passed": true,
+      "observed": {
+        "status": 401,
+        "durationMs": 7.079,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": false,
+          "mode": "platform-license-denied",
+          "message": "La plataforma requiere login para solicitar licencia.",
+          "challengeSize": 8
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F0-LICENSE-BYPASS",
+      "phase": "fase0",
+      "category": "bypass",
+      "description": "Ruta pública de licencia sin autenticación",
+      "expected": "Ruta alcanzable sin 401/403/404 y marcada como debilidad",
+      "passed": true,
+      "observed": {
+        "status": 500,
+        "durationMs": 362.204,
+        "headers": {
+          "x-phase0-weakness": "public-no-auth-license",
+          "content-type": "text/html; charset=utf-8"
+        },
+        "body": {
+          "binaryBytes": 25,
+          "contentType": "text/html; charset=utf-8"
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F0-ORIGIN-DIRECT",
+      "phase": "fase0",
+      "category": "topologia",
+      "description": "Acceso directo al origen publicado",
+      "expected": "HTTP 200",
+      "passed": true,
+      "observed": {
+        "status": 200,
+        "durationMs": 26.91,
+        "headers": {
+          "content-type": "application/octet-stream"
+        },
+        "body": {
+          "binaryBytes": 1821,
+          "contentType": "application/octet-stream"
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F0-LICENSE-DIRECT",
+      "phase": "fase0",
+      "category": "topologia",
+      "description": "Acceso directo al servidor de licencias publicado",
+      "expected": "HTTP 200",
+      "passed": true,
+      "observed": {
+        "status": 200,
+        "durationMs": 13.904,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "status": "ok",
+          "service": "license-server",
+          "drm": "widevine",
+          "mode": "proxy",
+          "activeSessions": 2
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F0-CLEARKEY-MPD",
+      "phase": "fase0",
+      "category": "contenido",
+      "description": "MPD CENC local sin token",
+      "expected": "HTTP 200",
+      "passed": true,
+      "observed": {
+        "status": 200,
+        "durationMs": 14.297,
+        "headers": {
+          "content-type": "application/octet-stream"
+        },
+        "body": {
+          "binaryBytes": 1821,
+          "contentType": "application/octet-stream"
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F1-HEALTH",
+      "phase": "fase1",
+      "category": "disponibilidad",
+      "description": "Health del plano de control",
+      "expected": "HTTP 200",
+      "passed": true,
+      "observed": {
+        "status": 200,
+        "durationMs": 5.015,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": true,
+          "service": "control-plane",
+          "activeSessions": 0,
+          "timestamp": "2026-08-30T19:03:19.169Z"
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F1-AUTH-OK",
+      "phase": "fase1",
+      "category": "autenticacion",
+      "description": "Login del usuario autorizado",
+      "expected": "HTTP 200",
+      "passed": true,
+      "observed": {
+        "status": 200,
+        "durationMs": 28.311,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": true,
+          "user": {
+            "accountId": "acc-allowed-001",
+            "email": "usuario-permitido@tfm.local",
+            "displayName": "Usuario con permiso",
+            "plan": "student"
+          },
+          "deviceId": "eval-fase1-baseline",
+          "accessToken": "<redacted>",
+          "accessTokenExpiresIn": "<redacted>",
+          "allowedAssets": [
+            "sintel-widevine"
+          ]
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F1-AUTH-BAD",
+      "phase": "fase1",
+      "category": "autenticacion",
+      "description": "Credenciales incorrectas",
+      "expected": "HTTP 401",
+      "passed": true,
+      "observed": {
+        "status": 401,
+        "durationMs": 18.84,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": false,
+          "error": "INVALID_CREDENTIALS",
+          "details": "Use usuario-permitido@tfm.local or usuario-denegado@tfm.local / demo123",
+          "timestamp": "2026-08-30T19:03:19.216Z"
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F1-DENIED-LOGIN",
+      "phase": "fase1",
+      "category": "autenticacion",
+      "description": "Login del usuario sin entitlement",
+      "expected": "HTTP 200",
+      "passed": true,
+      "observed": {
+        "status": 200,
+        "durationMs": 16.573,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": true,
+          "user": {
+            "accountId": "acc-denied-001",
+            "email": "usuario-denegado@tfm.local",
+            "displayName": "Usuario sin permiso",
+            "plan": "student"
+          },
+          "deviceId": "eval-fase1-baseline-denied",
+          "accessToken": "<redacted>",
+          "accessTokenExpiresIn": "<redacted>",
+          "allowedAssets": []
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F1-DENIED-SESSION",
+      "phase": "fase1",
+      "category": "autorizacion",
+      "description": "Usuario sin entitlement crea sesión",
+      "expected": "HTTP 403",
+      "passed": true,
+      "observed": {
+        "status": 403,
+        "durationMs": 14.922,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": false,
+          "error": "ASSET_NOT_ALLOWED",
+          "details": "Asset sintel-widevine is not in account entitlements",
+          "timestamp": "2026-08-30T19:03:19.247Z"
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F1-SESSION-OK",
+      "phase": "fase1",
+      "category": "sesion",
+      "description": "Primera sesión de reproducción",
+      "expected": "HTTP 201",
+      "passed": true,
+      "observed": {
+        "status": 201,
+        "durationMs": 14.889,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": true,
+          "session": {
+            "sessionId": "c13b9f12-6e73-49bc-96f6-f5e7171881a7",
+            "assetId": "sintel-widevine",
+            "startedAt": "2026-08-30T19:03:19.262Z",
+            "lastHeartbeatAt": "2026-08-30T19:03:19.262Z",
+            "status": "active"
+          },
+          "playbackToken": "<redacted>",
+          "playbackTokenExpiresIn": "<redacted>",
+          "manifestUrl": "http://localhost:9080/manifest/sintel-widevine",
+          "licenseUrl": "http://localhost:9080/license"
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F1-CONCURRENCY",
+      "phase": "fase1",
+      "category": "concurrencia",
+      "description": "Segunda sesión simultánea",
+      "expected": "HTTP 409 CONCURRENCY_LIMIT",
+      "passed": true,
+      "observed": {
+        "status": 409,
+        "durationMs": 5.926,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": false,
+          "error": "CONCURRENCY_LIMIT",
+          "details": "The account already has 1 active session(s)",
+          "timestamp": "2026-08-30T19:03:19.268Z"
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F1-MANIFEST-NO-TOKEN",
+      "phase": "fase1",
+      "category": "manifest",
+      "description": "Manifest sin token",
+      "expected": "HTTP 401",
+      "passed": true,
+      "observed": {
+        "status": 401,
+        "durationMs": 4.098,
+        "headers": {},
+        "body": null,
+        "transportError": null
+      }
+    },
+    {
+      "id": "F1-MANIFEST-ALTERED",
+      "phase": "fase1",
+      "category": "manifest",
+      "description": "Manifest con token alterado",
+      "expected": "HTTP 401",
+      "passed": true,
+      "observed": {
+        "status": 401,
+        "durationMs": 6.942,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": false,
+          "error": "UNAUTHORIZED",
+          "details": "Invalid token signature",
+          "timestamp": "2026-08-30T19:03:19.279Z"
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F1-MANIFEST-WRONG-SESSION",
+      "phase": "fase1",
+      "category": "binding",
+      "description": "Manifest con sesión distinta",
+      "expected": "HTTP 409",
+      "passed": true,
+      "observed": {
+        "status": 409,
+        "durationMs": 6.26,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": false,
+          "error": "SESSION_MISMATCH",
+          "details": "Manifest session id does not match the token",
+          "timestamp": "2026-08-30T19:03:19.286Z"
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F1-MANIFEST-WRONG-ASSET",
+      "phase": "fase1",
+      "category": "binding",
+      "description": "Manifest de otro activo",
+      "expected": "HTTP 403",
+      "passed": true,
+      "observed": {
+        "status": 403,
+        "durationMs": 22.25,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": false,
+          "error": "ASSET_MISMATCH",
+          "details": "Manifest asset does not match the playback token",
+          "timestamp": "2026-08-30T19:03:19.309Z"
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F1-MANIFEST-OK",
+      "phase": "fase1",
+      "category": "manifest",
+      "description": "Manifest protegido legítimo",
+      "expected": "HTTP 200 DASH",
+      "passed": true,
+      "observed": {
+        "status": 200,
+        "durationMs": 257.293,
+        "headers": {
+          "content-type": "application/dash+xml; charset=utf-8",
+          "x-playback-session-id": "c13b9f12-6e73-49bc-96f6-f5e7171881a7",
+          "x-asset-id": "sintel-widevine"
+        },
+        "body": {
+          "binaryBytes": 15852,
+          "contentType": "application/dash+xml; charset=utf-8"
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F1-CONTENT-NO-TOKEN",
+      "phase": "fase1",
+      "category": "contenido",
+      "description": "Contenido local sin token",
+      "expected": "HTTP 401",
+      "passed": true,
+      "observed": {
+        "status": 401,
+        "durationMs": 5.927,
+        "headers": {},
+        "body": null,
+        "transportError": null
+      }
+    },
+    {
+      "id": "F1-CONTENT-WRONG-ASSET",
+      "phase": "fase1",
+      "category": "binding",
+      "description": "Token Widevine intenta contenido de otro activo",
+      "expected": "HTTP 403",
+      "passed": true,
+      "observed": {
+        "status": 403,
+        "durationMs": 8.889,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": false,
+          "error": "CONTENT_NOT_ALLOWED_FOR_ASSET",
+          "details": "Content path is not assigned to asset sintel-widevine",
+          "timestamp": "2026-08-30T19:03:19.580Z"
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F1-LICENSE-NO-TOKEN",
+      "phase": "fase1",
+      "category": "licencia",
+      "description": "Licencia sin token",
+      "expected": "HTTP 401",
+      "passed": true,
+      "observed": {
+        "status": 401,
+        "durationMs": 5.054,
+        "headers": {},
+        "body": null,
+        "transportError": null
+      }
+    },
+    {
+      "id": "F1-LICENSE-WRONG-SESSION",
+      "phase": "fase1",
+      "category": "binding",
+      "description": "Licencia con sesión distinta",
+      "expected": "HTTP 409",
+      "passed": true,
+      "observed": {
+        "status": 409,
+        "durationMs": 9.004,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": false,
+          "error": "SESSION_MISMATCH",
+          "details": "Header session id does not match the playback token",
+          "timestamp": "2026-08-30T19:03:19.595Z"
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F1-NO-AUTH-UNAUTH",
+      "phase": "fase1",
+      "category": "superficie",
+      "description": "Ruta heredada sin token",
+      "expected": "HTTP 401",
+      "passed": true,
+      "observed": {
+        "status": 401,
+        "durationMs": 6.171,
+        "headers": {},
+        "body": null,
+        "transportError": null
+      }
+    },
+    {
+      "id": "F1-NO-AUTH-REMOVED",
+      "phase": "fase1",
+      "category": "superficie",
+      "description": "Ruta heredada con token válido",
+      "expected": "HTTP 404",
+      "passed": true,
+      "observed": {
+        "status": 404,
+        "durationMs": 16.071,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": false,
+          "error": "NOT_FOUND",
+          "details": "No route matched POST /license/no_auth",
+          "timestamp": "2026-08-30T19:03:19.618Z"
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F1-STOP",
+      "phase": "fase1",
+      "category": "sesion",
+      "description": "Parada explícita",
+      "expected": "HTTP 200",
+      "passed": true,
+      "observed": {
+        "status": 200,
+        "durationMs": 5.169,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": true,
+          "sessionId": "c13b9f12-6e73-49bc-96f6-f5e7171881a7",
+          "status": "stopped",
+          "stoppedAt": "2026-08-30T19:03:19.623Z"
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F1-TOKEN-AFTER-STOP",
+      "phase": "fase1",
+      "category": "revocacion",
+      "description": "Token después de detener sesión",
+      "expected": "HTTP 401",
+      "passed": true,
+      "observed": {
+        "status": 401,
+        "durationMs": 26.642,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": false,
+          "error": "UNAUTHORIZED",
+          "details": "Playback session is not active",
+          "timestamp": "2026-08-30T19:03:19.649Z"
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F2-HEALTH",
+      "phase": "fase2",
+      "category": "disponibilidad",
+      "description": "Health del plano de control",
+      "expected": "HTTP 200",
+      "passed": true,
+      "observed": {
+        "status": 200,
+        "durationMs": 22.616,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": true,
+          "service": "control-plane-phase2",
+          "activeSessionKeys": 0,
+          "timestamp": "2026-08-30T19:03:19.929Z"
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F2-AUTH-OK",
+      "phase": "fase2",
+      "category": "autenticacion",
+      "description": "Login del usuario autorizado",
+      "expected": "HTTP 200",
+      "passed": true,
+      "observed": {
+        "status": 200,
+        "durationMs": 38.385,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": true,
+          "user": {
+            "accountId": "acc-allowed-001",
+            "email": "usuario-permitido@tfm.local",
+            "displayName": "Usuario con permiso",
+            "plan": "student",
+            "roles": [
+              "user",
+              "admin"
+            ]
+          },
+          "deviceId": "eval-fase2-baseline",
+          "accessToken": "<redacted>",
+          "accessTokenExpiresIn": "<redacted>",
+          "allowedAssets": [
+            "sintel-widevine"
+          ],
+          "risk": {
+            "accountId": "acc-allowed-001",
+            "score": 0,
+            "reasons": [],
+            "lastUpdatedAt": "2026-08-30T19:03:19.965Z"
+          }
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F2-AUTH-BAD",
+      "phase": "fase2",
+      "category": "autenticacion",
+      "description": "Credenciales incorrectas",
+      "expected": "HTTP 401",
+      "passed": true,
+      "observed": {
+        "status": 401,
+        "durationMs": 25.47,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": false,
+          "error": "INVALID_CREDENTIALS",
+          "details": "Use usuario-permitido@tfm.local or usuario-denegado@tfm.local / demo123",
+          "timestamp": "2026-08-30T19:03:19.993Z"
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F2-DENIED-LOGIN",
+      "phase": "fase2",
+      "category": "autenticacion",
+      "description": "Login del usuario sin entitlement",
+      "expected": "HTTP 200",
+      "passed": true,
+      "observed": {
+        "status": 200,
+        "durationMs": 10.212,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": true,
+          "user": {
+            "accountId": "acc-denied-001",
+            "email": "usuario-denegado@tfm.local",
+            "displayName": "Usuario sin permiso",
+            "plan": "student",
+            "roles": [
+              "user"
+            ]
+          },
+          "deviceId": "eval-fase2-baseline-denied",
+          "accessToken": "<redacted>",
+          "accessTokenExpiresIn": "<redacted>",
+          "allowedAssets": [],
+          "risk": {
+            "accountId": "acc-denied-001",
+            "score": 0,
+            "reasons": [],
+            "lastUpdatedAt": "2026-08-30T19:03:20.001Z"
+          }
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F2-DENIED-SESSION",
+      "phase": "fase2",
+      "category": "autorizacion",
+      "description": "Usuario sin entitlement crea sesión",
+      "expected": "HTTP 403",
+      "passed": true,
+      "observed": {
+        "status": 403,
+        "durationMs": 6.859,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": false,
+          "error": "ASSET_NOT_ALLOWED",
+          "details": "Asset sintel-widevine is not in account entitlements",
+          "timestamp": "2026-08-30T19:03:20.010Z"
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F2-DENIED-ADMIN",
+      "phase": "fase2",
+      "category": "administracion",
+      "description": "Usuario sin rol accede a observabilidad",
+      "expected": "HTTP 403",
+      "passed": true,
+      "observed": {
+        "status": 403,
+        "durationMs": 5.448,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": false,
+          "error": "FORBIDDEN",
+          "details": "Admin role required",
+          "timestamp": "2026-08-30T19:03:20.016Z"
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F2-SESSION-OK",
+      "phase": "fase2",
+      "category": "sesion",
+      "description": "Primera sesión de reproducción",
+      "expected": "HTTP 201",
+      "passed": true,
+      "observed": {
+        "status": 201,
+        "durationMs": 26.196,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": true,
+          "session": {
+            "sessionId": "7e123d60-f06a-4bec-ac02-b9a89dfd5abb",
+            "assetId": "sintel-widevine",
+            "startedAt": "2026-08-30T19:03:20.038Z",
+            "lastHeartbeatAt": "2026-08-30T19:03:20.038Z",
+            "status": "active"
+          },
+          "playbackToken": "<redacted>",
+          "playbackTokenExpiresIn": "<redacted>",
+          "manifestUrl": "http://localhost:9180/manifest/sintel-widevine",
+          "licenseUrl": "http://localhost:9180/license",
+          "risk": {
+            "accountId": "acc-allowed-001",
+            "score": 0,
+            "reasons": [],
+            "lastUpdatedAt": "2026-08-30T19:03:19.965Z"
+          }
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F2-CONCURRENCY",
+      "phase": "fase2",
+      "category": "concurrencia",
+      "description": "Segunda sesión simultánea",
+      "expected": "HTTP 409 CONCURRENCY_LIMIT",
+      "passed": true,
+      "observed": {
+        "status": 409,
+        "durationMs": 29.771,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": false,
+          "error": "CONCURRENCY_LIMIT",
+          "details": "The account already has 1 active session(s)",
+          "timestamp": "2026-08-30T19:03:20.072Z"
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F2-MANIFEST-NO-TOKEN",
+      "phase": "fase2",
+      "category": "manifest",
+      "description": "Manifest sin token",
+      "expected": "HTTP 401",
+      "passed": true,
+      "observed": {
+        "status": 401,
+        "durationMs": 23.522,
+        "headers": {},
+        "body": null,
+        "transportError": null
+      }
+    },
+    {
+      "id": "F2-MANIFEST-ALTERED",
+      "phase": "fase2",
+      "category": "manifest",
+      "description": "Manifest con token alterado",
+      "expected": "HTTP 401",
+      "passed": true,
+      "observed": {
+        "status": 401,
+        "durationMs": 6.403,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": false,
+          "error": "UNAUTHORIZED",
+          "details": "Invalid token signature",
+          "timestamp": "2026-08-30T19:03:20.102Z"
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F2-MANIFEST-WRONG-SESSION",
+      "phase": "fase2",
+      "category": "binding",
+      "description": "Manifest con sesión distinta",
+      "expected": "HTTP 409",
+      "passed": true,
+      "observed": {
+        "status": 409,
+        "durationMs": 26.462,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": false,
+          "error": "SESSION_MISMATCH",
+          "details": "Manifest session id does not match the token",
+          "timestamp": "2026-08-30T19:03:20.129Z"
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F2-MANIFEST-WRONG-ASSET",
+      "phase": "fase2",
+      "category": "binding",
+      "description": "Manifest de otro activo",
+      "expected": "HTTP 403",
+      "passed": true,
+      "observed": {
+        "status": 403,
+        "durationMs": 6.961,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": false,
+          "error": "ASSET_MISMATCH",
+          "details": "Manifest asset does not match the playback token",
+          "timestamp": "2026-08-30T19:03:20.136Z"
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F2-MANIFEST-OK",
+      "phase": "fase2",
+      "category": "manifest",
+      "description": "Manifest protegido legítimo",
+      "expected": "HTTP 200 DASH",
+      "passed": true,
+      "observed": {
+        "status": 200,
+        "durationMs": 193.322,
+        "headers": {
+          "content-type": "application/dash+xml; charset=utf-8",
+          "x-playback-session-id": "7e123d60-f06a-4bec-ac02-b9a89dfd5abb",
+          "x-asset-id": "sintel-widevine",
+          "x-risk-score": "0"
+        },
+        "body": {
+          "binaryBytes": 15852,
+          "contentType": "application/dash+xml; charset=utf-8"
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F2-CONTENT-NO-TOKEN",
+      "phase": "fase2",
+      "category": "contenido",
+      "description": "Contenido local sin token",
+      "expected": "HTTP 401",
+      "passed": true,
+      "observed": {
+        "status": 401,
+        "durationMs": 14.007,
+        "headers": {},
+        "body": null,
+        "transportError": null
+      }
+    },
+    {
+      "id": "F2-CONTENT-WRONG-ASSET",
+      "phase": "fase2",
+      "category": "binding",
+      "description": "Token Widevine intenta contenido de otro activo",
+      "expected": "HTTP 403",
+      "passed": true,
+      "observed": {
+        "status": 403,
+        "durationMs": 6.928,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": false,
+          "error": "CONTENT_NOT_ALLOWED_FOR_ASSET",
+          "details": "Content path is not assigned to asset sintel-widevine",
+          "timestamp": "2026-08-30T19:03:20.350Z"
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F2-LICENSE-NO-TOKEN",
+      "phase": "fase2",
+      "category": "licencia",
+      "description": "Licencia sin token",
+      "expected": "HTTP 401",
+      "passed": true,
+      "observed": {
+        "status": 401,
+        "durationMs": 3.444,
+        "headers": {},
+        "body": null,
+        "transportError": null
+      }
+    },
+    {
+      "id": "F2-LICENSE-WRONG-SESSION",
+      "phase": "fase2",
+      "category": "binding",
+      "description": "Licencia con sesión distinta",
+      "expected": "HTTP 409",
+      "passed": true,
+      "observed": {
+        "status": 409,
+        "durationMs": 26.208,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": false,
+          "error": "SESSION_MISMATCH",
+          "details": "Header session id does not match the playback token",
+          "timestamp": "2026-08-30T19:03:20.380Z"
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F2-NO-AUTH-UNAUTH",
+      "phase": "fase2",
+      "category": "superficie",
+      "description": "Ruta heredada sin token",
+      "expected": "HTTP 401",
+      "passed": true,
+      "observed": {
+        "status": 401,
+        "durationMs": 4.32,
+        "headers": {},
+        "body": null,
+        "transportError": null
+      }
+    },
+    {
+      "id": "F2-NO-AUTH-REMOVED",
+      "phase": "fase2",
+      "category": "superficie",
+      "description": "Ruta heredada con token válido",
+      "expected": "HTTP 404",
+      "passed": true,
+      "observed": {
+        "status": 404,
+        "durationMs": 23.804,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": false,
+          "error": "NOT_FOUND",
+          "details": "No route matched POST /license/no_auth",
+          "timestamp": "2026-08-30T19:03:20.408Z"
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F2-STOP",
+      "phase": "fase2",
+      "category": "sesion",
+      "description": "Parada explícita",
+      "expected": "HTTP 200",
+      "passed": true,
+      "observed": {
+        "status": 200,
+        "durationMs": 23.003,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": true,
+          "sessionId": "7e123d60-f06a-4bec-ac02-b9a89dfd5abb",
+          "status": "stopped",
+          "stoppedAt": "2026-08-30T19:03:20.426Z"
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F2-TOKEN-AFTER-STOP",
+      "phase": "fase2",
+      "category": "revocacion",
+      "description": "Token después de detener sesión",
+      "expected": "HTTP 401",
+      "passed": true,
+      "observed": {
+        "status": 401,
+        "durationMs": 24.667,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": false,
+          "error": "UNAUTHORIZED",
+          "details": "Playback session is not active",
+          "timestamp": "2026-08-30T19:03:20.456Z"
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F2-CONCURRENCY-SCORE",
+      "phase": "fase2",
+      "category": "deteccion",
+      "description": "Cinco rechazos de concurrencia elevan el score",
+      "expected": "409 en los cinco intentos y score 0/25/50/75/100",
+      "passed": true,
+      "observed": {
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": 409,
+            "error": "CONCURRENCY_LIMIT",
+            "score": 0
+          },
+          {
+            "attempt": 2,
+            "status": 409,
+            "error": "CONCURRENCY_LIMIT",
+            "score": 25
+          },
+          {
+            "attempt": 3,
+            "status": 409,
+            "error": "CONCURRENCY_LIMIT",
+            "score": 50
+          },
+          {
+            "attempt": 4,
+            "status": 409,
+            "error": "CONCURRENCY_LIMIT",
+            "score": 75
+          },
+          {
+            "attempt": 5,
+            "status": 409,
+            "error": "CONCURRENCY_LIMIT",
+            "score": 100
+          }
+        ],
+        "scoreProgression": [
+          0,
+          25,
+          50,
+          75,
+          100
+        ]
+      }
+    },
+    {
+      "id": "F2-CONCURRENCY-BAN",
+      "phase": "fase2",
+      "category": "respuesta",
+      "description": "Ban automático de cuenta al llegar a 100",
+      "expected": "AUTO_BAN:REPEATED_CONCURRENCY_VIOLATION",
+      "passed": true,
+      "observed": {
+        "id": "397e3e5e-1c8c-476c-bdbf-7b8a2e872ba4",
+        "type": "account",
+        "subjectId": "acc-allowed-001",
+        "reason": "AUTO_BAN:REPEATED_CONCURRENCY_VIOLATION",
+        "createdBy": "system",
+        "createdAt": "2026-08-30T19:03:20.948Z",
+        "expiresAt": "2026-08-30T19:33:20.948Z"
+      }
+    },
+    {
+      "id": "F2-CONCURRENCY-MANIFEST-BLOCKED",
+      "phase": "fase2",
+      "category": "respuesta",
+      "description": "Manifest tras ban de cuenta",
+      "expected": "HTTP 401",
+      "passed": true,
+      "observed": {
+        "status": 401,
+        "durationMs": 20.64,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": false,
+          "error": "UNAUTHORIZED",
+          "details": "Account banned until 2026-08-30T19:33:20.948Z",
+          "timestamp": "2026-08-30T19:03:20.999Z"
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F2-CONCURRENCY-CLEAR",
+      "phase": "fase2",
+      "category": "recuperacion",
+      "description": "Retirada administrativa del ban de cuenta",
+      "expected": "HTTP 200",
+      "passed": true,
+      "observed": {
+        "status": 200,
+        "durationMs": 16.807,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": true,
+          "type": "account",
+          "subjectId": "acc-allowed-001"
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F2-CONCURRENCY-RECOVER",
+      "phase": "fase2",
+      "category": "recuperacion",
+      "description": "Heartbeat tras retirar ban",
+      "expected": "HTTP 200",
+      "passed": true,
+      "observed": {
+        "status": 200,
+        "durationMs": 32.409,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": true,
+          "sessionId": "7f334d7c-64da-4baa-a47d-5a99a58be327",
+          "playbackToken": "<redacted>",
+          "playbackTokenExpiresIn": "<redacted>",
+          "lastHeartbeatAt": "2026-08-30T19:03:21.045Z",
+          "risk": {
+            "accountId": "acc-allowed-001",
+            "score": 100,
+            "reasons": [
+              "REPEATED_CONCURRENCY_VIOLATION"
+            ],
+            "lastUpdatedAt": "2026-08-30T19:03:20.947Z"
+          }
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F2-AUTH-BURST",
+      "phase": "fase2",
+      "category": "deteccion",
+      "description": "Ocho fallos de autenticación del mismo dispositivo",
+      "expected": "Ocho respuestas HTTP 401",
+      "passed": true,
+      "observed": {
+        "statuses": [
+          401,
+          401,
+          401,
+          401,
+          401,
+          401,
+          401,
+          401
+        ]
+      }
+    },
+    {
+      "id": "F2-DEVICE-BAN",
+      "phase": "fase2",
+      "category": "respuesta",
+      "description": "Ban de dispositivo por ráfaga de fallos",
+      "expected": "AUTH_FAILURE_BURST",
+      "passed": true,
+      "observed": {
+        "id": "9eab3bb9-3e9f-4b13-b26f-a3e3804b3eb4",
+        "type": "device",
+        "subjectId": "eval-fase2-device-ban",
+        "reason": "AUTH_FAILURE_BURST",
+        "createdBy": "system",
+        "createdAt": "2026-08-30T19:03:21.524Z",
+        "expiresAt": "2026-08-30T19:18:21.524Z"
+      }
+    },
+    {
+      "id": "F2-DEVICE-MANIFEST-BLOCKED",
+      "phase": "fase2",
+      "category": "respuesta",
+      "description": "Manifest tras ban de dispositivo",
+      "expected": "HTTP 401",
+      "passed": true,
+      "observed": {
+        "status": 401,
+        "durationMs": 26.549,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": false,
+          "error": "UNAUTHORIZED",
+          "details": "Device banned until 2026-08-30T19:18:21.524Z",
+          "timestamp": "2026-08-30T19:03:21.585Z"
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F2-DEVICE-CLEAR",
+      "phase": "fase2",
+      "category": "recuperacion",
+      "description": "Retirada administrativa del ban de dispositivo",
+      "expected": "HTTP 200",
+      "passed": true,
+      "observed": {
+        "status": 200,
+        "durationMs": 17.188,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": true,
+          "type": "device",
+          "subjectId": "eval-fase2-device-ban"
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "F2-DEVICE-RECOVER",
+      "phase": "fase2",
+      "category": "recuperacion",
+      "description": "Heartbeat tras retirar ban",
+      "expected": "HTTP 200",
+      "passed": true,
+      "observed": {
+        "status": 200,
+        "durationMs": 33.763,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "ok": true,
+          "sessionId": "9cd86249-32d8-4db0-a039-6a85ea01d1f8",
+          "playbackToken": "<redacted>",
+          "playbackTokenExpiresIn": "<redacted>",
+          "lastHeartbeatAt": "2026-08-30T19:03:21.632Z",
+          "risk": {
+            "accountId": "acc-allowed-001",
+            "score": 0,
+            "reasons": [],
+            "lastUpdatedAt": "2026-08-30T19:03:21.332Z"
+          }
+        },
+        "transportError": null
+      }
+    },
+    {
+      "id": "FASE0-TOPOLOGY",
+      "phase": "fase0",
+      "category": "topologia",
+      "description": "Publicación de servicios internos",
+      "expected": "Origen y licencia con bindings publicados",
+      "passed": true,
+      "observed": {
+        "tfm-origin": {
+          "80/tcp": [
+            {
+              "HostIp": "0.0.0.0",
+              "HostPort": "8081"
+            },
+            {
+              "HostIp": "::",
+              "HostPort": "8081"
+            }
+          ]
+        },
+        "tfm-license-server": {
+          "8080/tcp": [
+            {
+              "HostIp": "0.0.0.0",
+              "HostPort": "8082"
+            },
+            {
+              "HostIp": "::",
+              "HostPort": "8082"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "FASE1-TOPOLOGY",
+      "phase": "fase1",
+      "category": "topologia",
+      "description": "Publicación de servicios internos",
+      "expected": "Sin bindings publicados para servicios internos",
+      "passed": true,
+      "observed": {
+        "tfm-fase1-origin": {
+          "80/tcp": null
+        },
+        "tfm-fase1-license-server": {
+          "8080/tcp": null
+        },
+        "tfm-fase1-control-plane": {
+          "8080/tcp": null
+        }
+      }
+    },
+    {
+      "id": "FASE2-TOPOLOGY",
+      "phase": "fase2",
+      "category": "topologia",
+      "description": "Publicación de servicios internos",
+      "expected": "Sin bindings publicados para servicios internos",
+      "passed": true,
+      "observed": {
+        "tfm-fase2-origin": {
+          "80/tcp": null
+        },
+        "tfm-fase2-license-server": {
+          "8080/tcp": null
+        },
+        "tfm-fase2-control-plane": {
+          "8080/tcp": null
+        },
+        "tfm-fase2-redis": {
+          "6379/tcp": null
+        }
+      }
+    }
+  ]
+}

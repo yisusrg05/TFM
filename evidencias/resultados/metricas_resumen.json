@@ -1,0 +1,150 @@
+{
+  "generatedAt": "2026-08-30T19:03:56.541166Z",
+  "iterations": 20,
+  "summary": [
+    {
+      "phase": "fase0",
+      "operation": "autorizar_reproduccion",
+      "samples": 20,
+      "successes": 20,
+      "mean_ms": 15.669,
+      "median_ms": 15.639,
+      "p95_ms": 24.857,
+      "min_ms": 4.979,
+      "max_ms": 28.737,
+      "stddev_ms": 5.49
+    },
+    {
+      "phase": "fase0",
+      "operation": "login",
+      "samples": 20,
+      "successes": 20,
+      "mean_ms": 14.05,
+      "median_ms": 15.1,
+      "p95_ms": 17.779,
+      "min_ms": 5.144,
+      "max_ms": 26.24,
+      "stddev_ms": 4.87
+    },
+    {
+      "phase": "fase1",
+      "operation": "autorizar_reproduccion",
+      "samples": 20,
+      "successes": 20,
+      "mean_ms": 13.108,
+      "median_ms": 15.072,
+      "p95_ms": 24.332,
+      "min_ms": 4.919,
+      "max_ms": 25.038,
+      "stddev_ms": 6.804
+    },
+    {
+      "phase": "fase1",
+      "operation": "detener_sesion",
+      "samples": 20,
+      "successes": 20,
+      "mean_ms": 13.958,
+      "median_ms": 15.639,
+      "p95_ms": 27.15,
+      "min_ms": 4.469,
+      "max_ms": 28.227,
+      "stddev_ms": 7.304
+    },
+    {
+      "phase": "fase1",
+      "operation": "heartbeat",
+      "samples": 20,
+      "successes": 20,
+      "mean_ms": 11.313,
+      "median_ms": 9.347,
+      "p95_ms": 20.541,
+      "min_ms": 4.484,
+      "max_ms": 28.598,
+      "stddev_ms": 6.933
+    },
+    {
+      "phase": "fase1",
+      "operation": "login",
+      "samples": 20,
+      "successes": 20,
+      "mean_ms": 14.692,
+      "median_ms": 15.489,
+      "p95_ms": 26.231,
+      "min_ms": 5.349,
+      "max_ms": 35.479,
+      "stddev_ms": 7.529
+    },
+    {
+      "phase": "fase1",
+      "operation": "manifest",
+      "samples": 20,
+      "successes": 20,
+      "mean_ms": 53.184,
+      "median_ms": 44.166,
+      "p95_ms": 79.107,
+      "min_ms": 29.631,
+      "max_ms": 216.522,
+      "stddev_ms": 39.162
+    },
+    {
+      "phase": "fase2",
+      "operation": "autorizar_reproduccion",
+      "samples": 20,
+      "successes": 20,
+      "mean_ms": 18.119,
+      "median_ms": 11.293,
+      "p95_ms": 31.528,
+      "min_ms": 8.027,
+      "max_ms": 31.616,
+      "stddev_ms": 10.128
+    },
+    {
+      "phase": "fase2",
+      "operation": "detener_sesion",
+      "samples": 20,
+      "successes": 20,
+      "mean_ms": 26.276,
+      "median_ms": 29.335,
+      "p95_ms": 32.36,
+      "min_ms": 8.031,
+      "max_ms": 32.644,
+      "stddev_ms": 7.701
+    },
+    {
+      "phase": "fase2",
+      "operation": "heartbeat",
+      "samples": 20,
+      "successes": 20,
+      "mean_ms": 19.298,
+      "median_ms": 19.595,
+      "p95_ms": 32.182,
+      "min_ms": 8.494,
+      "max_ms": 32.888,
+      "stddev_ms": 9.297
+    },
+    {
+      "phase": "fase2",
+      "operation": "login",
+      "samples": 20,
+      "successes": 20,
+      "mean_ms": 18.166,
+      "median_ms": 18.659,
+      "p95_ms": 32.617,
+      "min_ms": 8.016,
+      "max_ms": 32.957,
+      "stddev_ms": 6.185
+    },
+    {
+      "phase": "fase2",
+      "operation": "manifest",
+      "samples": 20,
+      "successes": 20,
+      "mean_ms": 80.801,
+      "median_ms": 84.614,
+      "p95_ms": 125.13,
+      "min_ms": 35.459,
+      "max_ms": 149.182,
+      "stddev_ms": 33.99
+    }
+  ]
+}

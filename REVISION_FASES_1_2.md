@@ -61,7 +61,8 @@ Todos los contenedores de ambas fases están en estado `running`, con cero reini
 - Reproducción Widevine real: vídeo no pausado, `readyState=4`, duración aproximada de 888 segundos y tiempo creciente.
 - El laboratorio `http://localhost:9401` genera el token automaticamente desde las credenciales y reproduce con manifest y licencia protegidos.
 - Ocho autenticaciones fallidas desde el mismo dispositivo crean un ban `AUTH_FAILURE_BURST`; el manifest posterior devuelve HTTP 401 y la interfaz impide iniciar otra reproducción.
-- Al retirar el ban desde el plano administrativo, el manifest y la reproducción vuelven a funcionar.
+- El laboratorio materializa también la regla de concurrencia: cinco solicitudes de sesión mientras existe una activa devuelven HTTP 409, muestran la progresión 0/25/50/75/100 y crean un ban automático de cuenta.
+- Tras ese ban, el manifest devuelve HTTP 401. Al retirar cualquiera de los dos bans desde el plano administrativo, el manifest y la reproducción vuelven a funcionar; el score se conserva para trazabilidad.
 
 ### Correcciones aplicadas
 
@@ -72,6 +73,7 @@ Todos los contenedores de ambas fases están en estado `running`, con cero reini
 - Sustituido el renderizado de eventos mediante `innerHTML` por creación segura de nodos y `textContent`.
 - Bloqueado el cambio de identidad durante una sesión activa.
 - Añadida propagación fiable de IP y binding entre activo, sesión y ruta de contenido.
+- Añadida durante la evaluación final la validación de `X-Playback-Session-Id` en `/license`; la regresión pasó de 64/65 a 65/65 comprobaciones y el caso distinto devuelve ahora HTTP 409 `SESSION_MISMATCH`.
 
 ## Estado de los datos
 

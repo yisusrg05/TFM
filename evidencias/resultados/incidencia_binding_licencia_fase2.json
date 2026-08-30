@@ -1,0 +1,29 @@
+{
+  "date": "2026-08-30",
+  "testId": "F2-LICENSE-WRONG-SESSION",
+  "description": "La ruta /license de Fase 2 no contrastaba X-Playback-Session-Id con la sesión incluida en el playback token.",
+  "initialRun": {
+    "suiteSummary": {
+      "total": 65,
+      "passed": 64,
+      "failed": 1
+    },
+    "expectedStatus": 409,
+    "observedStatus": 500,
+    "observedDurationMs": 271.912,
+    "effect": "El cuerpo de prueba llegó al proxy interno de licencia en lugar de rechazarse en el control-plane."
+  },
+  "correction": {
+    "component": "fase2-hardening/control-plane/src/index.js",
+    "change": "Validación temprana de la cabecera de sesión y respuesta 409 SESSION_MISMATCH."
+  },
+  "regressionRun": {
+    "suiteSummary": {
+      "total": 65,
+      "passed": 65,
+      "failed": 0
+    },
+    "observedStatus": 409,
+    "observedError": "SESSION_MISMATCH"
+  }
+}

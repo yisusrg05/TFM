@@ -1,0 +1,66 @@
+id,phase,category,description,expected,passed,status
+F0-HEALTH,fase0,disponibilidad,Health del servicio base,HTTP 200,True,200
+F0-AUTH-OK,fase0,autenticacion,Login del usuario autorizado,HTTP 200,True,200
+F0-AUTH-BAD,fase0,autenticacion,Credenciales incorrectas,HTTP 401,True,401
+F0-AUTH-DENIED-LOGIN,fase0,autenticacion,Login del usuario sin entitlement,HTTP 200,True,200
+F0-CONFIG-OK,fase0,reproduccion,Configuración Widevine autorizada,HTTP 200,True,200
+F0-CONFIG-DENIED,fase0,autorizacion,Usuario sin entitlement solicita configuración,HTTP 403,True,403
+F0-LICENSE-PROTECTED,fase0,licencia,Ruta oficial de licencia sin token,HTTP 401,True,401
+F0-LICENSE-BYPASS,fase0,bypass,Ruta pública de licencia sin autenticación,Ruta alcanzable sin 401/403/404 y marcada como debilidad,True,500
+F0-ORIGIN-DIRECT,fase0,topologia,Acceso directo al origen publicado,HTTP 200,True,200
+F0-LICENSE-DIRECT,fase0,topologia,Acceso directo al servidor de licencias publicado,HTTP 200,True,200
+F0-CLEARKEY-MPD,fase0,contenido,MPD CENC local sin token,HTTP 200,True,200
+F1-HEALTH,fase1,disponibilidad,Health del plano de control,HTTP 200,True,200
+F1-AUTH-OK,fase1,autenticacion,Login del usuario autorizado,HTTP 200,True,200
+F1-AUTH-BAD,fase1,autenticacion,Credenciales incorrectas,HTTP 401,True,401
+F1-DENIED-LOGIN,fase1,autenticacion,Login del usuario sin entitlement,HTTP 200,True,200
+F1-DENIED-SESSION,fase1,autorizacion,Usuario sin entitlement crea sesión,HTTP 403,True,403
+F1-SESSION-OK,fase1,sesion,Primera sesión de reproducción,HTTP 201,True,201
+F1-CONCURRENCY,fase1,concurrencia,Segunda sesión simultánea,HTTP 409 CONCURRENCY_LIMIT,True,409
+F1-MANIFEST-NO-TOKEN,fase1,manifest,Manifest sin token,HTTP 401,True,401
+F1-MANIFEST-ALTERED,fase1,manifest,Manifest con token alterado,HTTP 401,True,401
+F1-MANIFEST-WRONG-SESSION,fase1,binding,Manifest con sesión distinta,HTTP 409,True,409
+F1-MANIFEST-WRONG-ASSET,fase1,binding,Manifest de otro activo,HTTP 403,True,403
+F1-MANIFEST-OK,fase1,manifest,Manifest protegido legítimo,HTTP 200 DASH,True,200
+F1-CONTENT-NO-TOKEN,fase1,contenido,Contenido local sin token,HTTP 401,True,401
+F1-CONTENT-WRONG-ASSET,fase1,binding,Token Widevine intenta contenido de otro activo,HTTP 403,True,403
+F1-LICENSE-NO-TOKEN,fase1,licencia,Licencia sin token,HTTP 401,True,401
+F1-LICENSE-WRONG-SESSION,fase1,binding,Licencia con sesión distinta,HTTP 409,True,409
+F1-NO-AUTH-UNAUTH,fase1,superficie,Ruta heredada sin token,HTTP 401,True,401
+F1-NO-AUTH-REMOVED,fase1,superficie,Ruta heredada con token válido,HTTP 404,True,404
+F1-STOP,fase1,sesion,Parada explícita,HTTP 200,True,200
+F1-TOKEN-AFTER-STOP,fase1,revocacion,Token después de detener sesión,HTTP 401,True,401
+F2-HEALTH,fase2,disponibilidad,Health del plano de control,HTTP 200,True,200
+F2-AUTH-OK,fase2,autenticacion,Login del usuario autorizado,HTTP 200,True,200
+F2-AUTH-BAD,fase2,autenticacion,Credenciales incorrectas,HTTP 401,True,401
+F2-DENIED-LOGIN,fase2,autenticacion,Login del usuario sin entitlement,HTTP 200,True,200
+F2-DENIED-SESSION,fase2,autorizacion,Usuario sin entitlement crea sesión,HTTP 403,True,403
+F2-DENIED-ADMIN,fase2,administracion,Usuario sin rol accede a observabilidad,HTTP 403,True,403
+F2-SESSION-OK,fase2,sesion,Primera sesión de reproducción,HTTP 201,True,201
+F2-CONCURRENCY,fase2,concurrencia,Segunda sesión simultánea,HTTP 409 CONCURRENCY_LIMIT,True,409
+F2-MANIFEST-NO-TOKEN,fase2,manifest,Manifest sin token,HTTP 401,True,401
+F2-MANIFEST-ALTERED,fase2,manifest,Manifest con token alterado,HTTP 401,True,401
+F2-MANIFEST-WRONG-SESSION,fase2,binding,Manifest con sesión distinta,HTTP 409,True,409
+F2-MANIFEST-WRONG-ASSET,fase2,binding,Manifest de otro activo,HTTP 403,True,403
+F2-MANIFEST-OK,fase2,manifest,Manifest protegido legítimo,HTTP 200 DASH,True,200
+F2-CONTENT-NO-TOKEN,fase2,contenido,Contenido local sin token,HTTP 401,True,401
+F2-CONTENT-WRONG-ASSET,fase2,binding,Token Widevine intenta contenido de otro activo,HTTP 403,True,403
+F2-LICENSE-NO-TOKEN,fase2,licencia,Licencia sin token,HTTP 401,True,401
+F2-LICENSE-WRONG-SESSION,fase2,binding,Licencia con sesión distinta,HTTP 409,True,409
+F2-NO-AUTH-UNAUTH,fase2,superficie,Ruta heredada sin token,HTTP 401,True,401
+F2-NO-AUTH-REMOVED,fase2,superficie,Ruta heredada con token válido,HTTP 404,True,404
+F2-STOP,fase2,sesion,Parada explícita,HTTP 200,True,200
+F2-TOKEN-AFTER-STOP,fase2,revocacion,Token después de detener sesión,HTTP 401,True,401
+F2-CONCURRENCY-SCORE,fase2,deteccion,Cinco rechazos de concurrencia elevan el score,409 en los cinco intentos y score 0/25/50/75/100,True,
+F2-CONCURRENCY-BAN,fase2,respuesta,Ban automático de cuenta al llegar a 100,AUTO_BAN:REPEATED_CONCURRENCY_VIOLATION,True,
+F2-CONCURRENCY-MANIFEST-BLOCKED,fase2,respuesta,Manifest tras ban de cuenta,HTTP 401,True,401
+F2-CONCURRENCY-CLEAR,fase2,recuperacion,Retirada administrativa del ban de cuenta,HTTP 200,True,200
+F2-CONCURRENCY-RECOVER,fase2,recuperacion,Heartbeat tras retirar ban,HTTP 200,True,200
+F2-AUTH-BURST,fase2,deteccion,Ocho fallos de autenticación del mismo dispositivo,Ocho respuestas HTTP 401,True,
+F2-DEVICE-BAN,fase2,respuesta,Ban de dispositivo por ráfaga de fallos,AUTH_FAILURE_BURST,True,
+F2-DEVICE-MANIFEST-BLOCKED,fase2,respuesta,Manifest tras ban de dispositivo,HTTP 401,True,401
+F2-DEVICE-CLEAR,fase2,recuperacion,Retirada administrativa del ban de dispositivo,HTTP 200,True,200
+F2-DEVICE-RECOVER,fase2,recuperacion,Heartbeat tras retirar ban,HTTP 200,True,200
+FASE0-TOPOLOGY,fase0,topologia,Publicación de servicios internos,Origen y licencia con bindings publicados,True,
+FASE1-TOPOLOGY,fase1,topologia,Publicación de servicios internos,Sin bindings publicados para servicios internos,True,
+FASE2-TOPOLOGY,fase2,topologia,Publicación de servicios internos,Sin bindings publicados para servicios internos,True,

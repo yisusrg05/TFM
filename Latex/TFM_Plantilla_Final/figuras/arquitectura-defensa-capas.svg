@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#07111d"/><stop offset="1" stop-color="#10263b"/></linearGradient>
+    <filter id="shadow"><feDropShadow dx="0" dy="8" stdDeviation="10" flood-opacity=".25"/></filter>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#85d3ff"/></marker>
+    <style>
+      .title{font:700 42px 'Segoe UI',sans-serif;fill:#f4f8fc}.sub{font:400 21px 'Segoe UI',sans-serif;fill:#a8bfd4}
+      .layer{rx:22;stroke-width:2;filter:url(#shadow)}.h{font:700 27px 'Segoe UI',sans-serif;fill:#f7fbff}.t{font:400 20px 'Segoe UI',sans-serif;fill:#d9e8f5}
+      .tag{font:700 18px 'Segoe UI',sans-serif;fill:#07111d}.side{font:600 20px 'Segoe UI',sans-serif;fill:#b9cde0}
+    </style>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <text x="800" y="65" text-anchor="middle" class="title">Arquitectura defensiva por capas</text>
+  <text x="800" y="102" text-anchor="middle" class="sub">La Fase 1 previene accesos fuera de contexto; la Fase 2 observa, correlaciona y responde</text>
+
+  <rect x="250" y="140" width="1100" height="125" class="layer" fill="#163654" stroke="#78c9f8"/>
+  <rect x="275" y="158" width="112" height="34" rx="17" fill="#78c9f8"/><text x="331" y="181" text-anchor="middle" class="tag">CLIENTE</text>
+  <text x="420" y="185" class="h">Interfaz y reproducción</text>
+  <text x="420" y="224" class="t">Cliente OTT · laboratorio de auditoría · Shaka Player · EME/CDM · watermark visible</text>
+
+  <rect x="250" y="295" width="1100" height="135" class="layer" fill="#153d44" stroke="#63e0c2"/>
+  <rect x="275" y="313" width="112" height="34" rx="17" fill="#63e0c2"/><text x="331" y="336" text-anchor="middle" class="tag">PERÍMETRO</text>
+  <text x="420" y="340" class="h">Varnish y plano de control</text>
+  <text x="420" y="378" class="t">Rutas permitidas · CORS acotado · IP de entrada fiable · autenticación · entitlement</text>
+  <text x="420" y="407" class="t">sesión activa · binding cuenta/dispositivo/activo · manifest y licencia protegidos</text>
+
+  <rect x="250" y="460" width="1100" height="135" class="layer" fill="#40345d" stroke="#c7a9ff"/>
+  <rect x="275" y="478" width="112" height="34" rx="17" fill="#c7a9ff"/><text x="331" y="501" text-anchor="middle" class="tag">ESTADO</text>
+  <text x="420" y="505" class="h">Sesiones, telemetría y decisión</text>
+  <text x="420" y="543" class="t">Fase 1: memoria y límites preventivos · Fase 2: Redis, eventos, contadores y score</text>
+  <text x="420" y="572" class="t">bans temporales de cuenta/dispositivo · plano administrativo para observación y recuperación</text>
+
+  <rect x="250" y="625" width="1100" height="135" class="layer" fill="#49372a" stroke="#ffc786"/>
+  <rect x="275" y="643" width="112" height="34" rx="17" fill="#ffc786"/><text x="331" y="666" text-anchor="middle" class="tag">MEDIOS</text>
+  <text x="420" y="670" class="h">Distribución y DRM</text>
+  <text x="420" y="708" class="t">Origin interno · MPD DASH · segmentos CENC · proxy interno de licencias</text>
+  <text x="420" y="737" class="t">Widevine conserva las claves dentro del CDM; la aplicación decide si el flujo es legítimo</text>
+
+  <line x1="800" y1="265" x2="800" y2="292" stroke="#85d3ff" stroke-width="4" marker-end="url(#arrow)"/>
+  <line x1="800" y1="430" x2="800" y2="457" stroke="#85d3ff" stroke-width="4" marker-end="url(#arrow)"/>
+  <line x1="800" y1="595" x2="800" y2="622" stroke="#85d3ff" stroke-width="4" marker-end="url(#arrow)"/>
+  <text x="1385" y="360" class="side">FASE 1</text><text x="1385" y="390" class="sub">prevención</text>
+  <text x="1385" y="525" class="side">FASE 2</text><text x="1385" y="555" class="sub">detección y respuesta</text>
+  <text x="800" y="830" text-anchor="middle" class="sub">Una petición solo alcanza el servicio interno si supera las validaciones de las capas anteriores</text>
+</svg>

@@ -1,0 +1,246 @@
+{
+  "generatedAt": "2026-08-30T19:09:24.423789Z",
+  "source": "evidencias/fase0/pcap/fase0_03_clearkey_sin_licencia.pcap",
+  "bytes": 298001,
+  "sha256": "DABC315BE2EE948AF8E323DF48C4C1EB4DA6B70B219D24F5FCCF563C3860804A",
+  "httpRequestCount": 10,
+  "httpResponseCount": 10,
+  "requestCounts": {
+    "GET /content/dash-known-key/audio_1.m4s?evidence=1787745920": 1,
+    "GET /content/dash-known-key/audio_init.mp4?evidence=1787745920": 1,
+    "GET /content/dash-known-key/stream.mpd?evidence=1787745920": 1,
+    "GET /content/dash-known-key/video_1.m4s?evidence=1787745920": 1,
+    "GET /content/dash-known-key/video_init.mp4?evidence=1787745920": 1,
+    "GET /dash-known-key/audio_1.m4s?evidence=1787745920": 1,
+    "GET /dash-known-key/audio_init.mp4?evidence=1787745920": 1,
+    "GET /dash-known-key/stream.mpd?evidence=1787745920": 1,
+    "GET /dash-known-key/video_1.m4s?evidence=1787745920": 1,
+    "GET /dash-known-key/video_init.mp4?evidence=1787745920": 1
+  },
+  "responseCounts": {
+    "200": 6,
+    "404": 4
+  },
+  "packets": [
+    {
+      "frame.number": "4",
+      "frame.time_epoch": "1787745920.825511000",
+      "ip.src": "172.18.0.1",
+      "ip.dst": "172.18.0.5",
+      "http.request.method": "GET",
+      "http.host": "localhost:8080",
+      "http.request.uri": "/content/dash-known-key/stream.mpd?evidence=1787745920",
+      "http.response.code": "",
+      "http.content_length": ""
+    },
+    {
+      "frame.number": "10",
+      "frame.time_epoch": "1787745920.827540000",
+      "ip.src": "172.18.0.5",
+      "ip.dst": "172.18.0.2",
+      "http.request.method": "GET",
+      "http.host": "localhost:8080",
+      "http.request.uri": "/dash-known-key/stream.mpd?evidence=1787745920",
+      "http.response.code": "",
+      "http.content_length": ""
+    },
+    {
+      "frame.number": "16",
+      "frame.time_epoch": "1787745920.851463000",
+      "ip.src": "172.18.0.2",
+      "ip.dst": "172.18.0.5",
+      "http.request.method": "",
+      "http.host": "",
+      "http.request.uri": "/dash-known-key/stream.mpd?evidence=1787745920",
+      "http.response.code": "200",
+      "http.content_length": "1821"
+    },
+    {
+      "frame.number": "18",
+      "frame.time_epoch": "1787745920.851677000",
+      "ip.src": "172.18.0.5",
+      "ip.dst": "172.18.0.1",
+      "http.request.method": "",
+      "http.host": "",
+      "http.request.uri": "/content/dash-known-key/stream.mpd?evidence=1787745920",
+      "http.response.code": "200",
+      "http.content_length": "1821"
+    },
+    {
+      "frame.number": "26",
+      "frame.time_epoch": "1787745920.894970000",
+      "ip.src": "172.18.0.1",
+      "ip.dst": "172.18.0.5",
+      "http.request.method": "GET",
+      "http.host": "localhost:8080",
+      "http.request.uri": "/content/dash-known-key/video_init.mp4?evidence=1787745920",
+      "http.response.code": "",
+      "http.content_length": ""
+    },
+    {
+      "frame.number": "28",
+      "frame.time_epoch": "1787745920.895537000",
+      "ip.src": "172.18.0.5",
+      "ip.dst": "172.18.0.2",
+      "http.request.method": "GET",
+      "http.host": "localhost:8080",
+      "http.request.uri": "/dash-known-key/video_init.mp4?evidence=1787745920",
+      "http.response.code": "",
+      "http.content_length": ""
+    },
+    {
+      "frame.number": "32",
+      "frame.time_epoch": "1787745920.907277000",
+      "ip.src": "172.18.0.2",
+      "ip.dst": "172.18.0.5",
+      "http.request.method": "",
+      "http.host": "",
+      "http.request.uri": "/dash-known-key/video_init.mp4?evidence=1787745920",
+      "http.response.code": "200",
+      "http.content_length": "1001"
+    },
+    {
+      "frame.number": "35",
+      "frame.time_epoch": "1787745920.907884000",
+      "ip.src": "172.18.0.5",
+      "ip.dst": "172.18.0.1",
+      "http.request.method": "",
+      "http.host": "",
+      "http.request.uri": "/content/dash-known-key/video_init.mp4?evidence=1787745920",
+      "http.response.code": "200",
+      "http.content_length": "1001"
+    },
+    {
+      "frame.number": "43",
+      "frame.time_epoch": "1787745920.958849000",
+      "ip.src": "172.18.0.1",
+      "ip.dst": "172.18.0.5",
+      "http.request.method": "GET",
+      "http.host": "localhost:8080",
+      "http.request.uri": "/content/dash-known-key/video_1.m4s?evidence=1787745920",
+      "http.response.code": "",
+      "http.content_length": ""
+    },
+    {
+      "frame.number": "45",
+      "frame.time_epoch": "1787745920.959281000",
+      "ip.src": "172.18.0.5",
+      "ip.dst": "172.18.0.2",
+      "http.request.method": "GET",
+      "http.host": "localhost:8080",
+      "http.request.uri": "/dash-known-key/video_1.m4s?evidence=1787745920",
+      "http.response.code": "",
+      "http.content_length": ""
+    },
+    {
+      "frame.number": "81",
+      "frame.time_epoch": "1787745920.975659000",
+      "ip.src": "172.18.0.2",
+      "ip.dst": "172.18.0.5",
+      "http.request.method": "",
+      "http.host": "",
+      "http.request.uri": "/dash-known-key/video_1.m4s?evidence=1787745920",
+      "http.response.code": "200",
+      "http.content_length": "137756"
+    },
+    {
+      "frame.number": "83",
+      "frame.time_epoch": "1787745920.975886000",
+      "ip.src": "172.18.0.5",
+      "ip.dst": "172.18.0.1",
+      "http.request.method": "",
+      "http.host": "",
+      "http.request.uri": "/content/dash-known-key/video_1.m4s?evidence=1787745920",
+      "http.response.code": "200",
+      "http.content_length": "137756"
+    },
+    {
+      "frame.number": "91",
+      "frame.time_epoch": "1787745921.018112000",
+      "ip.src": "172.18.0.1",
+      "ip.dst": "172.18.0.5",
+      "http.request.method": "GET",
+      "http.host": "localhost:8080",
+      "http.request.uri": "/content/dash-known-key/audio_init.mp4?evidence=1787745920",
+      "http.response.code": "",
+      "http.content_length": ""
+    },
+    {
+      "frame.number": "93",
+      "frame.time_epoch": "1787745921.018353000",
+      "ip.src": "172.18.0.5",
+      "ip.dst": "172.18.0.2",
+      "http.request.method": "GET",
+      "http.host": "localhost:8080",
+      "http.request.uri": "/dash-known-key/audio_init.mp4?evidence=1787745920",
+      "http.response.code": "",
+      "http.content_length": ""
+    },
+    {
+      "frame.number": "94",
+      "frame.time_epoch": "1787745921.023511000",
+      "ip.src": "172.18.0.2",
+      "ip.dst": "172.18.0.5",
+      "http.request.method": "",
+      "http.host": "",
+      "http.request.uri": "/dash-known-key/audio_init.mp4?evidence=1787745920",
+      "http.response.code": "404",
+      "http.content_length": "153"
+    },
+    {
+      "frame.number": "98",
+      "frame.time_epoch": "1787745921.023895000",
+      "ip.src": "172.18.0.5",
+      "ip.dst": "172.18.0.1",
+      "http.request.method": "",
+      "http.host": "",
+      "http.request.uri": "/content/dash-known-key/audio_init.mp4?evidence=1787745920",
+      "http.response.code": "404",
+      "http.content_length": "153"
+    },
+    {
+      "frame.number": "106",
+      "frame.time_epoch": "1787745921.068138000",
+      "ip.src": "172.18.0.1",
+      "ip.dst": "172.18.0.5",
+      "http.request.method": "GET",
+      "http.host": "localhost:8080",
+      "http.request.uri": "/content/dash-known-key/audio_1.m4s?evidence=1787745920",
+      "http.response.code": "",
+      "http.content_length": ""
+    },
+    {
+      "frame.number": "108",
+      "frame.time_epoch": "1787745921.068425000",
+      "ip.src": "172.18.0.5",
+      "ip.dst": "172.18.0.2",
+      "http.request.method": "GET",
+      "http.host": "localhost:8080",
+      "http.request.uri": "/dash-known-key/audio_1.m4s?evidence=1787745920",
+      "http.response.code": "",
+      "http.content_length": ""
+    },
+    {
+      "frame.number": "109",
+      "frame.time_epoch": "1787745921.070217000",
+      "ip.src": "172.18.0.2",
+      "ip.dst": "172.18.0.5",
+      "http.request.method": "",
+      "http.host": "",
+      "http.request.uri": "/dash-known-key/audio_1.m4s?evidence=1787745920",
+      "http.response.code": "404",
+      "http.content_length": "153"
+    },
+    {
+      "frame.number": "113",
+      "frame.time_epoch": "1787745921.070654000",
+      "ip.src": "172.18.0.5",
+      "ip.dst": "172.18.0.1",
+      "http.request.method": "",
+      "http.host": "",
+      "http.request.uri": "/content/dash-known-key/audio_1.m4s?evidence=1787745920",
+      "http.response.code": "404",
+      "http.content_length": "153"
+    }
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "generatedAt": "2026-08-30T19:09:24.423789Z",
+  "source": "evidencias/fase0/pcap/fase0_02_bypass_widevine_no_auth.pcap",
+  "bytes": 11026,
+  "sha256": "BAAC6D1C3DFCEDDC7D1675983BB85E7B61373164496EEF821DBFC4CE80EC7B2B",
+  "httpRequestCount": 3,
+  "httpResponseCount": 3,
+  "requestCounts": {
+    "OPTIONS /license/no_auth": 1,
+    "POST /license/no_auth": 2
+  },
+  "responseCounts": {
+    "200": 2,
+    "204": 1
+  },
+  "packets": [
+    {
+      "frame.number": "5",
+      "frame.time_epoch": "1787745757.915649000",
+      "ip.src": "172.18.0.1",
+      "ip.dst": "172.18.0.5",
+      "http.request.method": "OPTIONS",
+      "http.host": "localhost:8080",
+      "http.request.uri": "/license/no_auth",
+      "http.response.code": "",
+      "http.content_length": ""
+    },
+    {
+      "frame.number": "7",
+      "frame.time_epoch": "1787745757.916217000",
+      "ip.src": "172.18.0.5",
+      "ip.dst": "172.18.0.1",
+      "http.request.method": "",
+      "http.host": "",
+      "http.request.uri": "/license/no_auth",
+      "http.response.code": "204",
+      "http.content_length": ""
+    },
+    {
+      "frame.number": "9",
+      "frame.time_epoch": "1787745757.918540000",
+      "ip.src": "172.18.0.1",
+      "ip.dst": "172.18.0.5",
+      "http.request.method": "POST",
+      "http.host": "localhost:8080",
+      "http.request.uri": "/license/no_auth",
+      "http.response.code": "",
+      "http.content_length": "2"
+    },
+    {
+      "frame.number": "11",
+      "frame.time_epoch": "1787745758.171676000",
+      "ip.src": "172.18.0.5",
+      "ip.dst": "172.18.0.1",
+      "http.request.method": "",
+      "http.host": "",
+      "http.request.uri": "/license/no_auth",
+      "http.response.code": "200",
+      "http.content_length": "714"
+    },
+    {
+      "frame.number": "12",
+      "frame.time_epoch": "1787745758.207437000",
+      "ip.src": "172.18.0.1",
+      "ip.dst": "172.18.0.5",
+      "http.request.method": "POST",
+      "http.host": "localhost:8080",
+      "http.request.uri": "/license/no_auth",
+      "http.response.code": "",
+      "http.content_length": "3824"
+    },
+    {
+      "frame.number": "14",
+      "frame.time_epoch": "1787745758.376426000",
+      "ip.src": "172.18.0.5",
+      "ip.dst": "172.18.0.1",
+      "http.request.method": "",
+      "http.host": "",
+      "http.request.uri": "/license/no_auth",
+      "http.response.code": "200",
+      "http.content_length": "1229"
+    }
+  ]
+}

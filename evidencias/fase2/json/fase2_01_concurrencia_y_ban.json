@@ -1,0 +1,268 @@
+{
+  "generatedAt": "2026-08-30T19:06:56.475175Z",
+  "scenario": "fase2_01_concurrencia_y_ban",
+  "risk": {
+    "accountId": "acc-allowed-001",
+    "score": 100,
+    "reasons": [
+      "REPEATED_CONCURRENCY_VIOLATION"
+    ],
+    "lastUpdatedAt": "2026-08-30T19:05:57.022Z"
+  },
+  "activeBans": [],
+  "sessions": [
+    {
+      "sessionId": "0f56a9c2-e487-4671-9b07-9d582cacc928",
+      "accountId": "acc-allowed-001",
+      "deviceId": "lab-f2-04a9f78a-7cee-4e49-93dc-5e1503d123bf",
+      "assetId": "sintel-widevine",
+      "ip": "172.21.0.1",
+      "status": "stopped",
+      "startedAt": 1788116753102,
+      "lastHeartbeatAt": 1788116782031,
+      "stoppedAt": 1788116782717
+    }
+  ],
+  "events": [
+    {
+      "sessionId": "0f56a9c2-e487-4671-9b07-9d582cacc928",
+      "accountId": "acc-allowed-001",
+      "id": "90861f0a-0429-4802-9d32-ecf89f035b37",
+      "type": "playback.stopped",
+      "timestamp": "2026-08-30T19:06:22.719Z"
+    },
+    {
+      "sessionId": "0f56a9c2-e487-4671-9b07-9d582cacc928",
+      "accountId": "acc-allowed-001",
+      "risk": {
+        "accountId": "acc-allowed-001",
+        "score": 100,
+        "reasons": [
+          "REPEATED_CONCURRENCY_VIOLATION"
+        ],
+        "lastUpdatedAt": "2026-08-30T19:05:57.022Z"
+      },
+      "id": "97e8b287-7ab3-424f-b8f1-310cd843fcab",
+      "type": "playback.heartbeat",
+      "timestamp": "2026-08-30T19:06:22.035Z"
+    },
+    {
+      "subjectType": "account",
+      "subjectId": "acc-allowed-001",
+      "id": "fd62bb66-682f-4610-a8a7-414f255aea66",
+      "type": "ban.cleared",
+      "timestamp": "2026-08-30T19:06:22.023Z"
+    },
+    {
+      "accountId": "acc-allowed-001",
+      "deviceId": "lab-f2-04a9f78a-7cee-4e49-93dc-5e1503d123bf",
+      "ip": "172.21.0.1",
+      "id": "c8c68b1c-8879-473a-9aa0-08848f4fbd1c",
+      "type": "playback.concurrency_rejected",
+      "timestamp": "2026-08-30T19:05:57.026Z"
+    },
+    {
+      "banId": "a6f29990-87aa-45f0-b77f-8a1fe0d03876",
+      "subjectType": "account",
+      "subjectId": "acc-allowed-001",
+      "reason": "AUTO_BAN:REPEATED_CONCURRENCY_VIOLATION",
+      "createdBy": "system",
+      "createdAt": "2026-08-30T19:05:57.023Z",
+      "expiresAt": "2026-08-30T19:35:57.023Z",
+      "id": "5901524b-269e-483d-ba77-8d96e865b55c",
+      "type": "ban.created",
+      "timestamp": "2026-08-30T19:05:57.024Z"
+    },
+    {
+      "accountId": "acc-allowed-001",
+      "scoreAdded": 25,
+      "reason": "REPEATED_CONCURRENCY_VIOLATION",
+      "context": {
+        "count": 5
+      },
+      "risk": {
+        "accountId": "acc-allowed-001",
+        "score": 100,
+        "reasons": [
+          "REPEATED_CONCURRENCY_VIOLATION"
+        ],
+        "lastUpdatedAt": "2026-08-30T19:05:57.022Z"
+      },
+      "id": "ae974bea-a17e-4fb4-984a-4b6c348e4495",
+      "type": "risk.incremented",
+      "timestamp": "2026-08-30T19:05:57.022Z"
+    },
+    {
+      "accountId": "acc-allowed-001",
+      "deviceId": "lab-f2-04a9f78a-7cee-4e49-93dc-5e1503d123bf",
+      "ip": "172.21.0.1",
+      "id": "811d61b8-1997-4e2b-8a72-9bc986169524",
+      "type": "playback.concurrency_rejected",
+      "timestamp": "2026-08-30T19:05:57.001Z"
+    },
+    {
+      "accountId": "acc-allowed-001",
+      "scoreAdded": 25,
+      "reason": "REPEATED_CONCURRENCY_VIOLATION",
+      "context": {
+        "count": 4
+      },
+      "risk": {
+        "accountId": "acc-allowed-001",
+        "score": 75,
+        "reasons": [
+          "REPEATED_CONCURRENCY_VIOLATION"
+        ],
+        "lastUpdatedAt": "2026-08-30T19:05:56.999Z"
+      },
+      "id": "0498a91c-ac78-489f-9d57-6c3ea0eabd2e",
+      "type": "risk.incremented",
+      "timestamp": "2026-08-30T19:05:57.000Z"
+    },
+    {
+      "accountId": "acc-allowed-001",
+      "deviceId": "lab-f2-04a9f78a-7cee-4e49-93dc-5e1503d123bf",
+      "ip": "172.21.0.1",
+      "id": "595c0d1b-4fb4-4f33-8559-c3d7012a3e24",
+      "type": "playback.concurrency_rejected",
+      "timestamp": "2026-08-30T19:05:56.979Z"
+    },
+    {
+      "accountId": "acc-allowed-001",
+      "scoreAdded": 25,
+      "reason": "REPEATED_CONCURRENCY_VIOLATION",
+      "context": {
+        "count": 3
+      },
+      "risk": {
+        "accountId": "acc-allowed-001",
+        "score": 50,
+        "reasons": [
+          "REPEATED_CONCURRENCY_VIOLATION"
+        ],
+        "lastUpdatedAt": "2026-08-30T19:05:56.974Z"
+      },
+      "id": "42686c4e-298f-4ae8-85ce-f94599839aed",
+      "type": "risk.incremented",
+      "timestamp": "2026-08-30T19:05:56.976Z"
+    },
+    {
+      "accountId": "acc-allowed-001",
+      "deviceId": "lab-f2-04a9f78a-7cee-4e49-93dc-5e1503d123bf",
+      "ip": "172.21.0.1",
+      "id": "5d2c840a-8de1-4df5-9021-ad5084c2c78b",
+      "type": "playback.concurrency_rejected",
+      "timestamp": "2026-08-30T19:05:56.951Z"
+    },
+    {
+      "accountId": "acc-allowed-001",
+      "scoreAdded": 25,
+      "reason": "REPEATED_CONCURRENCY_VIOLATION",
+      "context": {
+        "count": 2
+      },
+      "risk": {
+        "accountId": "acc-allowed-001",
+        "score": 25,
+        "reasons": [
+          "REPEATED_CONCURRENCY_VIOLATION"
+        ],
+        "lastUpdatedAt": "2026-08-30T19:05:56.949Z"
+      },
+      "id": "d6a7336c-c4cc-4876-a78b-85bcb0f05d81",
+      "type": "risk.incremented",
+      "timestamp": "2026-08-30T19:05:56.949Z"
+    },
+    {
+      "accountId": "acc-allowed-001",
+      "deviceId": "lab-f2-04a9f78a-7cee-4e49-93dc-5e1503d123bf",
+      "ip": "172.21.0.1",
+      "id": "9590f187-9177-4f87-8063-a5763d13a162",
+      "type": "playback.concurrency_rejected",
+      "timestamp": "2026-08-30T19:05:56.926Z"
+    },
+    {
+      "sessionId": "0f56a9c2-e487-4671-9b07-9d582cacc928",
+      "accountId": "acc-allowed-001",
+      "risk": {
+        "accountId": "acc-allowed-001",
+        "score": 0,
+        "reasons": [],
+        "lastUpdatedAt": "2026-08-30T19:05:53.090Z"
+      },
+      "id": "913976b7-b757-45d7-b9e3-d0f7c26813e0",
+      "type": "license.request",
+      "timestamp": "2026-08-30T19:05:54.538Z"
+    },
+    {
+      "sessionId": "0f56a9c2-e487-4671-9b07-9d582cacc928",
+      "accountId": "acc-allowed-001",
+      "risk": {
+        "accountId": "acc-allowed-001",
+        "score": 0,
+        "reasons": [],
+        "lastUpdatedAt": "2026-08-30T19:05:53.090Z"
+      },
+      "id": "43c38c01-1c52-4f2e-8442-e54dfd96c57e",
+      "type": "license.request",
+      "timestamp": "2026-08-30T19:05:54.330Z"
+    },
+    {
+      "sessionId": "0f56a9c2-e487-4671-9b07-9d582cacc928",
+      "accountId": "acc-allowed-001",
+      "assetId": "sintel-widevine",
+      "risk": {
+        "accountId": "acc-allowed-001",
+        "score": 0,
+        "reasons": [],
+        "lastUpdatedAt": "2026-08-30T19:05:53.090Z"
+      },
+      "id": "963c0ea7-eb44-486a-a2ad-317315cff8ed",
+      "type": "manifest.request",
+      "timestamp": "2026-08-30T19:05:53.986Z"
+    },
+    {
+      "sessionId": "0f56a9c2-e487-4671-9b07-9d582cacc928",
+      "accountId": "acc-allowed-001",
+      "assetId": "sintel-widevine",
+      "risk": {
+        "accountId": "acc-allowed-001",
+        "score": 0,
+        "reasons": [],
+        "lastUpdatedAt": "2026-08-30T19:05:53.090Z"
+      },
+      "id": "231d01f2-2896-4562-b7da-3fbd985f0b25",
+      "type": "manifest.request",
+      "timestamp": "2026-08-30T19:05:53.943Z"
+    },
+    {
+      "sessionId": "0f56a9c2-e487-4671-9b07-9d582cacc928",
+      "accountId": "acc-allowed-001",
+      "deviceId": "lab-f2-04a9f78a-7cee-4e49-93dc-5e1503d123bf",
+      "ip": "172.21.0.1",
+      "risk": {
+        "accountId": "acc-allowed-001",
+        "score": 0,
+        "reasons": [],
+        "lastUpdatedAt": "2026-08-30T19:05:53.090Z"
+      },
+      "id": "651c4dc1-402c-4379-ba49-c9d5e7bcde93",
+      "type": "playback.session_created",
+      "timestamp": "2026-08-30T19:05:53.106Z"
+    },
+    {
+      "accountId": "acc-allowed-001",
+      "deviceId": "lab-f2-04a9f78a-7cee-4e49-93dc-5e1503d123bf",
+      "ip": "172.21.0.1",
+      "risk": {
+        "accountId": "acc-allowed-001",
+        "score": 0,
+        "reasons": [],
+        "lastUpdatedAt": "2026-08-30T19:05:53.090Z"
+      },
+      "id": "417f92d9-db55-416c-9742-7055ace57f5d",
+      "type": "auth.success",
+      "timestamp": "2026-08-30T19:05:53.091Z"
+    }
+  ]
+}

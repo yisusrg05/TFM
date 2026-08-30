@@ -65,7 +65,8 @@ Abre `http://localhost:9401` y utiliza `usuario-permitido@tfm.local` / `demo123`
 1. Reproducir solicitando con token tanto `http://localhost:9180/manifest/sintel-widevine` como la licencia.
 2. Ejecutar los casos negativos 401/401/409/403 del manifest.
 3. Simular ocho autenticaciones fallidas desde el mismo `deviceId`, activar un ban automatico `AUTH_FAILURE_BURST` y comprobar que una nueva peticion del manifest queda rechazada.
-4. Retirar el ban desde el plano administrativo y demostrar que la reproduccion vuelve a funcionar.
+4. Mantener una sesion activa y solicitar cinco sesiones adicionales. Las cinco peticiones reciben `409 CONCURRENCY_LIMIT`; el score observado progresa como 0, 25, 50, 75 y 100, se crea el ban de cuenta `AUTO_BAN:REPEATED_CONCURRENCY_VIOLATION` y el manifest posterior queda rechazado.
+5. Retirar el ban de dispositivo o de cuenta desde el plano administrativo y demostrar que el manifest vuelve a estar disponible. El laboratorio renueva la credencial por heartbeat o crea una nueva sesión si la anterior ya expiró. El score no se borra: se conserva como evidencia del comportamiento previo.
 
 El registro del laboratorio conserva estados y claims utiles para la evidencia, pero no imprime el token completo ni las claves Widevine; estas ultimas permanecen dentro del CDM del navegador.
 

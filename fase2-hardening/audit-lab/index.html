@@ -30,7 +30,7 @@
     <main class="shell">
       <section class="panel">
         <h1>Laboratorio de tokens y bloqueo — Fase 2</h1>
-        <p>Genera automáticamente el token desde usuario y contraseña, reproduce mediante manifest y licencia protegidos y simula ocho fallos de autenticación para bloquear realmente el dispositivo.</p>
+        <p>Genera automáticamente el token desde usuario y contraseña, reproduce mediante manifest y licencia protegidos y permite comprobar dos respuestas reales: el bloqueo del dispositivo por fallos de autenticación y el bloqueo de la cuenta por concurrencia reiterada.</p>
       </section>
 
       <section class="layout">
@@ -44,7 +44,8 @@
           <button id="btnPlay" class="secondary" disabled>2. Reproducir con token válido</button>
           <button id="btnNegative" class="secondary" disabled>3. Pruebas negativas del manifest</button>
           <button id="btnBlock" class="warning" disabled>4. Simular fallos y bloquear device</button>
-          <button id="btnClear" class="warning" disabled>5. Quitar ban y recuperar</button>
+          <button id="btnConcurrency" class="warning" disabled>5. Forzar concurrencia y bloquear cuenta</button>
+          <button id="btnClear" class="warning" disabled>6. Quitar ban y recuperar</button>
           <button id="btnStop" class="danger" disabled>Detener sesión</button>
           <div id="status" class="status warn">Esperando credenciales.</div>
         </aside>
@@ -77,7 +78,8 @@
         manifestUrl: null,
         heartbeatTimer: null,
         deviceId: `lab-f2-${crypto.randomUUID()}`,
-        banned: false,
+        accountId: null,
+        activeBanType: null,
         events: []
       };
 
@@ -105,11 +107,12 @@
       function setButtons() {
         const ready = Boolean(state.playbackToken && state.sessionId);
         document.getElementById('btnPrepare').disabled = ready;
-        document.getElementById('btnPlay').disabled = !ready || state.banned;
-        document.getElementById('btnNegative').disabled = !ready || state.banned;
-        document.getElementById('btnBlock').disabled = !ready || state.banned;
-        document.getElementById('btnClear').disabled = !state.banned || !state.accessToken;
-        document.getElementById('btnStop').disabled = !ready || state.banned;
+        document.getElementById('btnPlay').disabled = !ready || Boolean(state.activeBanType);
+        document.getElementById('btnNegative').disabled = !ready || Boolean(state.activeBanType);
+        document.getElementById('btnBlock').disabled = !ready || Boolean(state.activeBanType);
+        document.getElementById('btnConcurrency').disabled = !ready || Boolean(state.activeBanType);
+        document.getElementById('btnClear').disabled = !state.activeBanType || !state.accessToken;
+        document.getElementById('btnStop').disabled = !ready || Boolean(state.activeBanType);
       }
 
       async function requestJson(path, options = {}) {
@@ -137,8 +140,14 @@
       async function refreshOverview() {
         const data = await requestJson('/admin/overview', { headers: { Authorization: `Bearer ${state.accessToken}` } });
         document.getElementById('risk').textContent = `${data.overview.risk.score} — ${data.overview.risk.reasons.join(', ') || 'sin razones'}`;
+        const accountBan = data.overview.bans.find((item) => item.type === 'account' && item.subjectId === state.accountId);
         const deviceBan = data.overview.bans.find((item) => item.type === 'device' && item.subjectId === state.deviceId);
-        document.getElementById('ban').textContent = deviceBan ? `${deviceBan.reason} hasta ${deviceBan.expiresAt}` : 'No';
+        const activeBan = accountBan || deviceBan;
+        state.activeBanType = accountBan ? 'account' : deviceBan ? 'device' : null;
+        document.getElementById('ban').textContent = activeBan
+          ? `${activeBan.type === 'account' ? 'CUENTA' : 'DISPOSITIVO'} — ${activeBan.reason} hasta ${activeBan.expiresAt}`
+          : 'No';
+        setButtons();
         return data.overview;
       }
 
@@ -151,6 +160,7 @@
           body: JSON.stringify({ email, password, deviceId: state.deviceId })
         });
         state.accessToken = login.accessToken;
+        state.accountId = login.user.accountId;
         addEvent('AUTH_OK', { accountId: login.user.accountId, deviceId: login.deviceId, roles: login.user.roles, expiresIn: login.accessTokenExpiresIn });
 
         const playback = await requestJson('/playback/session', {
@@ -158,19 +168,23 @@
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${state.accessToken}` },
           body: JSON.stringify({ assetId: 'sintel-widevine' })
         });
+        usePlaybackSession(playback);
+        await refreshOverview();
+        startHeartbeat();
+        setButtons();
+        setStatus('Token generado. El dispositivo está autorizado.', 'ok');
+      }
+
+      function usePlaybackSession(playback) {
         state.playbackToken = playback.playbackToken;
         state.sessionId = playback.session.sessionId;
         state.manifestUrl = playback.manifestUrl;
-        state.banned = false;
+        state.activeBanType = null;
         const claims = decodeClaims(state.playbackToken);
         document.getElementById('sessionId').textContent = state.sessionId;
         document.getElementById('manifestUrl').textContent = state.manifestUrl;
         document.getElementById('claims').textContent = `${claims.typ} | ${claims.assetId} | exp ${new Date(claims.exp * 1000).toISOString()} | ${claims.scope.join(', ')}`;
         addEvent('PLAYBACK_TOKEN_ISSUED', { sessionId: state.sessionId, assetId: claims.assetId, scopes: claims.scope, expiresAt: new Date(claims.exp * 1000).toISOString() });
-        await refreshOverview();
-        startHeartbeat();
-        setButtons();
-        setStatus('Token generado. El dispositivo está autorizado.', 'ok');
       }
 
       async function heartbeat() {
@@ -235,27 +249,101 @@
           playbackRejected = true;
         }
         const manifestAfterBan = await probe(state.manifestUrl, { Authorization: `Bearer ${state.playbackToken}`, 'X-Playback-Session-Id': state.sessionId });
-        state.banned = manifestAfterBan.status === 401 || manifestAfterBan.status === 403;
         const overview = await refreshOverview();
         const deviceBan = overview.bans.find((item) => item.type === 'device' && item.subjectId === state.deviceId);
+        state.activeBanType = deviceBan ? 'device' : null;
         addEvent('DEVICE_BLOCK_SIMULATION', { attempts, playbackRejected, manifestAfterBan, ban: deviceBan || null });
         setButtons();
-        setStatus(state.banned && playbackRejected ? 'Dispositivo bloqueado: la nueva reproducción no puede obtener el manifest.' : 'No se confirmó el bloqueo esperado.', state.banned && playbackRejected ? 'bad' : 'warn');
+        const blocked = state.activeBanType === 'device' && playbackRejected;
+        setStatus(blocked ? 'Dispositivo bloqueado: la nueva reproducción no puede obtener el manifest.' : 'No se confirmó el bloqueo esperado.', blocked ? 'bad' : 'warn');
       }
 
-      async function clearDeviceBan() {
-        await requestJson('/admin/bans/clear', {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${state.accessToken}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ type: 'device', subjectId: state.deviceId })
-        });
-        state.banned = false;
-        await heartbeat();
+      async function simulateConcurrencyBlock() {
+        clearInterval(state.heartbeatTimer);
+        const attempts = [];
+        const scoreProgression = [];
+
+        for (let index = 1; index <= 5; index += 1) {
+          const response = await fetch(`${API_BASE}/playback/session`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${state.accessToken}` },
+            body: JSON.stringify({ assetId: 'sintel-widevine' })
+          });
+          let body = {};
+          try { body = await response.json(); } catch (_error) {}
+          const overview = await refreshOverview();
+          attempts.push({ attempt: index, status: response.status, error: body.error || null, score: overview.risk.score });
+          scoreProgression.push(overview.risk.score);
+        }
+
+        await player.unload();
+        let playbackRejected = false;
+        try {
+          configurePlayer();
+          await player.load(state.manifestUrl);
+        } catch (_error) {
+          playbackRejected = true;
+        }
+        const manifestAfterBan = await probe(state.manifestUrl, { Authorization: `Bearer ${state.playbackToken}`, 'X-Playback-Session-Id': state.sessionId });
+        const overview = await refreshOverview();
+        const accountBan = overview.bans.find((item) => item.type === 'account' && item.subjectId === state.accountId);
+        state.activeBanType = accountBan ? 'account' : null;
+        addEvent('ACCOUNT_CONCURRENCY_BLOCK_SIMULATION', { scoreProgression, playbackRejected, manifestAfterBan, ban: accountBan || null, attempts });
+        setButtons();
+
+        const expectedScores = [0, 25, 50, 75, 100];
+        const expectedProgression = scoreProgression.length === expectedScores.length
+          && scoreProgression.every((score, index) => score === expectedScores[index]);
+        const blocked = state.activeBanType === 'account' && playbackRejected && manifestAfterBan.status === 401;
+        setStatus(
+          blocked && expectedProgression
+            ? 'Cuenta bloqueada por concurrencia: score 0 → 25 → 50 → 75 → 100; el manifest queda rechazado.'
+            : 'No se confirmó toda la secuencia esperada de concurrencia y bloqueo.',
+          blocked && expectedProgression ? 'bad' : 'warn'
+        );
+      }
+
+      async function clearActiveBan() {
+        const beforeClear = await requestJson('/admin/overview', { headers: { Authorization: `Bearer ${state.accessToken}` } });
+        const targets = beforeClear.overview.bans.filter((ban) =>
+          (ban.type === 'account' && ban.subjectId === state.accountId)
+          || (ban.type === 'device' && ban.subjectId === state.deviceId)
+        );
+        if (!targets.length) throw new Error('No hay ningún ban activo que retirar.');
+        for (const ban of targets) {
+          await requestJson('/admin/bans/clear', {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${state.accessToken}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: ban.type, subjectId: ban.subjectId })
+          });
+        }
+        state.activeBanType = null;
+        let recovery = 'heartbeat';
+        try {
+          await heartbeat();
+        } catch (_error) {
+          const playback = await requestJson('/playback/session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${state.accessToken}` },
+            body: JSON.stringify({ assetId: 'sintel-widevine' })
+          });
+          usePlaybackSession(playback);
+          recovery = 'new_session';
+        }
         await refreshOverview();
-        addEvent('DEVICE_BAN_CLEARED', { deviceId: state.deviceId });
+        addEvent('BAN_CLEARED', {
+          banTypes: targets.map((ban) => ban.type),
+          subjectIds: targets.map((ban) => ban.subjectId),
+          recovery
+        });
         startHeartbeat();
         setButtons();
-        setStatus('Ban retirado. El manifest vuelve a estar disponible.', 'ok');
+        setStatus(
+          recovery === 'heartbeat'
+            ? 'Ban retirado y credencial renovada. El manifest vuelve a estar disponible; el score se conserva para trazabilidad.'
+            : 'Ban retirado y nueva sesión creada porque la anterior había expirado. El score se conserva para trazabilidad.',
+          'ok'
+        );
       }
 
       async function stop() {
@@ -266,7 +354,7 @@
         state.playbackToken = null;
         state.sessionId = null;
         state.manifestUrl = null;
-        state.banned = false;
+        state.activeBanType = null;
         document.getElementById('sessionId').textContent = '-';
         document.getElementById('manifestUrl').textContent = '-';
         document.getElementById('claims').textContent = '-';
@@ -278,7 +366,8 @@
       document.getElementById('btnPlay').addEventListener('click', () => play().catch((error) => setStatus(error.message, 'bad')));
       document.getElementById('btnNegative').addEventListener('click', () => negativeTests().catch((error) => setStatus(error.message, 'bad')));
       document.getElementById('btnBlock').addEventListener('click', () => simulateDeviceBlock().catch((error) => setStatus(error.message, 'bad')));
-      document.getElementById('btnClear').addEventListener('click', () => clearDeviceBan().catch((error) => setStatus(error.message, 'bad')));
+      document.getElementById('btnConcurrency').addEventListener('click', () => simulateConcurrencyBlock().catch((error) => setStatus(error.message, 'bad')));
+      document.getElementById('btnClear').addEventListener('click', () => clearActiveBan().catch((error) => setStatus(error.message, 'bad')));
       document.getElementById('btnStop').addEventListener('click', () => stop().catch((error) => setStatus(error.message, 'bad')));
 
       configurePlayer();
