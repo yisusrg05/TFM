@@ -51,11 +51,15 @@ def main() -> None:
     logs = {
         ROOT / "evidencias" / "fase1" / "logs" / "control-plane.log": "tfm-fase1-control-plane",
         ROOT / "evidencias" / "fase1" / "logs" / "license-server.log": "tfm-fase1-license-server",
+        ROOT / "evidencias" / "fase1" / "logs" / "key-leak-lab.log": "tfm-fase1-key-leak-lab",
         ROOT / "evidencias" / "fase2" / "logs" / "control-plane.log": "tfm-fase2-control-plane",
         ROOT / "evidencias" / "fase2" / "logs" / "license-server.log": "tfm-fase2-license-server",
+        ROOT / "evidencias" / "fase2" / "logs" / "key-leak-lab.log": "tfm-fase2-key-leak-lab",
     }
     for path, container in logs.items():
-        path.write_text(run("docker", "logs", "--timestamps", container) + "\n", encoding="utf-8")
+        raw_log = run("docker", "logs", "--timestamps", container)
+        normalized_log = "\n".join(line.rstrip() for line in raw_log.splitlines()) + "\n"
+        path.write_text(normalized_log, encoding="utf-8")
     print(destination)
 
 

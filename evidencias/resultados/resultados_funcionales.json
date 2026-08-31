@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-30T19:03:23.212559Z",
+  "generatedAt": "2026-08-31T10:38:42.590569Z",
   "host": {
     "platform": "Windows-10-10.0.26200-SP0",
     "python": "3.11.3"
@@ -19,7 +19,7 @@
       "passed": true,
       "observed": {
         "status": 200,
-        "durationMs": 27.314,
+        "durationMs": 29.374,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
@@ -42,7 +42,7 @@
       "passed": true,
       "observed": {
         "status": 200,
-        "durationMs": 16.632,
+        "durationMs": 40.06,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
@@ -87,7 +87,7 @@
       "passed": true,
       "observed": {
         "status": 401,
-        "durationMs": 17.679,
+        "durationMs": 8.826,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
@@ -107,7 +107,7 @@
       "passed": true,
       "observed": {
         "status": 200,
-        "durationMs": 5.87,
+        "durationMs": 6.095,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
@@ -149,7 +149,7 @@
       "passed": true,
       "observed": {
         "status": 200,
-        "durationMs": 25.846,
+        "durationMs": 6.865,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
@@ -174,7 +174,7 @@
       "passed": true,
       "observed": {
         "status": 403,
-        "durationMs": 6.256,
+        "durationMs": 6.447,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
@@ -197,7 +197,7 @@
       "passed": true,
       "observed": {
         "status": 401,
-        "durationMs": 7.079,
+        "durationMs": 24.934,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
@@ -219,7 +219,7 @@
       "passed": true,
       "observed": {
         "status": 500,
-        "durationMs": 362.204,
+        "durationMs": 487.806,
         "headers": {
           "x-phase0-weakness": "public-no-auth-license",
           "content-type": "text/html; charset=utf-8"
@@ -240,7 +240,7 @@
       "passed": true,
       "observed": {
         "status": 200,
-        "durationMs": 26.91,
+        "durationMs": 29.43,
         "headers": {
           "content-type": "application/octet-stream"
         },
@@ -260,7 +260,7 @@
       "passed": true,
       "observed": {
         "status": 200,
-        "durationMs": 13.904,
+        "durationMs": 4.603,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
@@ -283,7 +283,7 @@
       "passed": true,
       "observed": {
         "status": 200,
-        "durationMs": 14.297,
+        "durationMs": 28.826,
         "headers": {
           "content-type": "application/octet-stream"
         },
@@ -303,7 +303,7 @@
       "passed": true,
       "observed": {
         "status": 200,
-        "durationMs": 5.015,
+        "durationMs": 6.013,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
@@ -311,7 +311,7 @@
           "ok": true,
           "service": "control-plane",
           "activeSessions": 0,
-          "timestamp": "2026-08-30T19:03:19.169Z"
+          "timestamp": "2026-08-31T10:38:38.082Z"
         },
         "transportError": null
       }
@@ -325,7 +325,7 @@
       "passed": true,
       "observed": {
         "status": 200,
-        "durationMs": 28.311,
+        "durationMs": 29.559,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
@@ -341,7 +341,8 @@
           "accessToken": "<redacted>",
           "accessTokenExpiresIn": "<redacted>",
           "allowedAssets": [
-            "sintel-widevine"
+            "sintel-widevine",
+            "local-cenc-clearkey"
           ]
         },
         "transportError": null
@@ -356,7 +357,7 @@
       "passed": true,
       "observed": {
         "status": 401,
-        "durationMs": 18.84,
+        "durationMs": 22.497,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
@@ -364,7 +365,7 @@
           "ok": false,
           "error": "INVALID_CREDENTIALS",
           "details": "Use usuario-permitido@tfm.local or usuario-denegado@tfm.local / demo123",
-          "timestamp": "2026-08-30T19:03:19.216Z"
+          "timestamp": "2026-08-31T10:38:38.135Z"
         },
         "transportError": null
       }
@@ -378,7 +379,7 @@
       "passed": true,
       "observed": {
         "status": 200,
-        "durationMs": 16.573,
+        "durationMs": 16.331,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
@@ -407,7 +408,7 @@
       "passed": true,
       "observed": {
         "status": 403,
-        "durationMs": 14.922,
+        "durationMs": 9.693,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
@@ -415,7 +416,7 @@
           "ok": false,
           "error": "ASSET_NOT_ALLOWED",
           "details": "Asset sintel-widevine is not in account entitlements",
-          "timestamp": "2026-08-30T19:03:19.247Z"
+          "timestamp": "2026-08-31T10:38:38.161Z"
         },
         "transportError": null
       }
@@ -429,17 +430,18 @@
       "passed": true,
       "observed": {
         "status": 201,
-        "durationMs": 14.889,
+        "durationMs": 9.705,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
         "body": {
           "ok": true,
           "session": {
-            "sessionId": "c13b9f12-6e73-49bc-96f6-f5e7171881a7",
+            "sessionId": "c3b187c7-cc83-4886-a117-bc312e88f6ce",
+            "clientInstanceId": "eval-instance-fase1-baseline",
             "assetId": "sintel-widevine",
-            "startedAt": "2026-08-30T19:03:19.262Z",
-            "lastHeartbeatAt": "2026-08-30T19:03:19.262Z",
+            "startedAt": "2026-08-31T10:38:38.170Z",
+            "lastHeartbeatAt": "2026-08-31T10:38:38.170Z",
             "status": "active"
           },
           "playbackToken": "<redacted>",
@@ -459,7 +461,7 @@
       "passed": true,
       "observed": {
         "status": 409,
-        "durationMs": 5.926,
+        "durationMs": 10.424,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
@@ -467,7 +469,7 @@
           "ok": false,
           "error": "CONCURRENCY_LIMIT",
           "details": "The account already has 1 active session(s)",
-          "timestamp": "2026-08-30T19:03:19.268Z"
+          "timestamp": "2026-08-31T10:38:38.179Z"
         },
         "transportError": null
       }
@@ -481,7 +483,7 @@
       "passed": true,
       "observed": {
         "status": 401,
-        "durationMs": 4.098,
+        "durationMs": 8.001,
         "headers": {},
         "body": null,
         "transportError": null
@@ -496,7 +498,7 @@
       "passed": true,
       "observed": {
         "status": 401,
-        "durationMs": 6.942,
+        "durationMs": 11.588,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
@@ -504,7 +506,7 @@
           "ok": false,
           "error": "UNAUTHORIZED",
           "details": "Invalid token signature",
-          "timestamp": "2026-08-30T19:03:19.279Z"
+          "timestamp": "2026-08-31T10:38:38.200Z"
         },
         "transportError": null
       }
@@ -518,7 +520,7 @@
       "passed": true,
       "observed": {
         "status": 409,
-        "durationMs": 6.26,
+        "durationMs": 7.501,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
@@ -526,7 +528,7 @@
           "ok": false,
           "error": "SESSION_MISMATCH",
           "details": "Manifest session id does not match the token",
-          "timestamp": "2026-08-30T19:03:19.286Z"
+          "timestamp": "2026-08-31T10:38:38.209Z"
         },
         "transportError": null
       }
@@ -540,7 +542,7 @@
       "passed": true,
       "observed": {
         "status": 403,
-        "durationMs": 22.25,
+        "durationMs": 18.89,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
@@ -548,7 +550,7 @@
           "ok": false,
           "error": "ASSET_MISMATCH",
           "details": "Manifest asset does not match the playback token",
-          "timestamp": "2026-08-30T19:03:19.309Z"
+          "timestamp": "2026-08-31T10:38:38.228Z"
         },
         "transportError": null
       }
@@ -562,10 +564,10 @@
       "passed": true,
       "observed": {
         "status": 200,
-        "durationMs": 257.293,
+        "durationMs": 443.787,
         "headers": {
           "content-type": "application/dash+xml; charset=utf-8",
-          "x-playback-session-id": "c13b9f12-6e73-49bc-96f6-f5e7171881a7",
+          "x-playback-session-id": "c3b187c7-cc83-4886-a117-bc312e88f6ce",
           "x-asset-id": "sintel-widevine"
         },
         "body": {
@@ -584,7 +586,7 @@
       "passed": true,
       "observed": {
         "status": 401,
-        "durationMs": 5.927,
+        "durationMs": 4.278,
         "headers": {},
         "body": null,
         "transportError": null
@@ -599,7 +601,7 @@
       "passed": true,
       "observed": {
         "status": 403,
-        "durationMs": 8.889,
+        "durationMs": 16.763,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
@@ -607,7 +609,7 @@
           "ok": false,
           "error": "CONTENT_NOT_ALLOWED_FOR_ASSET",
           "details": "Content path is not assigned to asset sintel-widevine",
-          "timestamp": "2026-08-30T19:03:19.580Z"
+          "timestamp": "2026-08-31T10:38:38.693Z"
         },
         "transportError": null
       }
@@ -621,7 +623,7 @@
       "passed": true,
       "observed": {
         "status": 401,
-        "durationMs": 5.054,
+        "durationMs": 27.646,
         "headers": {},
         "body": null,
         "transportError": null
@@ -636,7 +638,7 @@
       "passed": true,
       "observed": {
         "status": 409,
-        "durationMs": 9.004,
+        "durationMs": 18.724,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
@@ -644,7 +646,7 @@
           "ok": false,
           "error": "SESSION_MISMATCH",
           "details": "Header session id does not match the playback token",
-          "timestamp": "2026-08-30T19:03:19.595Z"
+          "timestamp": "2026-08-31T10:38:38.740Z"
         },
         "transportError": null
       }
@@ -658,7 +660,7 @@
       "passed": true,
       "observed": {
         "status": 401,
-        "durationMs": 6.171,
+        "durationMs": 12.947,
         "headers": {},
         "body": null,
         "transportError": null
@@ -673,7 +675,7 @@
       "passed": true,
       "observed": {
         "status": 404,
-        "durationMs": 16.071,
+        "durationMs": 15.939,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
@@ -681,7 +683,7 @@
           "ok": false,
           "error": "NOT_FOUND",
           "details": "No route matched POST /license/no_auth",
-          "timestamp": "2026-08-30T19:03:19.618Z"
+          "timestamp": "2026-08-31T10:38:38.769Z"
         },
         "transportError": null
       }
@@ -695,15 +697,15 @@
       "passed": true,
       "observed": {
         "status": 200,
-        "durationMs": 5.169,
+        "durationMs": 7.058,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
         "body": {
           "ok": true,
-          "sessionId": "c13b9f12-6e73-49bc-96f6-f5e7171881a7",
+          "sessionId": "c3b187c7-cc83-4886-a117-bc312e88f6ce",
           "status": "stopped",
-          "stoppedAt": "2026-08-30T19:03:19.623Z"
+          "stoppedAt": "2026-08-31T10:38:38.776Z"
         },
         "transportError": null
       }
@@ -717,7 +719,7 @@
       "passed": true,
       "observed": {
         "status": 401,
-        "durationMs": 26.642,
+        "durationMs": 7.804,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
@@ -725,7 +727,7 @@
           "ok": false,
           "error": "UNAUTHORIZED",
           "details": "Playback session is not active",
-          "timestamp": "2026-08-30T19:03:19.649Z"
+          "timestamp": "2026-08-31T10:38:38.783Z"
         },
         "transportError": null
       }
@@ -739,7 +741,7 @@
       "passed": true,
       "observed": {
         "status": 200,
-        "durationMs": 22.616,
+        "durationMs": 6.97,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
@@ -747,7 +749,7 @@
           "ok": true,
           "service": "control-plane-phase2",
           "activeSessionKeys": 0,
-          "timestamp": "2026-08-30T19:03:19.929Z"
+          "timestamp": "2026-08-31T10:38:39.089Z"
         },
         "transportError": null
       }
@@ -761,7 +763,7 @@
       "passed": true,
       "observed": {
         "status": 200,
-        "durationMs": 38.385,
+        "durationMs": 15.425,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
@@ -781,13 +783,14 @@
           "accessToken": "<redacted>",
           "accessTokenExpiresIn": "<redacted>",
           "allowedAssets": [
-            "sintel-widevine"
+            "sintel-widevine",
+            "local-cenc-clearkey"
           ],
           "risk": {
             "accountId": "acc-allowed-001",
             "score": 0,
             "reasons": [],
-            "lastUpdatedAt": "2026-08-30T19:03:19.965Z"
+            "lastUpdatedAt": "2026-08-31T10:38:39.100Z"
           }
         },
         "transportError": null
@@ -802,7 +805,7 @@
       "passed": true,
       "observed": {
         "status": 401,
-        "durationMs": 25.47,
+        "durationMs": 8.929,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
@@ -810,7 +813,7 @@
           "ok": false,
           "error": "INVALID_CREDENTIALS",
           "details": "Use usuario-permitido@tfm.local or usuario-denegado@tfm.local / demo123",
-          "timestamp": "2026-08-30T19:03:19.993Z"
+          "timestamp": "2026-08-31T10:38:39.114Z"
         },
         "transportError": null
       }
@@ -824,7 +827,7 @@
       "passed": true,
       "observed": {
         "status": 200,
-        "durationMs": 10.212,
+        "durationMs": 12.125,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
@@ -847,7 +850,7 @@
             "accountId": "acc-denied-001",
             "score": 0,
             "reasons": [],
-            "lastUpdatedAt": "2026-08-30T19:03:20.001Z"
+            "lastUpdatedAt": "2026-08-31T10:38:39.123Z"
           }
         },
         "transportError": null
@@ -862,7 +865,7 @@
       "passed": true,
       "observed": {
         "status": 403,
-        "durationMs": 6.859,
+        "durationMs": 10.985,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
@@ -870,7 +873,7 @@
           "ok": false,
           "error": "ASSET_NOT_ALLOWED",
           "details": "Asset sintel-widevine is not in account entitlements",
-          "timestamp": "2026-08-30T19:03:20.010Z"
+          "timestamp": "2026-08-31T10:38:39.136Z"
         },
         "transportError": null
       }
@@ -884,7 +887,7 @@
       "passed": true,
       "observed": {
         "status": 403,
-        "durationMs": 5.448,
+        "durationMs": 8.598,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
@@ -892,7 +895,7 @@
           "ok": false,
           "error": "FORBIDDEN",
           "details": "Admin role required",
-          "timestamp": "2026-08-30T19:03:20.016Z"
+          "timestamp": "2026-08-31T10:38:39.145Z"
         },
         "transportError": null
       }
@@ -906,17 +909,18 @@
       "passed": true,
       "observed": {
         "status": 201,
-        "durationMs": 26.196,
+        "durationMs": 20.401,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
         "body": {
           "ok": true,
           "session": {
-            "sessionId": "7e123d60-f06a-4bec-ac02-b9a89dfd5abb",
+            "sessionId": "c7aea5fc-5804-42ff-8d33-80ab45c740c1",
+            "clientInstanceId": "eval-instance-fase2-baseline",
             "assetId": "sintel-widevine",
-            "startedAt": "2026-08-30T19:03:20.038Z",
-            "lastHeartbeatAt": "2026-08-30T19:03:20.038Z",
+            "startedAt": "2026-08-31T10:38:39.159Z",
+            "lastHeartbeatAt": "2026-08-31T10:38:39.159Z",
             "status": "active"
           },
           "playbackToken": "<redacted>",
@@ -927,7 +931,7 @@
             "accountId": "acc-allowed-001",
             "score": 0,
             "reasons": [],
-            "lastUpdatedAt": "2026-08-30T19:03:19.965Z"
+            "lastUpdatedAt": "2026-08-31T10:38:39.100Z"
           }
         },
         "transportError": null
@@ -942,7 +946,7 @@
       "passed": true,
       "observed": {
         "status": 409,
-        "durationMs": 29.771,
+        "durationMs": 27.537,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
@@ -950,7 +954,7 @@
           "ok": false,
           "error": "CONCURRENCY_LIMIT",
           "details": "The account already has 1 active session(s)",
-          "timestamp": "2026-08-30T19:03:20.072Z"
+          "timestamp": "2026-08-31T10:38:39.194Z"
         },
         "transportError": null
       }
@@ -964,7 +968,7 @@
       "passed": true,
       "observed": {
         "status": 401,
-        "durationMs": 23.522,
+        "durationMs": 5.012,
         "headers": {},
         "body": null,
         "transportError": null
@@ -979,7 +983,7 @@
       "passed": true,
       "observed": {
         "status": 401,
-        "durationMs": 6.403,
+        "durationMs": 17.371,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
@@ -987,7 +991,7 @@
           "ok": false,
           "error": "UNAUTHORIZED",
           "details": "Invalid token signature",
-          "timestamp": "2026-08-30T19:03:20.102Z"
+          "timestamp": "2026-08-31T10:38:39.217Z"
         },
         "transportError": null
       }
@@ -1001,7 +1005,7 @@
       "passed": true,
       "observed": {
         "status": 409,
-        "durationMs": 26.462,
+        "durationMs": 7.669,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
@@ -1009,7 +1013,7 @@
           "ok": false,
           "error": "SESSION_MISMATCH",
           "details": "Manifest session id does not match the token",
-          "timestamp": "2026-08-30T19:03:20.129Z"
+          "timestamp": "2026-08-31T10:38:39.225Z"
         },
         "transportError": null
       }
@@ -1023,7 +1027,7 @@
       "passed": true,
       "observed": {
         "status": 403,
-        "durationMs": 6.961,
+        "durationMs": 26.509,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
@@ -1031,7 +1035,7 @@
           "ok": false,
           "error": "ASSET_MISMATCH",
           "details": "Manifest asset does not match the playback token",
-          "timestamp": "2026-08-30T19:03:20.136Z"
+          "timestamp": "2026-08-31T10:38:39.251Z"
         },
         "transportError": null
       }
@@ -1045,10 +1049,10 @@
       "passed": true,
       "observed": {
         "status": 200,
-        "durationMs": 193.322,
+        "durationMs": 240.846,
         "headers": {
           "content-type": "application/dash+xml; charset=utf-8",
-          "x-playback-session-id": "7e123d60-f06a-4bec-ac02-b9a89dfd5abb",
+          "x-playback-session-id": "c7aea5fc-5804-42ff-8d33-80ab45c740c1",
           "x-asset-id": "sintel-widevine",
           "x-risk-score": "0"
         },
@@ -1068,7 +1072,7 @@
       "passed": true,
       "observed": {
         "status": 401,
-        "durationMs": 14.007,
+        "durationMs": 19.531,
         "headers": {},
         "body": null,
         "transportError": null
@@ -1083,7 +1087,7 @@
       "passed": true,
       "observed": {
         "status": 403,
-        "durationMs": 6.928,
+        "durationMs": 19.739,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
@@ -1091,7 +1095,7 @@
           "ok": false,
           "error": "CONTENT_NOT_ALLOWED_FOR_ASSET",
           "details": "Content path is not assigned to asset sintel-widevine",
-          "timestamp": "2026-08-30T19:03:20.350Z"
+          "timestamp": "2026-08-31T10:38:39.532Z"
         },
         "transportError": null
       }
@@ -1105,7 +1109,7 @@
       "passed": true,
       "observed": {
         "status": 401,
-        "durationMs": 3.444,
+        "durationMs": 3.333,
         "headers": {},
         "body": null,
         "transportError": null
@@ -1120,7 +1124,7 @@
       "passed": true,
       "observed": {
         "status": 409,
-        "durationMs": 26.208,
+        "durationMs": 26.191,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
@@ -1128,7 +1132,7 @@
           "ok": false,
           "error": "SESSION_MISMATCH",
           "details": "Header session id does not match the playback token",
-          "timestamp": "2026-08-30T19:03:20.380Z"
+          "timestamp": "2026-08-31T10:38:39.562Z"
         },
         "transportError": null
       }
@@ -1142,7 +1146,7 @@
       "passed": true,
       "observed": {
         "status": 401,
-        "durationMs": 4.32,
+        "durationMs": 12.036,
         "headers": {},
         "body": null,
         "transportError": null
@@ -1157,7 +1161,7 @@
       "passed": true,
       "observed": {
         "status": 404,
-        "durationMs": 23.804,
+        "durationMs": 17.965,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
@@ -1165,7 +1169,7 @@
           "ok": false,
           "error": "NOT_FOUND",
           "details": "No route matched POST /license/no_auth",
-          "timestamp": "2026-08-30T19:03:20.408Z"
+          "timestamp": "2026-08-31T10:38:39.592Z"
         },
         "transportError": null
       }
@@ -1179,15 +1183,15 @@
       "passed": true,
       "observed": {
         "status": 200,
-        "durationMs": 23.003,
+        "durationMs": 18.637,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
         "body": {
           "ok": true,
-          "sessionId": "7e123d60-f06a-4bec-ac02-b9a89dfd5abb",
+          "sessionId": "c7aea5fc-5804-42ff-8d33-80ab45c740c1",
           "status": "stopped",
-          "stoppedAt": "2026-08-30T19:03:20.426Z"
+          "stoppedAt": "2026-08-31T10:38:39.609Z"
         },
         "transportError": null
       }
@@ -1201,7 +1205,7 @@
       "passed": true,
       "observed": {
         "status": 401,
-        "durationMs": 24.667,
+        "durationMs": 29.247,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
@@ -1209,7 +1213,7 @@
           "ok": false,
           "error": "UNAUTHORIZED",
           "details": "Playback session is not active",
-          "timestamp": "2026-08-30T19:03:20.456Z"
+          "timestamp": "2026-08-31T10:38:39.640Z"
         },
         "transportError": null
       }
@@ -1271,13 +1275,13 @@
       "expected": "AUTO_BAN:REPEATED_CONCURRENCY_VIOLATION",
       "passed": true,
       "observed": {
-        "id": "397e3e5e-1c8c-476c-bdbf-7b8a2e872ba4",
+        "id": "b62d5a52-f966-4ad4-9508-d94dad524c81",
         "type": "account",
         "subjectId": "acc-allowed-001",
         "reason": "AUTO_BAN:REPEATED_CONCURRENCY_VIOLATION",
         "createdBy": "system",
-        "createdAt": "2026-08-30T19:03:20.948Z",
-        "expiresAt": "2026-08-30T19:33:20.948Z"
+        "createdAt": "2026-08-31T10:38:40.080Z",
+        "expiresAt": "2026-08-31T11:08:40.080Z"
       }
     },
     {
@@ -1289,15 +1293,15 @@
       "passed": true,
       "observed": {
         "status": 401,
-        "durationMs": 20.64,
+        "durationMs": 5.923,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
         "body": {
           "ok": false,
           "error": "UNAUTHORIZED",
-          "details": "Account banned until 2026-08-30T19:33:20.948Z",
-          "timestamp": "2026-08-30T19:03:20.999Z"
+          "details": "Account banned until 2026-08-31T11:08:40.080Z",
+          "timestamp": "2026-08-31T10:38:40.127Z"
         },
         "transportError": null
       }
@@ -1311,7 +1315,7 @@
       "passed": true,
       "observed": {
         "status": 200,
-        "durationMs": 16.807,
+        "durationMs": 29.817,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
@@ -1332,23 +1336,23 @@
       "passed": true,
       "observed": {
         "status": 200,
-        "durationMs": 32.409,
+        "durationMs": 31.953,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
         "body": {
           "ok": true,
-          "sessionId": "7f334d7c-64da-4baa-a47d-5a99a58be327",
+          "sessionId": "fb97d7bc-96f6-4378-9c90-07d3c036ce0f",
           "playbackToken": "<redacted>",
           "playbackTokenExpiresIn": "<redacted>",
-          "lastHeartbeatAt": "2026-08-30T19:03:21.045Z",
+          "lastHeartbeatAt": "2026-08-31T10:38:40.186Z",
           "risk": {
             "accountId": "acc-allowed-001",
             "score": 100,
             "reasons": [
               "REPEATED_CONCURRENCY_VIOLATION"
             ],
-            "lastUpdatedAt": "2026-08-30T19:03:20.947Z"
+            "lastUpdatedAt": "2026-08-31T10:38:40.079Z"
           }
         },
         "transportError": null
@@ -1382,13 +1386,13 @@
       "expected": "AUTH_FAILURE_BURST",
       "passed": true,
       "observed": {
-        "id": "9eab3bb9-3e9f-4b13-b26f-a3e3804b3eb4",
+        "id": "2e5d56ef-964c-4003-b153-15978fba9d33",
         "type": "device",
         "subjectId": "eval-fase2-device-ban",
         "reason": "AUTH_FAILURE_BURST",
         "createdBy": "system",
-        "createdAt": "2026-08-30T19:03:21.524Z",
-        "expiresAt": "2026-08-30T19:18:21.524Z"
+        "createdAt": "2026-08-31T10:38:40.674Z",
+        "expiresAt": "2026-08-31T10:53:40.674Z"
       }
     },
     {
@@ -1400,15 +1404,15 @@
       "passed": true,
       "observed": {
         "status": 401,
-        "durationMs": 26.549,
+        "durationMs": 30.285,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
         "body": {
           "ok": false,
           "error": "UNAUTHORIZED",
-          "details": "Device banned until 2026-08-30T19:18:21.524Z",
-          "timestamp": "2026-08-30T19:03:21.585Z"
+          "details": "Device banned until 2026-08-31T10:53:40.674Z",
+          "timestamp": "2026-08-31T10:38:40.731Z"
         },
         "transportError": null
       }
@@ -1422,7 +1426,7 @@
       "passed": true,
       "observed": {
         "status": 200,
-        "durationMs": 17.188,
+        "durationMs": 29.91,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
@@ -1443,21 +1447,21 @@
       "passed": true,
       "observed": {
         "status": 200,
-        "durationMs": 33.763,
+        "durationMs": 17.755,
         "headers": {
           "content-type": "application/json; charset=utf-8"
         },
         "body": {
           "ok": true,
-          "sessionId": "9cd86249-32d8-4db0-a039-6a85ea01d1f8",
+          "sessionId": "eb6b4886-9eab-4966-bc35-103ad31cdf2e",
           "playbackToken": "<redacted>",
           "playbackTokenExpiresIn": "<redacted>",
-          "lastHeartbeatAt": "2026-08-30T19:03:21.632Z",
+          "lastHeartbeatAt": "2026-08-31T10:38:40.777Z",
           "risk": {
             "accountId": "acc-allowed-001",
             "score": 0,
             "reasons": [],
-            "lastUpdatedAt": "2026-08-30T19:03:21.332Z"
+            "lastUpdatedAt": "2026-08-31T10:38:40.503Z"
           }
         },
         "transportError": null

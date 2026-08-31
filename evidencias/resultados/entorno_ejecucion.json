@@ -1,30 +1,84 @@
 {
-  "generatedAt": "2026-08-30T19:10:15.365635Z",
+  "generatedAt": "2026-08-31T13:25:29.099528Z",
   "host": {
     "platform": "Windows-10-10.0.26200-SP0",
     "processor": "AMD64 Family 23 Model 96 Stepping 1, AuthenticAMD",
     "logicalCpuCount": 16
   },
   "dockerVersion": "\"29.7.2\"",
-  "gitRevision": "4db7a8db8b0075322fc53bf4fd922b0f768b9954",
+  "gitRevision": "5bdcb5e9c2c639f95e46a3cccf8ff5c15fe90fd6",
   "containers": [
     {
       "Command": "\"docker-entrypoint.sâ€¦\"",
-      "CreatedAt": "2026-08-30 21:03:08 +0200 CEST",
+      "CreatedAt": "2026-08-31 12:51:10 +0200 CEST",
       "HealthStatus": "none",
-      "ID": "240d8c85444a",
+      "ID": "5e11effde93e",
+      "Image": "fase2-hardening-key-leak-lab",
+      "Labels": "com.docker.compose.config-hash=8d1dc8222e3a86bace61e8055c9be1b4848df35fd355c3550e88802c810bfa42,com.docker.compose.container-number=1,com.docker.compose.depends_on=cdn:service_started:false,com.docker.compose.image=sha256:3d51e673bd6ccd394602c154a5b48c536eff770bcc4679d25f495fb6b38f5037,com.docker.compose.oneoff=False,com.docker.compose.project.config_files=C:\\Users\\yisus\\Dropbox\\Mi PC (DESKTOP-L7CCKJE)\\Documents\\GitHub\\TFM\\fase2-hardening\\docker-compose.yml,com.docker.compose.project.working_dir=C:\\Users\\yisus\\Dropbox\\Mi PC (DESKTOP-L7CCKJE)\\Documents\\GitHub\\TFM\\fase2-hardening,com.docker.compose.project=fase2-hardening,com.docker.compose.replace=tfm-fase2-key-leak-lab,com.docker.compose.service=key-leak-lab,com.docker.compose.version=5.4.0,desktop.docker.io/ports.scheme=v2,desktop.docker.io/ports/8080/tcp=:9402",
+      "LocalVolumes": "0",
+      "Mounts": "",
+      "Names": "tfm-fase2-key-leak-lab",
+      "Networks": "tfm-fase2-net",
+      "Platform": null,
+      "Ports": "0.0.0.0:9402->8080/tcp, [::]:9402->8080/tcp",
+      "RunningFor": "3 hours ago",
+      "Size": "528B (virtual 143MB)",
+      "State": "running",
+      "Status": "Up 3 hours"
+    },
+    {
+      "Command": "\"docker-entrypoint.sâ€¦\"",
+      "CreatedAt": "2026-08-31 12:49:16 +0200 CEST",
+      "HealthStatus": "none",
+      "ID": "c0b1099deff6",
+      "Image": "fase1-hardening-key-leak-lab",
+      "Labels": "com.docker.compose.config-hash=061fc5f92e3b2492998326b4c87d261f6cc464c5818020f2500ec8e305ac237a,com.docker.compose.container-number=1,com.docker.compose.depends_on=cdn:service_started:false,com.docker.compose.image=sha256:bc34335a9065770192538deef6f62f0d03579669d9d824859628404718dd0e02,com.docker.compose.oneoff=False,com.docker.compose.project.config_files=C:\\Users\\yisus\\Dropbox\\Mi PC (DESKTOP-L7CCKJE)\\Documents\\GitHub\\TFM\\fase1-hardening\\docker-compose.yml,com.docker.compose.project.working_dir=C:\\Users\\yisus\\Dropbox\\Mi PC (DESKTOP-L7CCKJE)\\Documents\\GitHub\\TFM\\fase1-hardening,com.docker.compose.project=fase1-hardening,com.docker.compose.replace=tfm-fase1-key-leak-lab,com.docker.compose.service=key-leak-lab,com.docker.compose.version=5.4.0,desktop.docker.io/ports.scheme=v2,desktop.docker.io/ports/8080/tcp=:9302",
+      "LocalVolumes": "0",
+      "Mounts": "",
+      "Names": "tfm-fase1-key-leak-lab",
+      "Networks": "tfm-fase1-net",
+      "Platform": null,
+      "Ports": "0.0.0.0:9302->8080/tcp, [::]:9302->8080/tcp",
+      "RunningFor": "3 hours ago",
+      "Size": "528B (virtual 143MB)",
+      "State": "running",
+      "Status": "Up 3 hours"
+    },
+    {
+      "Command": "\"docker-entrypoint.sâ€¦\"",
+      "CreatedAt": "2026-08-31 12:36:53 +0200 CEST",
+      "HealthStatus": "none",
+      "ID": "9457374b008b",
+      "Image": "fase1-hardening-control-plane",
+      "Labels": "com.docker.compose.config-hash=474056cccc7a2d459773c7c4276a5a82784d1cc40dc666a5e092fd11c5f28d5c,com.docker.compose.container-number=1,com.docker.compose.depends_on=,com.docker.compose.image=sha256:169a1d2abfdf63e9bb57478d638d25a0c9713923489d5a89a4dc1cfd50ded2db,com.docker.compose.oneoff=False,com.docker.compose.project.config_files=C:\\Users\\yisus\\Dropbox\\Mi PC (DESKTOP-L7CCKJE)\\Documents\\GitHub\\TFM\\fase1-hardening\\docker-compose.yml,com.docker.compose.project.working_dir=C:\\Users\\yisus\\Dropbox\\Mi PC (DESKTOP-L7CCKJE)\\Documents\\GitHub\\TFM\\fase1-hardening,com.docker.compose.project=fase1-hardening,com.docker.compose.replace=tfm-fase1-control-plane,com.docker.compose.service=control-plane,com.docker.compose.version=5.4.0,desktop.docker.io/ports.scheme=v2",
+      "LocalVolumes": "0",
+      "Mounts": "",
+      "Names": "tfm-fase1-control-plane",
+      "Networks": "tfm-fase1-net",
+      "Platform": null,
+      "Ports": "8080/tcp",
+      "RunningFor": "3 hours ago",
+      "Size": "12.6kB (virtual 143MB)",
+      "State": "running",
+      "Status": "Up 2 hours"
+    },
+    {
+      "Command": "\"docker-entrypoint.sâ€¦\"",
+      "CreatedAt": "2026-08-31 12:36:53 +0200 CEST",
+      "HealthStatus": "none",
+      "ID": "7f541f4d93bb",
       "Image": "fase2-hardening-control-plane",
-      "Labels": "com.docker.compose.config-hash=d3c5aeeac1338d44950fe28e4a713b3c2b2e16ac3ef2d7ae605a5d6ef092833d,com.docker.compose.container-number=1,com.docker.compose.depends_on=redis:service_started:false,com.docker.compose.image=sha256:39e8c007d86a96652b24eb9a6a02bf740ee56087cc3b15920280d0d427f184d7,com.docker.compose.oneoff=False,com.docker.compose.project.config_files=C:\\Users\\yisus\\Dropbox\\Mi PC (DESKTOP-L7CCKJE)\\Documents\\GitHub\\TFM\\fase2-hardening\\docker-compose.yml,com.docker.compose.project.working_dir=C:\\Users\\yisus\\Dropbox\\Mi PC (DESKTOP-L7CCKJE)\\Documents\\GitHub\\TFM\\fase2-hardening,com.docker.compose.project=fase2-hardening,com.docker.compose.replace=tfm-fase2-control-plane,com.docker.compose.service=control-plane,com.docker.compose.version=5.4.0,desktop.docker.io/ports.scheme=v2",
+      "Labels": "com.docker.compose.config-hash=adfdf82e2758882b47933bb1c8c7820e7a6b79d4414ac00f51044b69feaeed69,com.docker.compose.container-number=1,com.docker.compose.depends_on=redis:service_started:false,com.docker.compose.image=sha256:8710fb0aafdcf342ef18ea978aca5d4e7c1a8ab87a44dc93dd3e5b187a712474,com.docker.compose.oneoff=False,com.docker.compose.project.config_files=C:\\Users\\yisus\\Dropbox\\Mi PC (DESKTOP-L7CCKJE)\\Documents\\GitHub\\TFM\\fase2-hardening\\docker-compose.yml,com.docker.compose.project.working_dir=C:\\Users\\yisus\\Dropbox\\Mi PC (DESKTOP-L7CCKJE)\\Documents\\GitHub\\TFM\\fase2-hardening,com.docker.compose.project=fase2-hardening,com.docker.compose.replace=tfm-fase2-control-plane,com.docker.compose.service=control-plane,com.docker.compose.version=5.4.0,desktop.docker.io/ports.scheme=v2",
       "LocalVolumes": "0",
       "Mounts": "",
       "Names": "tfm-fase2-control-plane",
       "Networks": "tfm-fase2-net",
       "Platform": null,
       "Ports": "8080/tcp",
-      "RunningFor": "7 minutes ago",
+      "RunningFor": "3 hours ago",
       "Size": "528B (virtual 146MB)",
       "State": "running",
-      "Status": "Up 7 minutes"
+      "Status": "Up 3 hours"
     },
     {
       "Command": "\"/docker-entrypoint.â€¦\"",
@@ -39,10 +93,10 @@
       "Networks": "tfm-fase2-net",
       "Platform": null,
       "Ports": "0.0.0.0:9401->80/tcp, [::]:9401->80/tcp",
-      "RunningFor": "2 hours ago",
+      "RunningFor": "20 hours ago",
       "Size": "1.09kB (virtual 48.2MB)",
       "State": "running",
-      "Status": "Up 19 minutes"
+      "Status": "Up 19 hours"
     },
     {
       "Command": "\"docker-entrypoint.sâ€¦\"",
@@ -57,10 +111,10 @@
       "Networks": "tfm-fase2-net",
       "Platform": null,
       "Ports": "8080/tcp",
-      "RunningFor": "2 hours ago",
+      "RunningFor": "20 hours ago",
       "Size": "2.55kB (virtual 143MB)",
       "State": "running",
-      "Status": "Up 19 minutes"
+      "Status": "Up 19 hours"
     },
     {
       "Command": "\"/docker-entrypoint.â€¦\"",
@@ -75,28 +129,10 @@
       "Networks": "tfm-fase1-net",
       "Platform": null,
       "Ports": "0.0.0.0:9301->80/tcp, [::]:9301->80/tcp",
-      "RunningFor": "2 hours ago",
+      "RunningFor": "20 hours ago",
       "Size": "1.09kB (virtual 48.2MB)",
       "State": "running",
-      "Status": "Up 2 hours"
-    },
-    {
-      "Command": "\"docker-entrypoint.sâ€¦\"",
-      "CreatedAt": "2026-08-30 19:39:34 +0200 CEST",
-      "HealthStatus": "none",
-      "ID": "7bd091df898e",
-      "Image": "fase1-hardening-control-plane",
-      "Labels": "com.docker.compose.config-hash=474056cccc7a2d459773c7c4276a5a82784d1cc40dc666a5e092fd11c5f28d5c,com.docker.compose.container-number=1,com.docker.compose.depends_on=,com.docker.compose.image=sha256:1fc014effb6e2277acd46f23569ce2421fc2f2127d411d30a203bbe4b10a568c,com.docker.compose.oneoff=False,com.docker.compose.project.config_files=C:\\Users\\yisus\\Dropbox\\Mi PC (DESKTOP-L7CCKJE)\\Documents\\GitHub\\TFM\\fase1-hardening\\docker-compose.yml,com.docker.compose.project.working_dir=C:\\Users\\yisus\\Dropbox\\Mi PC (DESKTOP-L7CCKJE)\\Documents\\GitHub\\TFM\\fase1-hardening,com.docker.compose.project=fase1-hardening,com.docker.compose.replace=tfm-fase1-control-plane,com.docker.compose.service=control-plane,com.docker.compose.version=5.4.0,desktop.docker.io/ports.scheme=v2",
-      "LocalVolumes": "0",
-      "Mounts": "",
-      "Names": "tfm-fase1-control-plane",
-      "Networks": "tfm-fase1-net",
-      "Platform": null,
-      "Ports": "8080/tcp",
-      "RunningFor": "2 hours ago",
-      "Size": "8.6kB (virtual 143MB)",
-      "State": "running",
-      "Status": "Up 5 minutes"
+      "Status": "Up 20 hours"
     },
     {
       "Command": "\"/usr/local/bin/dockâ€¦\"",
@@ -111,10 +147,10 @@
       "Networks": "tfm-fase2-net",
       "Platform": null,
       "Ports": "0.0.0.0:9180->80/tcp, [::]:9180->80/tcp",
-      "RunningFor": "2 hours ago",
+      "RunningFor": "20 hours ago",
       "Size": "84.3MB (virtual 465MB)",
       "State": "running",
-      "Status": "Up 19 minutes"
+      "Status": "Up 3 hours"
     },
     {
       "Command": "\"/usr/local/bin/dockâ€¦\"",
@@ -129,10 +165,10 @@
       "Networks": "tfm-fase1-net",
       "Platform": null,
       "Ports": "0.0.0.0:9080->80/tcp, [::]:9080->80/tcp",
-      "RunningFor": "2 hours ago",
+      "RunningFor": "20 hours ago",
       "Size": "84.3MB (virtual 465MB)",
       "State": "running",
-      "Status": "Up 2 hours"
+      "Status": "Up 3 hours"
     },
     {
       "Command": "\"/docker-entrypoint.â€¦\"",
@@ -147,10 +183,10 @@
       "Networks": "tfm-fase2-net",
       "Platform": null,
       "Ports": "0.0.0.0:9400->80/tcp, [::]:9400->80/tcp",
-      "RunningFor": "2 hours ago",
+      "RunningFor": "20 hours ago",
       "Size": "1.09kB (virtual 48.2MB)",
       "State": "running",
-      "Status": "Up 19 minutes"
+      "Status": "Up 19 hours"
     },
     {
       "Command": "\"/docker-entrypoint.â€¦\"",
@@ -165,10 +201,10 @@
       "Networks": "tfm-fase2-net",
       "Platform": null,
       "Ports": "80/tcp",
-      "RunningFor": "2 hours ago",
+      "RunningFor": "20 hours ago",
       "Size": "1.09kB (virtual 48.2MB)",
       "State": "running",
-      "Status": "Up 19 minutes"
+      "Status": "Up 19 hours"
     },
     {
       "Command": "\"docker-entrypoint.sâ€¦\"",
@@ -183,10 +219,10 @@
       "Networks": "tfm-fase2-net",
       "Platform": null,
       "Ports": "6379/tcp",
-      "RunningFor": "2 hours ago",
+      "RunningFor": "20 hours ago",
       "Size": "0B (virtual 39.1MB)",
       "State": "running",
-      "Status": "Up 19 minutes"
+      "Status": "Up 5 minutes"
     },
     {
       "Command": "\"/docker-entrypoint.â€¦\"",
@@ -201,10 +237,10 @@
       "Networks": "tfm-fase1-net",
       "Platform": null,
       "Ports": "0.0.0.0:9300->80/tcp, [::]:9300->80/tcp",
-      "RunningFor": "2 hours ago",
+      "RunningFor": "20 hours ago",
       "Size": "1.09kB (virtual 48.2MB)",
       "State": "running",
-      "Status": "Up 2 hours"
+      "Status": "Up 20 hours"
     },
     {
       "Command": "\"/docker-entrypoint.â€¦\"",
@@ -219,10 +255,10 @@
       "Networks": "tfm-fase1-net",
       "Platform": null,
       "Ports": "80/tcp",
-      "RunningFor": "2 hours ago",
+      "RunningFor": "20 hours ago",
       "Size": "1.09kB (virtual 48.2MB)",
       "State": "running",
-      "Status": "Up 2 hours"
+      "Status": "Up 20 hours"
     },
     {
       "Command": "\"docker-entrypoint.sâ€¦\"",
@@ -237,10 +273,10 @@
       "Networks": "tfm-fase1-net",
       "Platform": null,
       "Ports": "8080/tcp",
-      "RunningFor": "2 hours ago",
+      "RunningFor": "20 hours ago",
       "Size": "528B (virtual 143MB)",
       "State": "running",
-      "Status": "Up 2 hours"
+      "Status": "Up 20 hours"
     },
     {
       "Command": "\"/usr/local/bin/dockâ€¦\"",
@@ -255,10 +291,10 @@
       "Networks": "tfm-ott-net",
       "Platform": null,
       "Ports": "0.0.0.0:8080->80/tcp, [::]:8080->80/tcp",
-      "RunningFor": "4 days ago",
+      "RunningFor": "5 days ago",
       "Size": "84.4MB (virtual 465MB)",
       "State": "running",
-      "Status": "Up 16 minutes"
+      "Status": "Up 19 hours"
     },
     {
       "Command": "\"docker-entrypoint.sâ€¦\"",
@@ -274,9 +310,9 @@
       "Platform": null,
       "Ports": "0.0.0.0:8082->8080/tcp, [::]:8082->8080/tcp",
       "RunningFor": "2 months ago",
-      "Size": "14.2kB (virtual 143MB)",
+      "Size": "17.9kB (virtual 143MB)",
       "State": "running",
-      "Status": "Up 6 minutes"
+      "Status": "Up 3 hours"
     },
     {
       "Command": "\"/docker-entrypoint.â€¦\"",
@@ -294,7 +330,7 @@
       "RunningFor": "2 months ago",
       "Size": "1.09kB (virtual 48.2MB)",
       "State": "running",
-      "Status": "Up 16 minutes"
+      "Status": "Up 19 hours"
     },
     {
       "Command": "\"/docker-entrypoint.â€¦\"",
@@ -312,7 +348,7 @@
       "RunningFor": "2 months ago",
       "Size": "1.09kB (virtual 48.2MB)",
       "State": "running",
-      "Status": "Up 16 minutes"
+      "Status": "Up 19 hours"
     },
     {
       "Command": "\"/docker-entrypoint.â€¦\"",
@@ -330,7 +366,7 @@
       "RunningFor": "2 months ago",
       "Size": "1.09kB (virtual 48.2MB)",
       "State": "running",
-      "Status": "Up 16 minutes"
+      "Status": "Up 19 hours"
     },
     {
       "Command": "\"/docker-entrypoint.â€¦\"",
@@ -348,7 +384,7 @@
       "RunningFor": "2 months ago",
       "Size": "1.09kB (virtual 48.2MB)",
       "State": "running",
-      "Status": "Up 16 minutes"
+      "Status": "Up 19 hours"
     },
     {
       "Command": "\"/docker-entrypoint.â€¦\"",
@@ -366,19 +402,52 @@
       "RunningFor": "2 months ago",
       "Size": "1.09kB (virtual 48.2MB)",
       "State": "running",
-      "Status": "Up 16 minutes"
+      "Status": "Up 19 hours"
     }
   ],
   "pointInTimeStats": [
     {
-      "BlockIO": "4.01MB / 4.1kB",
+      "BlockIO": "4.58MB / 4.1kB",
       "CPUPerc": "0.00%",
-      "Container": "240d8c85444a156cdb846a36e25d7b956784a9a59c4836acae745e01abf60fa3",
-      "ID": "240d8c85444a",
-      "MemPerc": "0.50%",
-      "MemUsage": "38.52MiB / 7.467GiB",
+      "Container": "5e11effde93e8711c1456a50e90ba5b02ff27ada3ea9aaac50fabd053e64eef9",
+      "ID": "5e11effde93e",
+      "MemPerc": "0.42%",
+      "MemUsage": "32.38MiB / 7.467GiB",
+      "Name": "tfm-fase2-key-leak-lab",
+      "NetIO": "1.4MB / 1.24MB",
+      "PIDs": "22"
+    },
+    {
+      "BlockIO": "586kB / 4.1kB",
+      "CPUPerc": "0.00%",
+      "Container": "c0b1099deff62297600718e58f03d2292e5d1105c4ad68341149cffde0842a27",
+      "ID": "c0b1099deff6",
+      "MemPerc": "0.32%",
+      "MemUsage": "24.8MiB / 7.467GiB",
+      "Name": "tfm-fase1-key-leak-lab",
+      "NetIO": "2.12kB / 731B",
+      "PIDs": "22"
+    },
+    {
+      "BlockIO": "4.52MB / 4.1kB",
+      "CPUPerc": "0.00%",
+      "Container": "9457374b008b85976b9c47de921e1754110ef1dfd89d07fb81a43ad1fd3839e3",
+      "ID": "9457374b008b",
+      "MemPerc": "0.38%",
+      "MemUsage": "29.16MiB / 7.467GiB",
+      "Name": "tfm-fase1-control-plane",
+      "NetIO": "279kB / 277kB",
+      "PIDs": "22"
+    },
+    {
+      "BlockIO": "3.98MB / 4.1kB",
+      "CPUPerc": "0.00%",
+      "Container": "7f541f4d93bb1cb534e69db2af8648693bb7a6c5dc2830affbd912c82beea374",
+      "ID": "7f541f4d93bb",
+      "MemPerc": "0.51%",
+      "MemUsage": "38.83MiB / 7.467GiB",
       "Name": "tfm-fase2-control-plane",
-      "NetIO": "953kB / 1.03MB",
+      "NetIO": "8.44MB / 8.38MB",
       "PIDs": "22"
     },
     {
@@ -387,20 +456,20 @@
       "Container": "b2a06d1986cadbb266e6fa3f537c8457ce3648bbcdcf752219348238cbced3d8",
       "ID": "b2a06d1986ca",
       "MemPerc": "0.16%",
-      "MemUsage": "12.37MiB / 7.467GiB",
+      "MemUsage": "12.45MiB / 7.467GiB",
       "Name": "tfm-fase2-audit-lab",
-      "NetIO": "7.68kB / 24.3kB",
+      "NetIO": "12.6kB / 46.9kB",
       "PIDs": "17"
     },
     {
-      "BlockIO": "4.46MB / 4.1kB",
-      "CPUPerc": "0.01%",
+      "BlockIO": "4.47MB / 4.1kB",
+      "CPUPerc": "0.00%",
       "Container": "4a006715d7f9411c7b08ae946c5afcc6ee08517199cfd2c9de41fd45993d04cd",
       "ID": "4a006715d7f9",
       "MemPerc": "0.41%",
-      "MemUsage": "31.16MiB / 7.467GiB",
+      "MemUsage": "31.03MiB / 7.467GiB",
       "Name": "tfm-fase2-license-server",
-      "NetIO": "39.7kB / 29.5kB",
+      "NetIO": "62.3kB / 48.5kB",
       "PIDs": "22"
     },
     {
@@ -408,43 +477,32 @@
       "CPUPerc": "0.00%",
       "Container": "dc051cddcdab742152b852ef41cb82889acfe7f7ff2f6bd01da39df4218690ab",
       "ID": "dc051cddcdab",
-      "MemPerc": "0.16%",
-      "MemUsage": "12.61MiB / 7.467GiB",
+      "MemPerc": "0.17%",
+      "MemUsage": "12.83MiB / 7.467GiB",
       "Name": "tfm-fase1-audit-lab",
-      "NetIO": "14.9kB / 92.2kB",
+      "NetIO": "35.9kB / 122kB",
       "PIDs": "17"
     },
     {
-      "BlockIO": "0B / 4.1kB",
-      "CPUPerc": "0.02%",
-      "Container": "7bd091df898e31aaba71f35eb17f50eb63d95c7c84157c5dfc935f09e020b72a",
-      "ID": "7bd091df898e",
-      "MemPerc": "0.40%",
-      "MemUsage": "30.39MiB / 7.467GiB",
-      "Name": "tfm-fase1-control-plane",
-      "NetIO": "65.3kB / 36.7kB",
-      "PIDs": "22"
-    },
-    {
-      "BlockIO": "34.7MB / 91.3MB",
-      "CPUPerc": "0.10%",
+      "BlockIO": "94.2kB / 100MB",
+      "CPUPerc": "0.09%",
       "Container": "3f3ac2642c08da4638e2cba2a028d821da6fb687cc0af022c224429c749bde3d",
       "ID": "3f3ac2642c08",
-      "MemPerc": "1.26%",
-      "MemUsage": "96.08MiB / 7.467GiB",
+      "MemPerc": "1.30%",
+      "MemUsage": "99.37MiB / 7.467GiB",
       "Name": "tfm-fase2-cdn",
-      "NetIO": "1.12MB / 1.18MB",
+      "NetIO": "8.19MB / 8.3MB",
       "PIDs": "217"
     },
     {
-      "BlockIO": "35.1MB / 94.5MB",
-      "CPUPerc": "0.09%",
+      "BlockIO": "34MB / 93.3MB",
+      "CPUPerc": "0.07%",
       "Container": "f20a24c0f9fc684dd29ed80c9e0de429a805ef211b62eca42d79636b6db31341",
       "ID": "f20a24c0f9fc",
       "MemPerc": "1.26%",
-      "MemUsage": "96.17MiB / 7.467GiB",
+      "MemUsage": "96.11MiB / 7.467GiB",
       "Name": "tfm-fase1-cdn",
-      "NetIO": "970kB / 1.01MB",
+      "NetIO": "1.77MB / 1.8MB",
       "PIDs": "217"
     },
     {
@@ -453,9 +511,9 @@
       "Container": "5068ae1f6c46fc467f02003be2c0e42b488beb0a8788a009c7ce06588c5957f0",
       "ID": "5068ae1f6c46",
       "MemPerc": "0.16%",
-      "MemUsage": "12.28MiB / 7.467GiB",
+      "MemUsage": "12.38MiB / 7.467GiB",
       "Name": "tfm-fase2-client",
-      "NetIO": "6.95kB / 19.2kB",
+      "NetIO": "12.4kB / 71.4kB",
       "PIDs": "17"
     },
     {
@@ -463,21 +521,21 @@
       "CPUPerc": "0.00%",
       "Container": "2bd69673ccfac45f1e29577ac7b8376407104b2ceb5afb84139b9ec258e52cd7",
       "ID": "2bd69673ccfa",
-      "MemPerc": "0.16%",
-      "MemUsage": "12.18MiB / 7.467GiB",
+      "MemPerc": "0.17%",
+      "MemUsage": "12.7MiB / 7.467GiB",
       "Name": "tfm-fase2-origin",
-      "NetIO": "2.8kB / 126B",
+      "NetIO": "68.6kB / 5.56MB",
       "PIDs": "17"
     },
     {
-      "BlockIO": "13.3MB / 0B",
-      "CPUPerc": "0.53%",
+      "BlockIO": "1.88MB / 0B",
+      "CPUPerc": "0.58%",
       "Container": "d2b57de2ca316925803ec48932368502d0ed380eeea82777f323c7fe153cdb4f",
       "ID": "d2b57de2ca31",
-      "MemPerc": "0.07%",
-      "MemUsage": "5.129MiB / 7.467GiB",
+      "MemPerc": "0.05%",
+      "MemUsage": "3.605MiB / 7.467GiB",
       "Name": "tfm-fase2-redis",
-      "NetIO": "420kB / 383kB",
+      "NetIO": "9.02kB / 4.95kB",
       "PIDs": "6"
     },
     {
@@ -485,10 +543,10 @@
       "CPUPerc": "0.00%",
       "Container": "e526ed45152c26e18876c819d552d3273ea78dfb98d0153b599bb569df44668b",
       "ID": "e526ed45152c",
-      "MemPerc": "0.16%",
-      "MemUsage": "12.6MiB / 7.467GiB",
+      "MemPerc": "0.17%",
+      "MemUsage": "12.7MiB / 7.467GiB",
       "Name": "tfm-fase1-client",
-      "NetIO": "20kB / 107kB",
+      "NetIO": "25.9kB / 146kB",
       "PIDs": "17"
     },
     {
@@ -497,9 +555,9 @@
       "Container": "225de93797fe3d3f9e9c32313c62171d854b190b5b868023f8d41d75c8a765b7",
       "ID": "225de93797fe",
       "MemPerc": "0.16%",
-      "MemUsage": "12.25MiB / 7.467GiB",
+      "MemUsage": "12.45MiB / 7.467GiB",
       "Name": "tfm-fase1-origin",
-      "NetIO": "5.78kB / 2.58kB",
+      "NetIO": "22.4kB / 1.56MB",
       "PIDs": "17"
     },
     {
@@ -507,43 +565,43 @@
       "CPUPerc": "0.00%",
       "Container": "a3b74eb1965faa7459634a86bf7fc5f32d15e19a1869b4e745c1dbdc6968aa05",
       "ID": "a3b74eb1965f",
-      "MemPerc": "0.40%",
-      "MemUsage": "30.93MiB / 7.467GiB",
+      "MemPerc": "0.41%",
+      "MemUsage": "31.23MiB / 7.467GiB",
       "Name": "tfm-fase1-license-server",
-      "NetIO": "97.9kB / 72.8kB",
+      "NetIO": "101kB / 72.8kB",
       "PIDs": "22"
     },
     {
-      "BlockIO": "34.7MB / 87.1MB",
-      "CPUPerc": "0.07%",
+      "BlockIO": "38.2MB / 129MB",
+      "CPUPerc": "0.11%",
       "Container": "00e77d6f89e9b592e8a862a3097b790d5bd8ae2c4ffedb357c00a39671ab280a",
       "ID": "00e77d6f89e9",
-      "MemPerc": "1.25%",
-      "MemUsage": "95.33MiB / 7.467GiB",
+      "MemPerc": "1.26%",
+      "MemUsage": "96.13MiB / 7.467GiB",
       "Name": "tfm-cdn-varnish",
-      "NetIO": "114kB / 166kB",
+      "NetIO": "414kB / 616kB",
       "PIDs": "217"
     },
     {
-      "BlockIO": "0B / 4.1kB",
+      "BlockIO": "4.58MB / 4.1kB",
       "CPUPerc": "0.00%",
       "Container": "d4a3a8582465846538168a091746b111ff27496f2cfa4f385311a9f1228f060f",
       "ID": "d4a3a8582465",
-      "MemPerc": "0.32%",
-      "MemUsage": "24.75MiB / 7.467GiB",
+      "MemPerc": "0.37%",
+      "MemUsage": "28.56MiB / 7.467GiB",
       "Name": "tfm-license-server",
-      "NetIO": "18.8kB / 31.9kB",
-      "PIDs": "18"
+      "NetIO": "17.7kB / 8.55kB",
+      "PIDs": "22"
     },
     {
-      "BlockIO": "24.6kB / 4.1kB",
+      "BlockIO": "160kB / 4.1kB",
       "CPUPerc": "0.00%",
       "Container": "48dfeb06bf618805240ae418e89737c827c254c7032733ce6560125ae4b5c30c",
       "ID": "48dfeb06bf61",
       "MemPerc": "0.16%",
-      "MemUsage": "12.25MiB / 7.467GiB",
+      "MemUsage": "12.3MiB / 7.467GiB",
       "Name": "tfm-key-leak-demo",
-      "NetIO": "2.88kB / 126B",
+      "NetIO": "7.24kB / 6.93kB",
       "PIDs": "17"
     },
     {
@@ -554,7 +612,7 @@
       "MemPerc": "0.16%",
       "MemUsage": "12.31MiB / 7.467GiB",
       "Name": "tfm-external-player",
-      "NetIO": "2.64kB / 126B",
+      "NetIO": "3.43kB / 126B",
       "PIDs": "17"
     },
     {
@@ -565,7 +623,7 @@
       "MemPerc": "0.16%",
       "MemUsage": "12.25MiB / 7.467GiB",
       "Name": "tfm-drm-audit-lab",
-      "NetIO": "2.96kB / 126B",
+      "NetIO": "3.75kB / 126B",
       "PIDs": "17"
     },
     {
@@ -574,9 +632,9 @@
       "Container": "7cdea7b3d15839c4a722a65018eaf0a3bacc88a7c58da5531378496e83323c5a",
       "ID": "7cdea7b3d158",
       "MemPerc": "0.16%",
-      "MemUsage": "12.34MiB / 7.467GiB",
+      "MemUsage": "12.54MiB / 7.467GiB",
       "Name": "tfm-origin",
-      "NetIO": "5.11kB / 7.65kB",
+      "NetIO": "13.8kB / 292kB",
       "PIDs": "17"
     },
     {
@@ -587,7 +645,7 @@
       "MemPerc": "0.16%",
       "MemUsage": "12.25MiB / 7.467GiB",
       "Name": "tfm-ott-client",
-      "NetIO": "2.96kB / 126B",
+      "NetIO": "3.75kB / 126B",
       "PIDs": "17"
     }
   ]

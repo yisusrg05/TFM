@@ -18,8 +18,10 @@ PCAPS = [
     ROOT / "evidencias" / "fase0" / "pcap" / "fase0_02_bypass_widevine_no_auth.pcap",
     ROOT / "evidencias" / "fase0" / "pcap" / "fase0_03_clearkey_sin_licencia.pcap",
     ROOT / "evidencias" / "fase1" / "pcap" / "fase1_01_laboratorio_protegido.pcap",
+    ROOT / "evidencias" / "fase1" / "pcap" / "fase1_02_cdn_leeching.pcap",
     ROOT / "evidencias" / "fase2" / "pcap" / "fase2_01_concurrencia_y_ban.pcap",
     ROOT / "evidencias" / "fase2" / "pcap" / "fase2_02_fallos_auth_y_ban_device.pcap",
+    ROOT / "evidencias" / "fase2" / "pcap" / "fase2_03_cdn_leeching.pcap",
 ]
 
 

@@ -2,7 +2,7 @@
 
 \chapter{Implementación}
 
-Este capítulo describe la materialización de la arquitectura propuesta en Fase~1 y Fase~2. Ambas reutilizan el activo Widevine y los servicios de medios del entorno experimental, pero modifican de forma sustancial el camino de acceso: Varnish dirige las operaciones al \textit{control-plane}, el origen y el servidor de licencias dejan de publicarse en el anfitrión y el cliente necesita una sesión activa para cargar el manifiesto o solicitar una licencia.
+Este capítulo describe la materialización de la arquitectura propuesta en Fase~1 y Fase~2. Ambas reutilizan el activo Widevine y los servicios de medios del entorno experimental, pero modifican de forma sustancial el camino de acceso: Varnish dirige las operaciones al \textit{control-plane}, el origen y el servidor de licencias dejan de publicarse en el anfitrión y el cliente necesita una sesión activa para cargar el manifiesto, recuperar contenido local o solicitar una licencia.
 
 La exposición se centra en decisiones comprobables en el código y en la configuración desplegada. Los valores indicados corresponden al prototipo ejecutado; no se presentan como parámetros universales para un servicio OTT. Las pruebas comparativas, los códigos observados y el impacto de los controles se desarrollarán en el Capítulo~7.
 
@@ -10,7 +10,7 @@ La exposición se centra en decisiones comprobables en el código y en la config
 
 \subsection{Contenedores}
 
-Fase~1 se despliega mediante seis contenedores: Varnish, \textit{control-plane}, origen Nginx, servidor interno de licencias, cliente OTT y laboratorio de auditoría. Fase~2 conserva esos componentes y añade Redis, alcanzando siete servicios. Los clientes y laboratorios son aplicaciones estáticas servidas por Nginx; el plano de control y el proxy de licencia se implementan con Node.js y Express.
+Fase~1 se despliega mediante siete contenedores: Varnish, \textit{control-plane}, origen Nginx, servidor interno de licencias, cliente OTT, laboratorio de auditoría y laboratorio de CDN leeching. Fase~2 conserva esos componentes y añade Redis, alcanzando ocho servicios. El cliente y el laboratorio general son aplicaciones estáticas servidas por Nginx; el plano de control, el proxy de licencia y el laboratorio de CDN leeching se implementan con Node.js y Express.
 
 \begin{table}[H]
 \centering
@@ -26,12 +26,13 @@ Fase~1 se despliega mediante seis contenedores: Varnish, \textit{control-plane},
 \texttt{license-server} & Proxy interno del challenge hacia el servicio Widevine de pruebas. & 1 y 2 \\
 \texttt{ott-client} & Cliente oficial con Shaka Player, watermark y controles de sesión. & 1 y 2 \\
 \texttt{audit-lab} & Reproducción controlada, inspección de claims y escenarios reproducibles. & 1 y 2 \\
+\texttt{key-leak-lab} & Cliente externo controlado para Key Leak, CORS, concurrencia y reutilización contextual. & 1 y 2 \\
 \texttt{redis} & Sesiones, eventos, riesgo, contadores y bans sin persistencia en disco. & 2 \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-Las imágenes de Nginx y Redis proceden de versiones ligeras basadas en Alpine. Varnish utiliza la imagen 7.5 y reserva 256~MB para su almacenamiento en memoria. Los dos servicios Node.js se construyen desde los directorios de cada fase, lo que permite modificar su lógica sin mezclarla con la imagen de distribución.
+Las imágenes de Nginx y Redis proceden de versiones ligeras basadas en Alpine. Varnish utiliza la imagen 7.5 y reserva 256~MB para su almacenamiento en memoria. Los servicios Node.js se construyen desde los directorios correspondientes, lo que permite modificar su lógica sin mezclarla con la imagen de distribución.
 
 \subsection{Redes}
 
@@ -47,12 +48,12 @@ La Tabla~\ref{tab:puertos-fases} recoge las interfaces publicadas. Los puertos d
 \centering
 \caption{Interfaces publicadas en el anfitrión}
 \label{tab:puertos-fases}
-\begin{tabularx}{\textwidth}{p{0.18\textwidth}p{0.19\textwidth}p{0.19\textwidth}Y}
+\begin{tabularx}{\textwidth}{p{0.11\textwidth}p{0.17\textwidth}p{0.18\textwidth}p{0.20\textwidth}Y}
 \toprule
-\textbf{Fase} & \textbf{Cliente} & \textbf{Laboratorio} & \textbf{CDN / API} \\
+\textbf{Fase} & \textbf{Cliente} & \textbf{Lab. auditoría} & \textbf{Lab. CDN leeching} & \textbf{CDN / API} \\
 \midrule
-Fase~1 & \texttt{localhost:9300} & \texttt{localhost:9301} & \texttt{localhost:9080} \\
-Fase~2 & \texttt{localhost:9400} & \texttt{localhost:9401} & \texttt{localhost:9180} \\
+Fase~1 & \texttt{localhost:9300} & \texttt{localhost:9301} & \texttt{localhost:9302} & \texttt{localhost:9080} \\
+Fase~2 & \texttt{localhost:9400} & \texttt{localhost:9401} & \texttt{localhost:9402} & \texttt{localhost:9180} \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -67,7 +68,7 @@ El \textit{control-plane} es una aplicación Express que combina tres responsabi
 
 El manifiesto Widevine se obtiene desde la URL pública de Sintel únicamente después de validar la reproducción. El servicio inserta un elemento \texttt{BaseURL} con el directorio externo de los medios y devuelve el MPD como \texttt{application/dash+xml}. Esta reescritura permite que Shaka resuelva correctamente los segmentos aunque el MPD se haya solicitado a la URL local protegida. En consecuencia, el control implementado gobierna la entrega del manifiesto y el inicio del flujo; los segmentos del activo público continúan alojados fuera del laboratorio.
 
-Para el contenido local, \texttt{/content/*} elimina el prefijo público, contrasta la ruta con el activo del token y solo entonces reenvía la solicitud a Nginx. La respuesta conserva cabeceras como \texttt{Content-Type}, \texttt{Content-Length}, rangos y ETag. El mapeo explícito impide usar un token de un activo para recorrer otro prefijo del origen.
+Para el contenido local, el manifiesto CENC se obtiene del origen, se normaliza como una presentación estática de 60~s y se reescribe para que cada \texttt{BaseURL} apunte a \texttt{/content/dash-known-key/}. Esta ruta elimina el prefijo público, contrasta la ruta con el activo del token y solo entonces reenvía la solicitud a Nginx. La respuesta conserva cabeceras como \texttt{Content-Type}, \texttt{Content-Length}, rangos y ETag. El mapeo explícito impide usar un token de un activo para recorrer otro prefijo del origen y obliga a autorizar también las inicializaciones y los segmentos.
 
 La licencia sigue una cadena diferente. Express recibe el cuerpo binario con un límite de 2~MB, valida la sesión y envía el challenge a \texttt{/internal/license}. La llamada interna añade cuenta, dispositivo, activo y sesión como cabeceras. El servidor de licencias exige la presencia de ese contexto antes de reenviar el cuerpo al servicio CWIP de pruebas y marca la respuesta como no cacheable.
 
@@ -103,7 +104,7 @@ La ruta heredada \texttt{/license/no\_auth} no aparece en la lista permitida de 
 
 \subsection{\textit{Middleware} y perímetro}
 
-Varnish responde a las preflight CORS y solo admite los orígenes de cliente y laboratorio de su fase. Las cabeceras autorizadas se limitan a autorización, tipo de contenido, rangos, sesión y dispositivo. En Fase~2 se expone además \texttt{X-Risk-Score}. Todas las respuestas del frontal se marcan como \texttt{no-store}, puesto que el prototipo prioriza la consistencia de las decisiones sobre una evaluación de caché.
+Varnish responde a las preflight CORS y solo admite los orígenes de cliente y laboratorio de su fase. Las cabeceras autorizadas se limitan a autorización, tipo de contenido, rangos, sesión, dispositivo e instancia de cliente. En Fase~2 se expone además \texttt{X-Risk-Score}. Todas las respuestas del frontal se marcan como \texttt{no-store}, puesto que el prototipo prioriza la consistencia de las decisiones sobre una evaluación de caché. CORS limita un reproductor ejecutado desde un origen web ajeno, pero no autentica un cliente nativo o un backend; estos siguen dependiendo de la validación del token.
 
 Antes de enviar la petición al backend, Varnish comprueba que la ruta pertenezca al conjunto esperado y exige \texttt{Authorization} en las operaciones protegidas. Sobrescribe \texttt{X-Forwarded-For} con la IP de la conexión, añade \texttt{X-Request-Id} y fuerza el paso directo al backend. Express aplica a continuación la comprobación criptográfica y contextual; por tanto, la presencia de la cabecera en Varnish no se considera prueba suficiente de autorización.
 
@@ -113,7 +114,7 @@ Antes de enviar la petición al backend, Varnish comprueba que la ruta pertenezc
 
 La función de firma serializa un único objeto JSON, lo codifica como Base64URL y calcula un HMAC-SHA256. La verificación vuelve a calcular la firma y utiliza una comparación de tiempo constante antes de interpretar la carga. El formato resultante tiene dos segmentos y, como se ha indicado en el capítulo anterior, no es un JWT RFC~7519 completo.
 
-El token de acceso contiene \texttt{typ}, \texttt{sub}, \texttt{accountId}, \texttt{deviceId}, plan, entitlements, \texttt{jti} y expiración. Fase~2 añade los roles. El token de reproducción sustituye plan y permisos generales por \texttt{assetId}, \texttt{sessionId} y los ámbitos \texttt{manifest:read}, \texttt{content:read}, \texttt{license:request} y \texttt{heartbeat:write}. Los secretos de acceso y reproducción son distintos para impedir que una credencial de un tipo pueda validarse con la clave del otro.
+El token de acceso contiene \texttt{typ}, \texttt{sub}, \texttt{accountId}, \texttt{deviceId}, plan, entitlements, \texttt{jti} y expiración. Fase~2 añade los roles. El token de reproducción sustituye plan y permisos generales por \texttt{assetId}, \texttt{sessionId}, \texttt{clientInstanceId} y los ámbitos \texttt{manifest:read}, \texttt{content:read}, \texttt{license:request} y \texttt{heartbeat:write}. Los secretos de acceso y reproducción son distintos para impedir que una credencial de un tipo pueda validarse con la clave del otro.
 
 La Tabla~\ref{tab:parametros-sesion} muestra los parámetros comunes configurados en Docker Compose.
 
@@ -136,17 +137,17 @@ Umbral de auto-ban de cuenta & 100 puntos & Activar respuesta por riesgo acumula
 \end{tabularx}
 \end{table}
 
-\subsection{Validación de IP, dispositivo, activo y sesión}
+\subsection{Validación de IP, dispositivo, instancia, activo y sesión}
 
-La implementación no realiza geolocalización. La IP fiable proporcionada por Varnish se utiliza para rate limiting en Fase~1 y para correlación temporal en Fase~2. El \texttt{deviceId} se genera en el navegador, se incluye en el login y queda ligado tanto al token como a la sesión. Cada validación compara cuenta, dispositivo y activo del token con el objeto de sesión almacenado.
+La implementación no realiza geolocalización. La IP fiable proporcionada por Varnish se utiliza para rate limiting en Fase~1 y para correlación temporal en Fase~2. El \texttt{deviceId} se genera en el navegador y se incluye en el login. Al crear la reproducción se genera también un \texttt{clientInstanceId}, que queda ligado al token y a la sesión. Cada validación compara cuenta, dispositivo, instancia y activo del token con el objeto de sesión almacenado.
 
-El manifiesto contrasta también el \texttt{assetId} de la ruta, mientras que manifiesto, contenido y licencia comparan la cabecera \texttt{X-Playback-Session-Id}. Un activo diferente se rechaza como falta de autorización y una sesión diferente como conflicto. Esta distinción facilita el análisis posterior sin revelar el token utilizado.
+El manifiesto contrasta también el \texttt{assetId} de la ruta, mientras que manifiesto, contenido y licencia comparan las cabeceras \texttt{X-Playback-Session-Id} y \texttt{X-Client-Instance-Id}. Un activo diferente se rechaza como falta de autorización, una sesión diferente como conflicto y una instancia copiada como credencial no válida. Esta distinción facilita el análisis posterior sin revelar el token utilizado.
 
 Fase~2 ejecuta además la comprobación de bans en las operaciones que emplean credenciales de acceso o reproducción. El plano administrativo usa una validación separada de rol. Esta separación es intencional: un operador debe poder consultar y retirar un ban aunque su dispositivo no pueda utilizar el plano de reproducción.
 
 \subsection{Control de sesiones, concurrencia y expiración}
 
-La creación de sesión elimina primero las sesiones que han superado la gracia de heartbeat. Después comprueba el entitlement y cuenta las sesiones activas de la cuenta. Si no se supera el máximo, genera un UUID, almacena el contexto y emite el token de reproducción.
+La creación de sesión elimina primero las sesiones que han superado la gracia de heartbeat. Después comprueba el entitlement, exige la instancia de cliente y cuenta las sesiones activas de la cuenta. Si no se supera el máximo, genera un UUID, almacena el contexto y emite el token de reproducción.
 
 Fase~1 guarda los objetos en memoria. Fase~2 emplea claves \texttt{session:<uuid>} y un conjunto \texttt{account-sessions:<accountId>}. Las sesiones tienen un TTL operativo de 900~s y el índice por cuenta, de 24 horas. El proceso revisa cada diez segundos las sesiones conocidas y marca como \texttt{expired} las que superan los 45~s sin heartbeat. La parada explícita utiliza el estado \texttt{stopped}.
 
@@ -156,7 +157,7 @@ Fase~1 incorpora además límites en memoria por IP y minuto: 20 intentos de aut
 
 \section{Sistema de \textit{logging} y monitorización}
 
-Fase~2 registra cada evento como JSON en una lista Redis limitada a 300 elementos. El productor añade UUID, tipo y marca temporal a los campos específicos de la operación. Entre los tipos implementados se encuentran \texttt{auth.success}, \texttt{auth.failure}, \texttt{auth.blocked}, \texttt{playback.session\\_created}, \texttt{playback.concurrency\\_rejected}, \texttt{manifest.request}, \texttt{content.request}, \texttt{license.request}, \texttt{playback.heartbeat}, \texttt{playback.stopped}, \texttt{playback.expired}, \texttt{risk.incremented}, \texttt{ban.created} y \texttt{ban.cleared}.
+Fase~2 registra cada evento como JSON en una lista Redis limitada a 300 elementos. El productor añade UUID, tipo y marca temporal a los campos específicos de la operación. Entre los tipos implementados se encuentran \texttt{auth.success}, \texttt{auth.failure}, \texttt{auth.blocked}, \texttt{playback.session\_created}, \texttt{playback.concurrency\_rejected}, \texttt{playback.client\_instance\_rejected}, \texttt{manifest.request}, \texttt{content.request}, \texttt{license.request}, \texttt{key\_leak.pattern\_detected}, \texttt{playback.heartbeat}, \texttt{playback.stopped}, \texttt{playback.expired}, \texttt{risk.incremented}, \texttt{ban.created} y \texttt{ban.cleared}.
 
 La puntuación de riesgo se almacena durante 24 horas junto con un máximo de ocho razones distintas. Un login desde menos de tres IP recientes reduce cinco puntos, mientras que los patrones de la Tabla~\ref{tab:reglas-riesgo} incrementan el valor o crean un ban directo.
 
@@ -172,6 +173,7 @@ Actividad multi-IP & 3 IP en 10~min & $+30$ puntos de cuenta \\
 Concurrencia rechazada & 2 en 10~min & $+25$ puntos \\
 Solicitudes de licencia & 6 en 5~min & $+20$ puntos \\
 Solicitudes de contenido & 40 en 1~min & $+15$ puntos \\
+Contenido sin licencia & 3 objetos tras el manifest, una vez por sesión & $+20$ puntos \\
 Heartbeats & 8 en 1~min & $+10$ puntos \\
 Fallos de autenticación & 8 en 5~min & Ban de dispositivo de 15~min \\
 Riesgo acumulado & $\geq 100$ puntos & Ban de cuenta de 30~min \\
@@ -185,7 +187,7 @@ El panel de Fase~2 representa los eventos mediante nodos de texto, no mediante H
 
 \section{Clientes y laboratorios de auditoría}
 
-Los clientes oficiales mantienen separado el flujo de usuario de las acciones de auditoría. En ambos casos, el usuario autorizado inicia sesión, crea una reproducción y deja que Shaka Player añada el token a las solicitudes de manifiesto y licencia. Un watermark superpuesto utiliza correo enmascarado, prefijo de sesión y fase; aporta atribución visual, pero no se considera una medida criptográfica.
+Los clientes oficiales mantienen separado el flujo de usuario de las acciones de auditoría. En ambos casos, el usuario autorizado inicia sesión, crea una reproducción y deja que Shaka Player añada el token y la instancia a las solicitudes de manifiesto, contenido local y licencia. Un watermark superpuesto utiliza correo enmascarado, prefijo de sesión y fase; aporta atribución visual, pero no se considera una medida criptográfica.
 
 El laboratorio de Fase~1 automatiza login, creación de sesión y obtención del token a partir de usuario y contraseña. Muestra únicamente tipo, activo, expiración y scopes decodificados. También permite reproducir y ejecutar cuatro casos negativos: ausencia de token, token alterado, sesión distinta y activo distinto. La Figura~\ref{fig:fase1-cliente-laboratorio} presenta en paralelo el cliente legítimo y el laboratorio, ambos utilizando las mismas rutas protegidas.
 
@@ -216,9 +218,11 @@ El laboratorio de Fase~2 conserva las pruebas del manifiesto y añade dos secuen
 
 La misma interfaz permite retirar cualquiera de los dos bans con el token administrativo y volver a reproducir. Para ello renueva la credencial mediante heartbeat o crea una nueva sesión si la anterior ha expirado durante el bloqueo. La retirada no reinicia el score, que permanece como rastro del comportamiento observado. Estas secuencias proporcionan mecanismos controlados para el Capítulo~7, pero no sustituyen a las evidencias de red y servidor que se utilizarán allí para contrastar el resultado visible.
 
+Se ha incorporado además un laboratorio específico de CDN leeching, accesible en \texttt{localhost:9302} y \texttt{localhost:9402}. Su backend actúa como un cliente externo no sujeto a CORS: autentica al usuario de prueba, crea una sesión y vuelve a servir al navegador el manifiesto y los segmentos obtenidos con la clave CENC conocida. La interfaz permite contrastar la ausencia de token, el origen web no permitido, una única reproducción válida, una segunda sesión, la copia del token desde otra instancia, el cruce de activo y el uso posterior a la parada. En Fase~2 muestra también el score y la razón generada al consumir contenido sin que se haya observado una solicitud de licencia. Las capturas y el análisis se reservan para el capítulo de evaluación.
+
 \section{Integración completa del entorno}
 
-El flujo integrado comienza en uno de los dos frontales web y converge en Varnish. Tras el login, el cliente conserva el token de acceso únicamente para crear sesiones y, en Fase~2, consultar administración. La sesión devuelve las URLs locales de manifiesto y licencia y un token efímero. Shaka Player introduce el contexto en sus filtros de red; el \textit{control-plane} valida y actualiza la sesión; y el servidor interno de licencia reenvía el challenge sin quedar expuesto al anfitrión.
+El flujo integrado comienza en uno de los frontales web y converge en Varnish. Tras el login, el cliente conserva el token de acceso únicamente para crear sesiones y, en Fase~2, consultar administración. La sesión devuelve las URLs locales de manifiesto y licencia y un token efímero. Shaka Player introduce el contexto en sus filtros de red; el \textit{control-plane} valida y actualiza la sesión; y el servidor interno de licencia reenvía el challenge sin quedar expuesto al anfitrión. El laboratorio externo utiliza exactamente esas rutas, por lo que no dispone de un acceso privilegiado al origen.
 
 En Fase~2, cada paso relevante produce además un evento y puede modificar el riesgo. La respuesta activa se aplica antes de alcanzar manifiesto, contenido, heartbeat o licencia. El plano administrativo permanece disponible para observar y revertir el estado. Redis se configura sin RDB ni AOF para que reiniciar el contenedor deje el laboratorio en un estado conocido; la persistencia duradera y la alta disponibilidad no forman parte de esta implementación.
 

@@ -1,0 +1,228 @@
+{
+  "phase": "fase2",
+  "sessionId": "42603dcd-81fb-4bed-b4cb-24abaaf1bd33",
+  "assetId": "local-cenc-clearkey",
+  "manifestStatus": 200,
+  "contentStatuses": [
+    200,
+    200,
+    200
+  ],
+  "contentBytesServed": 253023,
+  "contentLatencyMs": [
+    20.497,
+    29.341,
+    46.808
+  ],
+  "licenseRequests": 0,
+  "cors": {
+    "hostileOrigin": "http://localhost:9402",
+    "allowOrigin": "http://localhost:9400",
+    "httpStatus": 200
+  },
+  "secondSessionStatus": 409,
+  "clonedInstanceStatus": 401,
+  "crossAssetStatus": 403,
+  "riskScore": 20,
+  "riskReasons": [
+    "POSSIBLE_KEY_LEAK_LICENSE_BYPASS"
+  ],
+  "keyLeakEvents": 1,
+  "postStopStatus": 401,
+  "overview": {
+    "accountId": "acc-allowed-001",
+    "activeSessions": 1,
+    "sessions": [
+      {
+        "sessionId": "42603dcd-81fb-4bed-b4cb-24abaaf1bd33",
+        "accountId": "acc-allowed-001",
+        "deviceId": "cdn-leech-fase2",
+        "clientInstanceId": "cdn-leech-instance-fase2",
+        "assetId": "local-cenc-clearkey",
+        "ip": "172.21.0.1",
+        "status": "active",
+        "startedAt": 1788173136933,
+        "lastHeartbeatAt": 1788173137195,
+        "manifestRequestedAt": 1788173136998,
+        "contentRequestCount": 4,
+        "keyLeakRiskAppliedAt": 1788173137077
+      }
+    ],
+    "risk": {
+      "accountId": "acc-allowed-001",
+      "score": 20,
+      "reasons": [
+        "POSSIBLE_KEY_LEAK_LICENSE_BYPASS"
+      ],
+      "lastUpdatedAt": "2026-08-31T10:45:37.084Z"
+    },
+    "bans": [],
+    "recentEvents": [
+      {
+        "sessionId": "42603dcd-81fb-4bed-b4cb-24abaaf1bd33",
+        "accountId": "acc-allowed-001",
+        "path": "dash-known-key/video_3.m4s",
+        "risk": {
+          "accountId": "acc-allowed-001",
+          "score": 20,
+          "reasons": [
+            "POSSIBLE_KEY_LEAK_LICENSE_BYPASS"
+          ],
+          "lastUpdatedAt": "2026-08-31T10:45:37.084Z"
+        },
+        "id": "b219923d-e879-48d1-a8ad-555a17cc2fcf",
+        "type": "content.request",
+        "timestamp": "2026-08-31T10:45:37.207Z"
+      },
+      {
+        "sessionId": "42603dcd-81fb-4bed-b4cb-24abaaf1bd33",
+        "accountId": "acc-allowed-001",
+        "expectedClientInstanceId": "cdn-leech-instance-fase2",
+        "receivedClientInstanceId": "cdn-leech-instance-fase2-clone",
+        "ip": "172.21.0.1",
+        "id": "83477915-7f6f-4338-a30a-a697a85acb17",
+        "type": "playback.client_instance_rejected",
+        "timestamp": "2026-08-31T10:45:37.136Z"
+      },
+      {
+        "accountId": "acc-allowed-001",
+        "deviceId": "cdn-leech-fase2",
+        "ip": "172.21.0.1",
+        "id": "edd63370-706b-417a-8e7c-e5af23215e80",
+        "type": "playback.concurrency_rejected",
+        "timestamp": "2026-08-31T10:45:37.122Z"
+      },
+      {
+        "sessionId": "42603dcd-81fb-4bed-b4cb-24abaaf1bd33",
+        "accountId": "acc-allowed-001",
+        "path": "dash-known-key/video_2.m4s",
+        "risk": {
+          "accountId": "acc-allowed-001",
+          "score": 20,
+          "reasons": [
+            "POSSIBLE_KEY_LEAK_LICENSE_BYPASS"
+          ],
+          "lastUpdatedAt": "2026-08-31T10:45:37.084Z"
+        },
+        "id": "5ad752fe-37f9-4ed4-ad8e-50ba3a40d110",
+        "type": "content.request",
+        "timestamp": "2026-08-31T10:45:37.095Z"
+      },
+      {
+        "accountId": "acc-allowed-001",
+        "scoreAdded": 20,
+        "reason": "POSSIBLE_KEY_LEAK_LICENSE_BYPASS",
+        "context": {
+          "sessionId": "42603dcd-81fb-4bed-b4cb-24abaaf1bd33",
+          "contentRequestCount": 3
+        },
+        "risk": {
+          "accountId": "acc-allowed-001",
+          "score": 20,
+          "reasons": [
+            "POSSIBLE_KEY_LEAK_LICENSE_BYPASS"
+          ],
+          "lastUpdatedAt": "2026-08-31T10:45:37.084Z"
+        },
+        "id": "3788e7c7-6c21-41d1-b7a6-30ece406e345",
+        "type": "risk.incremented",
+        "timestamp": "2026-08-31T10:45:37.085Z"
+      },
+      {
+        "sessionId": "42603dcd-81fb-4bed-b4cb-24abaaf1bd33",
+        "accountId": "acc-allowed-001",
+        "assetId": "local-cenc-clearkey",
+        "contentRequestCount": 3,
+        "licenseRequested": false,
+        "id": "f0ab31ba-6b2d-40e5-8477-cc46e532c11a",
+        "type": "key_leak.pattern_detected",
+        "timestamp": "2026-08-31T10:45:37.080Z"
+      },
+      {
+        "sessionId": "42603dcd-81fb-4bed-b4cb-24abaaf1bd33",
+        "accountId": "acc-allowed-001",
+        "path": "dash-known-key/video_1.m4s",
+        "risk": {
+          "accountId": "acc-allowed-001",
+          "score": 0,
+          "reasons": [],
+          "lastUpdatedAt": "2026-08-31T10:45:36.902Z"
+        },
+        "id": "35422b35-20d8-414c-a887-e1effba20051",
+        "type": "content.request",
+        "timestamp": "2026-08-31T10:45:37.048Z"
+      },
+      {
+        "sessionId": "42603dcd-81fb-4bed-b4cb-24abaaf1bd33",
+        "accountId": "acc-allowed-001",
+        "path": "dash-known-key/video_init.mp4",
+        "risk": {
+          "accountId": "acc-allowed-001",
+          "score": 0,
+          "reasons": [],
+          "lastUpdatedAt": "2026-08-31T10:45:36.902Z"
+        },
+        "id": "1e621cb0-cde3-44d0-8f5d-ff83193e5587",
+        "type": "content.request",
+        "timestamp": "2026-08-31T10:45:37.022Z"
+      },
+      {
+        "sessionId": "42603dcd-81fb-4bed-b4cb-24abaaf1bd33",
+        "accountId": "acc-allowed-001",
+        "assetId": "local-cenc-clearkey",
+        "risk": {
+          "accountId": "acc-allowed-001",
+          "score": 0,
+          "reasons": [],
+          "lastUpdatedAt": "2026-08-31T10:45:36.902Z"
+        },
+        "id": "602c1852-a6b2-44c7-a97a-7a714e13e0e0",
+        "type": "manifest.request",
+        "timestamp": "2026-08-31T10:45:37.003Z"
+      },
+      {
+        "sessionId": "42603dcd-81fb-4bed-b4cb-24abaaf1bd33",
+        "accountId": "acc-allowed-001",
+        "assetId": "local-cenc-clearkey",
+        "risk": {
+          "accountId": "acc-allowed-001",
+          "score": 0,
+          "reasons": [],
+          "lastUpdatedAt": "2026-08-31T10:45:36.902Z"
+        },
+        "id": "d6af0086-616d-4a60-82b6-9674ba54f47d",
+        "type": "manifest.request",
+        "timestamp": "2026-08-31T10:45:36.990Z"
+      },
+      {
+        "sessionId": "42603dcd-81fb-4bed-b4cb-24abaaf1bd33",
+        "accountId": "acc-allowed-001",
+        "deviceId": "cdn-leech-fase2",
+        "ip": "172.21.0.1",
+        "risk": {
+          "accountId": "acc-allowed-001",
+          "score": 0,
+          "reasons": [],
+          "lastUpdatedAt": "2026-08-31T10:45:36.902Z"
+        },
+        "id": "628c9a41-2746-48e0-80e8-70c980268c72",
+        "type": "playback.session_created",
+        "timestamp": "2026-08-31T10:45:36.934Z"
+      },
+      {
+        "accountId": "acc-allowed-001",
+        "deviceId": "cdn-leech-fase2",
+        "ip": "172.21.0.1",
+        "risk": {
+          "accountId": "acc-allowed-001",
+          "score": 0,
+          "reasons": [],
+          "lastUpdatedAt": "2026-08-31T10:45:36.902Z"
+        },
+        "id": "7b2b6e70-6a68-4b97-aa4d-a88f3409a3ba",
+        "type": "auth.success",
+        "timestamp": "2026-08-31T10:45:36.902Z"
+      }
+    ]
+  }
+}

@@ -20,8 +20,10 @@ const heartbeatGraceSeconds = Number(process.env.HEARTBEAT_GRACE_SECONDS || 45);
 const maxConcurrentStreams = Number(process.env.MAX_CONCURRENT_STREAMS || 1);
 const autoBanThreshold = Number(process.env.AUTO_BAN_THRESHOLD || 100);
 const eventRetention = Number(process.env.EVENT_RETENTION || 300);
+const localCencAssetId = 'local-cenc-clearkey';
+const keyLeakContentThreshold = Number(process.env.KEY_LEAK_CONTENT_THRESHOLD || 3);
 const localContentPrefixes = new Map([
-  ['local-cenc-clearkey', 'dash-known-key']
+  [localCencAssetId, 'dash-known-key']
 ]);
 const allowedOrigins = new Set([appOrigin, labOrigin]);
 
@@ -31,7 +33,7 @@ const users = new Map([
     password: 'demo123',
     displayName: 'Usuario con permiso',
     plan: 'student',
-    entitlements: ['sintel-widevine'],
+    entitlements: ['sintel-widevine', localCencAssetId],
     roles: ['user', 'admin']
   }],
   ['usuario-denegado@tfm.local', {
@@ -213,6 +215,7 @@ function issuePlaybackToken(session) {
     sub: session.accountId,
     accountId: session.accountId,
     deviceId: session.deviceId,
+    clientInstanceId: session.clientInstanceId,
     assetId: session.assetId,
     sessionId: session.sessionId,
     scope: ['manifest:read', 'content:read', 'license:request', 'heartbeat:write'],
@@ -360,6 +363,39 @@ async function applyAccountSignals({ accountId, deviceId, ip, signal }) {
   return getRisk(accountId);
 }
 
+async function applyKeyLeakSignal(session) {
+  if (
+    session.assetId !== localCencAssetId
+    || !session.manifestRequestedAt
+    || session.licenseRequestedAt
+    || Number(session.contentRequestCount || 0) < keyLeakContentThreshold
+  ) {
+    return getRisk(session.accountId);
+  }
+
+  const marker = await redis.set(`signal:key-leak:${session.sessionId}`, '1', {
+    NX: true,
+    EX: Math.max(playbackTokenTtlSeconds, heartbeatGraceSeconds) * 10
+  });
+  if (marker !== 'OK') {
+    return getRisk(session.accountId);
+  }
+
+  session.keyLeakRiskAppliedAt = Date.now();
+  await storeSession(session);
+  await pushEvent('key_leak.pattern_detected', {
+    sessionId: session.sessionId,
+    accountId: session.accountId,
+    assetId: session.assetId,
+    contentRequestCount: session.contentRequestCount,
+    licenseRequested: false
+  });
+  return addRisk(session.accountId, 20, 'POSSIBLE_KEY_LEAK_LICENSE_BYPASS', {
+    sessionId: session.sessionId,
+    contentRequestCount: session.contentRequestCount
+  });
+}
+
 async function requireAccessToken(req) {
   const payload = verifyToken(getBearerToken(req), accessTokenSecret);
   if (payload.typ !== 'access') {
@@ -382,8 +418,19 @@ async function requirePlaybackToken(req) {
   if (session.status !== 'active') {
     throw new Error('Playback session is not active');
   }
-  if (session.accountId !== payload.accountId || session.deviceId !== payload.deviceId || session.assetId !== payload.assetId) {
+  if (session.accountId !== payload.accountId || session.deviceId !== payload.deviceId || session.assetId !== payload.assetId || session.clientInstanceId !== payload.clientInstanceId) {
     throw new Error('Playback token context mismatch');
+  }
+  const requestClientInstanceId = req.headers['x-client-instance-id'];
+  if (!requestClientInstanceId || requestClientInstanceId !== session.clientInstanceId) {
+    await pushEvent('playback.client_instance_rejected', {
+      sessionId: session.sessionId,
+      accountId: session.accountId,
+      expectedClientInstanceId: session.clientInstanceId,
+      receivedClientInstanceId: requestClientInstanceId || null,
+      ip: getRequestIp(req)
+    });
+    throw new Error('Playback client instance mismatch');
   }
   await ensureNotBanned({ accountId: payload.accountId, deviceId: payload.deviceId });
   return { payload, session };
@@ -413,13 +460,18 @@ function escapeXml(value) {
   }[character]));
 }
 
-function addManifestBaseUrl(manifest) {
-  const mediaBaseUrl = new URL('.', widevineManifestUrl).toString();
+function addManifestBaseUrl(manifest, mediaBaseUrl = new URL('.', widevineManifestUrl).toString()) {
   const rewritten = manifest.replace(/<MPD\b[^>]*>/, (tag) => `${tag}\n  <BaseURL>${escapeXml(mediaBaseUrl)}</BaseURL>`);
   if (rewritten === manifest) {
     throw new Error('Upstream response is not a DASH manifest');
   }
   return rewritten;
+}
+
+function normalizeLocalManifest(manifest) {
+  return manifest
+    .replace('type="dynamic"', 'type="static" mediaPresentationDuration="PT60S"')
+    .replace(/\s(?:publishTime|availabilityStartTime|minimumUpdatePeriod|timeShiftBufferDepth)="[^"]*"/g, '');
 }
 
 function requireAdmin(accessPayload) {
@@ -449,7 +501,7 @@ app.use((req, res, next) => {
   const requestOrigin = req.get('origin');
   res.setHeader('Access-Control-Allow-Origin', allowedOrigins.has(requestOrigin) ? requestOrigin : appOrigin);
   res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS, POST');
-  res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type, Range, X-Playback-Session-Id, X-Device-Id');
+  res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type, Range, X-Playback-Session-Id, X-Device-Id, X-Client-Instance-Id');
   res.setHeader('Access-Control-Expose-Headers', 'Content-Length, Content-Range, Accept-Ranges, X-Request-Id');
   res.setHeader('Cache-Control', 'no-store');
   if (req.method === 'OPTIONS') {
@@ -513,7 +565,10 @@ app.post('/playback/session', async (req, res) => {
     return jsonError(res, 401, 'UNAUTHORIZED', error.message);
   }
 
-  const { assetId = 'sintel-widevine' } = req.body || {};
+  const { assetId = 'sintel-widevine', clientInstanceId } = req.body || {};
+  if (typeof clientInstanceId !== 'string' || !clientInstanceId.trim() || clientInstanceId.length > 128) {
+    return jsonError(res, 400, 'CLIENT_INSTANCE_REQUIRED', 'A clientInstanceId of at most 128 characters is required');
+  }
   if (!accessPayload.entitlements.includes(assetId)) {
     return jsonError(res, 403, 'ASSET_NOT_ALLOWED', `Asset ${assetId} is not in account entitlements`);
   }
@@ -528,6 +583,7 @@ app.post('/playback/session', async (req, res) => {
     sessionId: crypto.randomUUID(),
     accountId: accessPayload.accountId,
     deviceId: accessPayload.deviceId,
+    clientInstanceId,
     assetId,
     ip,
     status: 'active',
@@ -543,6 +599,7 @@ app.post('/playback/session', async (req, res) => {
     ok: true,
     session: {
       sessionId: session.sessionId,
+      clientInstanceId: session.clientInstanceId,
       assetId: session.assetId,
       startedAt: new Date(session.startedAt).toISOString(),
       lastHeartbeatAt: new Date(session.lastHeartbeatAt).toISOString(),
@@ -572,15 +629,24 @@ app.get('/manifest/:assetId', async (req, res) => {
   }
 
   authContext.session.lastHeartbeatAt = Date.now();
+  authContext.session.manifestRequestedAt = Date.now();
   await storeSession(authContext.session);
   const risk = await getRisk(authContext.session.accountId);
 
   try {
-    const upstreamResponse = await fetch(widevineManifestUrl, { headers: { Accept: 'application/dash+xml, application/xml' } });
+    const isLocalCenc = authContext.session.assetId === localCencAssetId;
+    const upstreamManifestUrl = isLocalCenc
+      ? `${originBaseUrl}/dash-known-key/stream.mpd`
+      : widevineManifestUrl;
+    const upstreamResponse = await fetch(upstreamManifestUrl, { headers: { Accept: 'application/dash+xml, application/xml' } });
     if (!upstreamResponse.ok) {
       return jsonError(res, 502, 'UPSTREAM_MANIFEST_ERROR', `Upstream returned HTTP ${upstreamResponse.status}`);
     }
-    const manifest = addManifestBaseUrl(await upstreamResponse.text());
+    const mediaBaseUrl = isLocalCenc
+      ? `${publicBaseUrl}/content/dash-known-key/`
+      : new URL('.', widevineManifestUrl).toString();
+    const upstreamManifest = await upstreamResponse.text();
+    const manifest = addManifestBaseUrl(isLocalCenc ? normalizeLocalManifest(upstreamManifest) : upstreamManifest, mediaBaseUrl);
     await pushEvent('manifest.request', { sessionId: authContext.session.sessionId, accountId: authContext.session.accountId, assetId: authContext.session.assetId, risk });
     res.setHeader('Content-Type', 'application/dash+xml; charset=utf-8');
     res.setHeader('X-Playback-Session-Id', authContext.session.sessionId);
@@ -662,13 +728,15 @@ app.use('/content/*', async (req, res) => {
   }
 
   authContext.session.lastHeartbeatAt = Date.now();
+  authContext.session.contentRequestCount = Number(authContext.session.contentRequestCount || 0) + 1;
   await storeSession(authContext.session);
-  const risk = await applyAccountSignals({
+  let risk = await applyAccountSignals({
     accountId: authContext.session.accountId,
     deviceId: authContext.session.deviceId,
     ip: getRequestIp(req),
     signal: 'content.request'
   });
+  risk = await applyKeyLeakSignal(authContext.session);
 
   const upstreamUrl = `${originBaseUrl}/${contentPath}`;
   const upstreamHeaders = {};
@@ -708,6 +776,7 @@ app.post('/license', async (req, res) => {
   }
 
   authContext.session.lastHeartbeatAt = Date.now();
+  authContext.session.licenseRequestedAt = Date.now();
   await storeSession(authContext.session);
   const risk = await applyAccountSignals({
     accountId: authContext.session.accountId,

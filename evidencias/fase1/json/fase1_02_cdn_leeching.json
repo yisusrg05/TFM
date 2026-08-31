@@ -1,0 +1,31 @@
+{
+  "phase": "fase1",
+  "sessionId": "a0de77e8-e634-4aa5-b32f-9d3c21c18152",
+  "assetId": "local-cenc-clearkey",
+  "manifestStatus": 200,
+  "contentStatuses": [
+    200,
+    200,
+    200
+  ],
+  "contentBytesServed": 253023,
+  "contentLatencyMs": [
+    13.224,
+    37.688,
+    26.482
+  ],
+  "licenseRequests": 0,
+  "cors": {
+    "hostileOrigin": "http://localhost:9302",
+    "allowOrigin": "http://localhost:9300",
+    "httpStatus": 200
+  },
+  "secondSessionStatus": 409,
+  "clonedInstanceStatus": 401,
+  "crossAssetStatus": 403,
+  "riskScore": null,
+  "riskReasons": [],
+  "keyLeakEvents": 0,
+  "postStopStatus": 401,
+  "overview": null
+}

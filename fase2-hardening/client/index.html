@@ -94,7 +94,8 @@
         heartbeatTimer: null,
         user: null,
         risk: { score: 0, reasons: [] },
-        deviceId: localStorage.getItem('tfm-phase2-device-id') || `web-${crypto.randomUUID()}`
+        deviceId: localStorage.getItem('tfm-phase2-device-id') || `web-${crypto.randomUUID()}`,
+        clientInstanceId: `client-f2-${crypto.randomUUID()}`
       };
 
       const player = new shaka.Player(document.getElementById('video'));
@@ -154,10 +155,12 @@
         if (type === requestType.LICENSE) {
           request.headers['Content-Type'] = 'application/octet-stream';
         }
-        if (state.playbackToken && (type === requestType.MANIFEST || type === requestType.LICENSE)) {
+        const protectedSegment = type === requestType.SEGMENT && request.uris.some((uri) => uri.startsWith(`${API_BASE}/content/`));
+        if (state.playbackToken && (type === requestType.MANIFEST || type === requestType.LICENSE || protectedSegment)) {
           request.headers.Authorization = `Bearer ${state.playbackToken}`;
           request.headers['X-Playback-Session-Id'] = state.sessionId;
           request.headers['X-Device-Id'] = state.deviceId;
+          request.headers['X-Client-Instance-Id'] = state.clientInstanceId;
         }
       });
 
@@ -198,7 +201,7 @@
         const data = await api('/playback/session', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${state.accessToken}` },
-          body: JSON.stringify({ assetId: 'sintel-widevine' })
+          body: JSON.stringify({ assetId: 'sintel-widevine', clientInstanceId: state.clientInstanceId })
         });
         state.playbackToken = data.playbackToken;
         state.sessionId = data.session.sessionId;
@@ -217,7 +220,7 @@
       async function heartbeat() {
         const data = await api('/playback/heartbeat', {
           method: 'POST',
-          headers: { Authorization: `Bearer ${state.playbackToken}`, 'X-Playback-Session-Id': state.sessionId }
+          headers: { Authorization: `Bearer ${state.playbackToken}`, 'X-Playback-Session-Id': state.sessionId, 'X-Client-Instance-Id': state.clientInstanceId }
         });
         state.playbackToken = data.playbackToken;
         state.risk = data.risk;
@@ -243,7 +246,7 @@
       async function stopSession() {
         await api('/playback/stop', {
           method: 'POST',
-          headers: { Authorization: `Bearer ${state.playbackToken}`, 'X-Playback-Session-Id': state.sessionId }
+          headers: { Authorization: `Bearer ${state.playbackToken}`, 'X-Playback-Session-Id': state.sessionId, 'X-Client-Instance-Id': state.clientInstanceId }
         });
         if (state.heartbeatTimer) clearInterval(state.heartbeatTimer);
         await player.unload();

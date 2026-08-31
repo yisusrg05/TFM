@@ -1,15 +1,15 @@
 # Revisión previa de las fases 1 y 2
 
-Fecha de revisión: 30 de agosto de 2026.
+Fecha de revisión: 30 y 31 de agosto de 2026.
 
 ## Estado final
 
 Las dos fases se encuentran levantadas y operativas de forma simultánea con la fase 0:
 
-| Entorno | Cliente | CDN/control-plane | Laboratorio | Estado |
-|---|---:|---:|---:|---|
-| Fase 1 | `http://localhost:9300` | `http://localhost:9080` | `http://localhost:9301` | Operativo |
-| Fase 2 | `http://localhost:9400` | `http://localhost:9180` | `http://localhost:9401` | Operativo |
+| Entorno | Cliente | CDN/control-plane | Laboratorio | Lab. CDN leeching | Estado |
+|---|---:|---:|---:|---:|---|
+| Fase 1 | `http://localhost:9300` | `http://localhost:9080` | `http://localhost:9301` | `http://localhost:9302` | Operativo |
+| Fase 2 | `http://localhost:9400` | `http://localhost:9180` | `http://localhost:9401` | `http://localhost:9402` | Operativo |
 
 Todos los contenedores de ambas fases están en estado `running`, con cero reinicios inesperados. Los clientes, los endpoints de salud, los orígenes internos y los servidores internos de licencia responden con HTTP 200. No se observaron errores de aplicación en los registros después de la regresión final.
 
@@ -30,6 +30,8 @@ Todos los contenedores de ambas fases están en estado `running`, con cero reini
 - Token de reproducción después de detener la sesión: rechazado.
 - Reproducción Widevine real: vídeo no pausado, `readyState=4`, duración aproximada de 888 segundos y tiempo creciente.
 - El laboratorio `http://localhost:9301` genera el token desde usuario y contraseña, registra las peticiones protegidas de manifest/licencia y supera los casos negativos 401/401/409/403.
+- El laboratorio `http://localhost:9302` confirma que manifest y segmentos sin token devuelven 401, mientras que una sesión única válida y la clave conocida todavía permiten reproducir un canal.
+- La segunda sesión devuelve 409; un token presentado desde otra instancia, 401; el cruce de activo, 403; y el acceso posterior a la parada, 401.
 - La interfaz no imprime `accessToken` ni `playbackToken`.
 
 ### Correcciones aplicadas
@@ -38,6 +40,8 @@ Todos los contenedores de ambas fases están en estado `running`, con cero reini
 - Bloqueado el cambio de identidad mientras existe una sesión activa.
 - Propagada de forma fiable la IP del cliente desde Varnish, sobrescribiendo cabeceras aportadas por el navegador.
 - Añadido binding entre `assetId` y el prefijo permitido del origen local.
+- Protegidos el manifest, las inicializaciones y los segmentos del activo CENC local.
+- Añadido `clientInstanceId` al token, la sesión y las cabeceras protegidas.
 
 ## Fase 2
 
@@ -63,6 +67,9 @@ Todos los contenedores de ambas fases están en estado `running`, con cero reini
 - Ocho autenticaciones fallidas desde el mismo dispositivo crean un ban `AUTH_FAILURE_BURST`; el manifest posterior devuelve HTTP 401 y la interfaz impide iniciar otra reproducción.
 - El laboratorio materializa también la regla de concurrencia: cinco solicitudes de sesión mientras existe una activa devuelven HTTP 409, muestran la progresión 0/25/50/75/100 y crean un ban automático de cuenta.
 - Tras ese ban, el manifest devuelve HTTP 401. Al retirar cualquiera de los dos bans desde el plano administrativo, el manifest y la reproducción vuelven a funcionar; el score se conserva para trazabilidad.
+- El laboratorio `http://localhost:9402` reproduce el caso positivo con token y clave conocida y muestra 253.023 bytes servidos sin solicitud de licencia.
+- Tras el tercer objeto de contenido se registra una sola vez `key_leak.pattern_detected`, se suman 20 puntos y no se crea un ban inmediato.
+- La copia del token a otra instancia deja `playback.client_instance_rejected` y devuelve HTTP 401.
 
 ### Correcciones aplicadas
 
@@ -74,6 +81,7 @@ Todos los contenedores de ambas fases están en estado `running`, con cero reini
 - Bloqueado el cambio de identidad durante una sesión activa.
 - Añadida propagación fiable de IP y binding entre activo, sesión y ruta de contenido.
 - Añadida durante la evaluación final la validación de `X-Playback-Session-Id` en `/license`; la regresión pasó de 64/65 a 65/65 comprobaciones y el caso distinto devuelve ahora HTTP 409 `SESSION_MISMATCH`.
+- Añadida la señal `POSSIBLE_KEY_LEAK_LICENSE_BYPASS`, limitada a una aplicación por sesión.
 
 ## Estado de los datos
 
@@ -86,7 +94,9 @@ Redis se reinició después de las pruebas para dejar la fase 2 sin sesiones, sc
 - Los umbrales antifraude son ilustrativos y no están calibrados con tráfico real ni con una tasa conocida de falsos positivos.
 - Redis se configura sin persistencia para que las pruebas sean repetibles; un despliegue real necesitaría persistencia, alta disponibilidad y política de retención.
 - La prueba se ha realizado con un navegador y un entorno Docker local, no con diversidad de dispositivos, redes o regiones.
-- No existe todavía una batería automatizada de integración; la revisión combinó pruebas HTTP controladas, estado de contenedores y reproducción real en navegador.
+- CORS solo contiene reproductores web de origen ajeno; un cliente nativo o backend IPTV sigue dependiendo de la autorización del servidor.
+- Una única sesión legítima con token vigente y clave conocida puede actuar como fuente de restreaming serial; Fase 2 lo puntúa, pero no lo bloquea por esa señal aislada.
+- La batería automatizada comprende 65 comprobaciones generales y 27 específicas de Key Leak/CDN leeching, complementadas con reproducción real y PCAP.
 
 ## Orientación para los capítulos
 

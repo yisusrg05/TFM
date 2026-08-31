@@ -78,7 +78,8 @@
         manifestUrl: null,
         heartbeatTimer: null,
         user: null,
-        deviceId: localStorage.getItem('tfm-phase1-device-id') || `web-${crypto.randomUUID()}`
+        deviceId: localStorage.getItem('tfm-phase1-device-id') || `web-${crypto.randomUUID()}`,
+        clientInstanceId: `client-f1-${crypto.randomUUID()}`
       };
 
       const player = new shaka.Player(document.getElementById('video'));
@@ -134,10 +135,12 @@
         if (type === requestType.LICENSE) {
           request.headers['Content-Type'] = 'application/octet-stream';
         }
-        if (state.playbackToken && (type === requestType.MANIFEST || type === requestType.LICENSE)) {
+        const protectedSegment = type === requestType.SEGMENT && request.uris.some((uri) => uri.startsWith(`${API_BASE}/content/`));
+        if (state.playbackToken && (type === requestType.MANIFEST || type === requestType.LICENSE || protectedSegment)) {
           request.headers.Authorization = `Bearer ${state.playbackToken}`;
           request.headers['X-Playback-Session-Id'] = state.sessionId;
           request.headers['X-Device-Id'] = state.deviceId;
+          request.headers['X-Client-Instance-Id'] = state.clientInstanceId;
           log({
             type: type === requestType.MANIFEST ? 'MANIFEST_REQUEST_PROTECTED' : 'LICENSE_REQUEST_PROTECTED',
             uri: request.uris[0],
@@ -176,7 +179,7 @@
             'Content-Type': 'application/json',
             Authorization: `Bearer ${state.accessToken}`
           },
-          body: JSON.stringify({ assetId: 'sintel-widevine' })
+          body: JSON.stringify({ assetId: 'sintel-widevine', clientInstanceId: state.clientInstanceId })
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.details || data.error || 'Playback session failed');
@@ -206,7 +209,8 @@
           method: 'POST',
           headers: {
             Authorization: `Bearer ${state.playbackToken}`,
-            'X-Playback-Session-Id': state.sessionId
+            'X-Playback-Session-Id': state.sessionId,
+            'X-Client-Instance-Id': state.clientInstanceId
           }
         });
         const data = await res.json();
@@ -233,7 +237,8 @@
           method: 'POST',
           headers: {
             Authorization: `Bearer ${state.playbackToken}`,
-            'X-Playback-Session-Id': state.sessionId
+            'X-Playback-Session-Id': state.sessionId,
+            'X-Client-Instance-Id': state.clientInstanceId
           }
         });
         if (state.heartbeatTimer) clearInterval(state.heartbeatTimer);

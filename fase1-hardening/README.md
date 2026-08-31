@@ -6,6 +6,7 @@ Esta fase parte de la base creada en fase 0, pero elimina el fallo deliberado `l
 
 - Plataforma OTT en `http://localhost:9300`.
 - Laboratorio de auditoria en `http://localhost:9301`.
+- Laboratorio de Key Leak y CDN leeching en `http://localhost:9302`.
 - CDN Varnish en `http://localhost:9080`.
 - `control-plane` con:
   - login,
@@ -16,6 +17,7 @@ Esta fase parte de la base creada en fase 0, pero elimina el fallo deliberado `l
   - heartbeat,
   - parada de sesion,
   - proxy protegido del manifest DASH,
+  - proxy protegido de inicializaciones y segmentos locales,
   - proxy protegido de licencia Widevine.
 - `license-server` interno:
   - no se publica en el host,
@@ -33,7 +35,7 @@ MPD publico + /license/no_auth = reproduccion externa sin login
 En fase 1:
 
 ```text
-/manifest protegido + /license protegido = ambos requieren playbackToken valido
+/manifest + /content + /license protegidos = requieren playbackToken valido
 ```
 
 El usuario sin permiso puede iniciar sesion, pero no puede crear una `playback session` para el activo `sintel-widevine`.
@@ -49,6 +51,7 @@ El usuario sin permiso puede iniciar sesion, pero no puede crear una `playback s
 
 - Cliente fase 1: `http://localhost:9300`
 - Laboratorio de auditoria: `http://localhost:9301`
+- Laboratorio de Key Leak / CDN leeching: `http://localhost:9302`
 - CDN protegida fase 1: `http://localhost:9080`
 
 `origin` y `license-server` no se publican en el host.
@@ -78,6 +81,17 @@ Abre `http://localhost:9301` y utiliza las credenciales de prueba. El boton de a
 3. Ejecutar casos negativos reproducibles: sin token (401), token alterado (401), sesion distinta (409) y activo distinto (403).
 4. Detener la sesion para invalidar el acceso asociado.
 
+### Laboratorio de Key Leak y CDN leeching
+
+Abre `http://localhost:9302`. El laboratorio representa un reproductor externo o backend IPTV y permite ejecutar de forma controlada:
+
+1. Acceso al manifest y a los segmentos sin token, que debe devolver 401.
+2. Peticion desde un origen web no permitido, cuya lectura bloquea el navegador por CORS.
+3. Reproduccion de un unico canal con sesion valida, token e identificador de instancia coherentes y clave CENC conocida.
+4. Segunda sesion simultanea (409), token copiado a otra instancia (401), cruce de activo (403) y uso posterior a la parada (401).
+
+El caso tercero permanece posible de forma deliberada: para el servidor es una sesion autorizada y Fase 1 no dispone de puntuacion de riesgo. CORS no se presenta como autenticacion, ya que un cliente nativo no esta obligado a aplicarlo.
+
 ## Lectura para el TFM
 
 Esta fase corresponde a la primera defensa en profundidad:
@@ -85,8 +99,8 @@ Esta fase corresponde a la primera defensa en profundidad:
 - El DRM sigue siendo Widevine.
 - El servidor de licencias de pruebas sigue existiendo aguas arriba.
 - La diferencia es que ya no se expone una ruta `no_auth`.
-- El control-plane ata licencia a usuario, dispositivo, activo y sesion.
-- El manifest tambien queda condicionado al mismo token y binding, no solo la licencia.
+- El control-plane ata manifest, contenido y licencia a usuario, dispositivo, instancia, activo y sesion.
+- El manifest y todos los objetos del activo CENC local quedan condicionados al mismo token y binding.
 - Las rutas del origen local se validan contra el activo incluido en el `playbackToken`; un token de otro activo recibe `403`.
-- El bypass de reproductor externo deja de funcionar salvo que se robe un `playbackToken` valido y vigente.
+- El acceso externo anonimo deja de funcionar. Una sesion legitima con token vigente y clave conocida sigue pudiendo reproducir un canal, limitacion documentada en la evaluacion.
 - La interfaz conserva solo metadatos de las operaciones y no imprime los tokens de acceso o reproduccion.

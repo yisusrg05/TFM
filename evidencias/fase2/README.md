@@ -22,6 +22,18 @@ El segundo escenario inició una reproducción válida y envió ocho logins inco
 
 `pcap/fase2_00_evaluacion_completa.pcapng` agrega ambos escenarios: 194 paquetes y 227.788 bytes.
 
+## Key Leak y CDN leeching
+
+La ampliación ha utilizado una única sesión válida y la clave CENC conocida. Se han servido tres objetos de contenido (253.023 bytes) sin petición de licencia y el navegador ha reproducido el vídeo. Después del tercer objeto, Redis ha registrado una sola vez `key_leak.pattern_detected` y el score ha aumentado a 20 con `POSSIBLE_KEY_LEAK_LICENSE_BYPASS`; la cuarta solicitud no ha duplicado la puntuación.
+
+- `capturas/fase2_03_cdn_leeching_caso_positivo.png`: reproducción positiva, bytes, ausencia de licencia y riesgo.
+- `capturas/fase2_04_cdn_leeching_controles.png`: CORS, concurrencia, instancia copiada, cruce de activo y ausencia de token.
+- `pcap/fase2_03_cdn_leeching.pcap`: 220 paquetes, 343.886 bytes, 18 solicitudes y 18 respuestas HTTP.
+- `json/fase2_03_cdn_leeching.json`: estado, score, razones y eventos Redis.
+- `json/fase2_03_cdn_leeching_http.json`: resumen HTTP seguro.
+
+La distribución ha sido: once respuestas 200, una 201, cuatro 401, una 403 y una 409. El PCAP complementario se conserva de forma independiente y no se ha añadido al PCAPNG de la batería original.
+
 ## Filtros de Wireshark
 
 ```text
@@ -29,7 +41,7 @@ http.request
 http.request.uri == "/playback/session" || http.request.uri == "/auth/login"
 http.response.code == 401 || http.response.code == 409
 http.request.uri contains "admin/bans" || http.request.uri contains "admin/overview"
+http.request.uri contains "dash-known-key"
 ```
 
 Las cabeceras de autorización no se incluyen en los resúmenes JSON, aunque permanecen dentro de los PCAP brutos como credenciales efímeras del laboratorio.
-

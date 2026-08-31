@@ -1,0 +1,518 @@
+{
+  "generatedAt": "2026-08-31T10:43:59.284730Z",
+  "campaign": "key-leak-cdn-leeching",
+  "summary": {
+    "total": 27,
+    "passed": 27,
+    "failed": 0
+  },
+  "checks": [
+    {
+      "id": "CDN-F0-MANIFEST-PUBLIC",
+      "phase": "fase0",
+      "description": "Manifest local sin token",
+      "expected": "HTTP 200",
+      "observed": 200,
+      "passed": true
+    },
+    {
+      "id": "CDN-F0-INIT-PUBLIC",
+      "phase": "fase0",
+      "description": "Inicialización sin token",
+      "expected": "HTTP 200",
+      "observed": 200,
+      "passed": true
+    },
+    {
+      "id": "CDN-F0-SEGMENT-PUBLIC",
+      "phase": "fase0",
+      "description": "Segmento cifrado sin token",
+      "expected": "HTTP 200",
+      "observed": 200,
+      "passed": true
+    },
+    {
+      "id": "CDN-F1-MANIFEST-NO-TOKEN",
+      "phase": "fase1",
+      "description": "Manifest sin playbackToken",
+      "expected": "HTTP 401",
+      "observed": 401,
+      "passed": true
+    },
+    {
+      "id": "CDN-F1-SEGMENT-NO-TOKEN",
+      "phase": "fase1",
+      "description": "Segmento sin playbackToken",
+      "expected": "HTTP 401",
+      "observed": 401,
+      "passed": true
+    },
+    {
+      "id": "CDN-F1-SESSION-VALID",
+      "phase": "fase1",
+      "description": "Única sesión externa autorizada",
+      "expected": "HTTP 201",
+      "observed": 201,
+      "passed": true
+    },
+    {
+      "id": "CDN-F1-MANIFEST-VALID",
+      "phase": "fase1",
+      "description": "Cliente no sujeto a CORS con token válido",
+      "expected": "HTTP 200 DASH",
+      "observed": 200,
+      "passed": true
+    },
+    {
+      "id": "CDN-F1-CORS-HOSTILE",
+      "phase": "fase1",
+      "description": "Origen web externo no autorizado",
+      "expected": "ACAO distinto del origen atacante",
+      "observed": {
+        "status": 200,
+        "origin": "http://localhost:9302",
+        "allowOrigin": "http://localhost:9300"
+      },
+      "passed": true
+    },
+    {
+      "id": "CDN-F1-CONTENT-VALID",
+      "phase": "fase1",
+      "description": "Tres objetos de contenido con token válido",
+      "expected": "HTTP 200/200/200",
+      "observed": [
+        200,
+        200,
+        200
+      ],
+      "passed": true
+    },
+    {
+      "id": "CDN-F1-SECOND-SESSION",
+      "phase": "fase1",
+      "description": "Segunda sesión para la misma cuenta",
+      "expected": "HTTP 409",
+      "observed": 409,
+      "passed": true
+    },
+    {
+      "id": "CDN-F1-CLONED-INSTANCE",
+      "phase": "fase1",
+      "description": "Mismo token desde otra instancia",
+      "expected": "HTTP 401",
+      "observed": 401,
+      "passed": true
+    },
+    {
+      "id": "CDN-F1-CROSS-ASSET",
+      "phase": "fase1",
+      "description": "Token del canal local aplicado a otro activo",
+      "expected": "HTTP 403",
+      "observed": 403,
+      "passed": true
+    },
+    {
+      "id": "CDN-F1-STOP",
+      "phase": "fase1",
+      "description": "Parada explícita de la sesión externa",
+      "expected": "HTTP 200",
+      "observed": 200,
+      "passed": true
+    },
+    {
+      "id": "CDN-F1-AFTER-STOP",
+      "phase": "fase1",
+      "description": "Segmento tras detener la sesión",
+      "expected": "HTTP 401",
+      "observed": 401,
+      "passed": true
+    },
+    {
+      "id": "CDN-F2-MANIFEST-NO-TOKEN",
+      "phase": "fase2",
+      "description": "Manifest sin playbackToken",
+      "expected": "HTTP 401",
+      "observed": 401,
+      "passed": true
+    },
+    {
+      "id": "CDN-F2-SEGMENT-NO-TOKEN",
+      "phase": "fase2",
+      "description": "Segmento sin playbackToken",
+      "expected": "HTTP 401",
+      "observed": 401,
+      "passed": true
+    },
+    {
+      "id": "CDN-F2-SESSION-VALID",
+      "phase": "fase2",
+      "description": "Única sesión externa autorizada",
+      "expected": "HTTP 201",
+      "observed": 201,
+      "passed": true
+    },
+    {
+      "id": "CDN-F2-MANIFEST-VALID",
+      "phase": "fase2",
+      "description": "Cliente no sujeto a CORS con token válido",
+      "expected": "HTTP 200 DASH",
+      "observed": 200,
+      "passed": true
+    },
+    {
+      "id": "CDN-F2-CORS-HOSTILE",
+      "phase": "fase2",
+      "description": "Origen web externo no autorizado",
+      "expected": "ACAO distinto del origen atacante",
+      "observed": {
+        "status": 200,
+        "origin": "http://localhost:9402",
+        "allowOrigin": "http://localhost:9400"
+      },
+      "passed": true
+    },
+    {
+      "id": "CDN-F2-CONTENT-VALID",
+      "phase": "fase2",
+      "description": "Tres objetos de contenido con token válido",
+      "expected": "HTTP 200/200/200",
+      "observed": [
+        200,
+        200,
+        200
+      ],
+      "passed": true
+    },
+    {
+      "id": "CDN-F2-SECOND-SESSION",
+      "phase": "fase2",
+      "description": "Segunda sesión para la misma cuenta",
+      "expected": "HTTP 409",
+      "observed": 409,
+      "passed": true
+    },
+    {
+      "id": "CDN-F2-CLONED-INSTANCE",
+      "phase": "fase2",
+      "description": "Mismo token desde otra instancia",
+      "expected": "HTTP 401",
+      "observed": 401,
+      "passed": true
+    },
+    {
+      "id": "CDN-F2-CROSS-ASSET",
+      "phase": "fase2",
+      "description": "Token del canal local aplicado a otro activo",
+      "expected": "HTTP 403",
+      "observed": 403,
+      "passed": true
+    },
+    {
+      "id": "CDN-F2-KEY-LEAK-RISK",
+      "phase": "fase2",
+      "description": "Contenido sin licencia genera riesgo una vez",
+      "expected": "+20 y razón específica",
+      "observed": {
+        "score": 20,
+        "reasons": [
+          "POSSIBLE_KEY_LEAK_LICENSE_BYPASS"
+        ],
+        "events": 1
+      },
+      "passed": true
+    },
+    {
+      "id": "CDN-F2-RISK-ONCE",
+      "phase": "fase2",
+      "description": "La señal no se duplica en la misma sesión",
+      "expected": "Score permanece en 20",
+      "observed": 20,
+      "passed": true
+    },
+    {
+      "id": "CDN-F2-STOP",
+      "phase": "fase2",
+      "description": "Parada explícita de la sesión externa",
+      "expected": "HTTP 200",
+      "observed": 200,
+      "passed": true
+    },
+    {
+      "id": "CDN-F2-AFTER-STOP",
+      "phase": "fase2",
+      "description": "Segmento tras detener la sesión",
+      "expected": "HTTP 401",
+      "observed": 401,
+      "passed": true
+    }
+  ],
+  "phaseSummaries": [
+    {
+      "phase": "fase0",
+      "manifestStatus": 200,
+      "initializationStatus": 200,
+      "segmentStatus": 200,
+      "bytesAccessibleWithoutToken": 138757,
+      "existingPlaybackEvidence": "evidencias/fase0/capturas/fase0_03_clearkey_sin_licencia.png"
+    },
+    {
+      "phase": "fase1",
+      "sessionId": "b9fba842-b280-46d0-bd13-051b20dd4b27",
+      "assetId": "local-cenc-clearkey",
+      "manifestStatus": 200,
+      "contentStatuses": [
+        200,
+        200,
+        200
+      ],
+      "contentBytesServed": 253023,
+      "contentLatencyMs": [
+        30.812,
+        16.716,
+        12.898
+      ],
+      "licenseRequests": 0,
+      "cors": {
+        "hostileOrigin": "http://localhost:9302",
+        "allowOrigin": "http://localhost:9300",
+        "httpStatus": 200
+      },
+      "secondSessionStatus": 409,
+      "clonedInstanceStatus": 401,
+      "crossAssetStatus": 403,
+      "riskScore": null,
+      "riskReasons": [],
+      "keyLeakEvents": 0,
+      "postStopStatus": 401,
+      "overview": null
+    },
+    {
+      "phase": "fase2",
+      "sessionId": "06c5bbb1-6592-4721-926f-08e103b7984a",
+      "assetId": "local-cenc-clearkey",
+      "manifestStatus": 200,
+      "contentStatuses": [
+        200,
+        200,
+        200
+      ],
+      "contentBytesServed": 253023,
+      "contentLatencyMs": [
+        20.159,
+        31.727,
+        20.707
+      ],
+      "licenseRequests": 0,
+      "cors": {
+        "hostileOrigin": "http://localhost:9402",
+        "allowOrigin": "http://localhost:9400",
+        "httpStatus": 200
+      },
+      "secondSessionStatus": 409,
+      "clonedInstanceStatus": 401,
+      "crossAssetStatus": 403,
+      "riskScore": 20,
+      "riskReasons": [
+        "POSSIBLE_KEY_LEAK_LICENSE_BYPASS"
+      ],
+      "keyLeakEvents": 1,
+      "postStopStatus": 401,
+      "overview": {
+        "accountId": "acc-allowed-001",
+        "activeSessions": 1,
+        "sessions": [
+          {
+            "sessionId": "06c5bbb1-6592-4721-926f-08e103b7984a",
+            "accountId": "acc-allowed-001",
+            "deviceId": "cdn-leech-fase2",
+            "clientInstanceId": "cdn-leech-instance-fase2",
+            "assetId": "local-cenc-clearkey",
+            "ip": "172.21.0.1",
+            "status": "active",
+            "startedAt": 1788173038999,
+            "lastHeartbeatAt": 1788173039231,
+            "manifestRequestedAt": 1788173039056,
+            "contentRequestCount": 4,
+            "keyLeakRiskAppliedAt": 1788173039130
+          }
+        ],
+        "risk": {
+          "accountId": "acc-allowed-001",
+          "score": 20,
+          "reasons": [
+            "POSSIBLE_KEY_LEAK_LICENSE_BYPASS"
+          ],
+          "lastUpdatedAt": "2026-08-31T10:43:59.132Z"
+        },
+        "bans": [],
+        "recentEvents": [
+          {
+            "sessionId": "06c5bbb1-6592-4721-926f-08e103b7984a",
+            "accountId": "acc-allowed-001",
+            "path": "dash-known-key/video_3.m4s",
+            "risk": {
+              "accountId": "acc-allowed-001",
+              "score": 20,
+              "reasons": [
+                "POSSIBLE_KEY_LEAK_LICENSE_BYPASS"
+              ],
+              "lastUpdatedAt": "2026-08-31T10:43:59.132Z"
+            },
+            "id": "954e2eb6-887b-43a2-9430-aa7372961c3e",
+            "type": "content.request",
+            "timestamp": "2026-08-31T10:43:59.237Z"
+          },
+          {
+            "sessionId": "06c5bbb1-6592-4721-926f-08e103b7984a",
+            "accountId": "acc-allowed-001",
+            "expectedClientInstanceId": "cdn-leech-instance-fase2",
+            "receivedClientInstanceId": "cdn-leech-instance-fase2-clone",
+            "ip": "172.21.0.1",
+            "id": "f168272f-3f13-4d34-97d4-8a6eccadaaa7",
+            "type": "playback.client_instance_rejected",
+            "timestamp": "2026-08-31T10:43:59.167Z"
+          },
+          {
+            "accountId": "acc-allowed-001",
+            "deviceId": "cdn-leech-fase2",
+            "ip": "172.21.0.1",
+            "id": "232ab5d9-bc2d-4f55-8d33-dee9b8ed53e6",
+            "type": "playback.concurrency_rejected",
+            "timestamp": "2026-08-31T10:43:59.149Z"
+          },
+          {
+            "sessionId": "06c5bbb1-6592-4721-926f-08e103b7984a",
+            "accountId": "acc-allowed-001",
+            "path": "dash-known-key/video_2.m4s",
+            "risk": {
+              "accountId": "acc-allowed-001",
+              "score": 20,
+              "reasons": [
+                "POSSIBLE_KEY_LEAK_LICENSE_BYPASS"
+              ],
+              "lastUpdatedAt": "2026-08-31T10:43:59.132Z"
+            },
+            "id": "b72e93f4-9072-480b-a68d-601bf1756d02",
+            "type": "content.request",
+            "timestamp": "2026-08-31T10:43:59.138Z"
+          },
+          {
+            "accountId": "acc-allowed-001",
+            "scoreAdded": 20,
+            "reason": "POSSIBLE_KEY_LEAK_LICENSE_BYPASS",
+            "context": {
+              "sessionId": "06c5bbb1-6592-4721-926f-08e103b7984a",
+              "contentRequestCount": 3
+            },
+            "risk": {
+              "accountId": "acc-allowed-001",
+              "score": 20,
+              "reasons": [
+                "POSSIBLE_KEY_LEAK_LICENSE_BYPASS"
+              ],
+              "lastUpdatedAt": "2026-08-31T10:43:59.132Z"
+            },
+            "id": "fe42f91c-8f9f-4bcb-9280-a70f070d05ba",
+            "type": "risk.incremented",
+            "timestamp": "2026-08-31T10:43:59.132Z"
+          },
+          {
+            "sessionId": "06c5bbb1-6592-4721-926f-08e103b7984a",
+            "accountId": "acc-allowed-001",
+            "assetId": "local-cenc-clearkey",
+            "contentRequestCount": 3,
+            "licenseRequested": false,
+            "id": "7eddcf69-54a8-401f-9c4f-1d8ca35cba27",
+            "type": "key_leak.pattern_detected",
+            "timestamp": "2026-08-31T10:43:59.131Z"
+          },
+          {
+            "sessionId": "06c5bbb1-6592-4721-926f-08e103b7984a",
+            "accountId": "acc-allowed-001",
+            "path": "dash-known-key/video_1.m4s",
+            "risk": {
+              "accountId": "acc-allowed-001",
+              "score": 0,
+              "reasons": [],
+              "lastUpdatedAt": "2026-08-31T10:43:58.977Z"
+            },
+            "id": "d69d185f-cea9-47d6-a731-694d6de846cd",
+            "type": "content.request",
+            "timestamp": "2026-08-31T10:43:59.115Z"
+          },
+          {
+            "sessionId": "06c5bbb1-6592-4721-926f-08e103b7984a",
+            "accountId": "acc-allowed-001",
+            "path": "dash-known-key/video_init.mp4",
+            "risk": {
+              "accountId": "acc-allowed-001",
+              "score": 0,
+              "reasons": [],
+              "lastUpdatedAt": "2026-08-31T10:43:58.977Z"
+            },
+            "id": "bc15735f-871f-473c-b4f0-7f73b78695ed",
+            "type": "content.request",
+            "timestamp": "2026-08-31T10:43:59.086Z"
+          },
+          {
+            "sessionId": "06c5bbb1-6592-4721-926f-08e103b7984a",
+            "accountId": "acc-allowed-001",
+            "assetId": "local-cenc-clearkey",
+            "risk": {
+              "accountId": "acc-allowed-001",
+              "score": 0,
+              "reasons": [],
+              "lastUpdatedAt": "2026-08-31T10:43:58.977Z"
+            },
+            "id": "1d8f1ac3-6907-4af3-8ed8-a4998a8f920d",
+            "type": "manifest.request",
+            "timestamp": "2026-08-31T10:43:59.066Z"
+          },
+          {
+            "sessionId": "06c5bbb1-6592-4721-926f-08e103b7984a",
+            "accountId": "acc-allowed-001",
+            "assetId": "local-cenc-clearkey",
+            "risk": {
+              "accountId": "acc-allowed-001",
+              "score": 0,
+              "reasons": [],
+              "lastUpdatedAt": "2026-08-31T10:43:58.977Z"
+            },
+            "id": "260e4bf9-f0c9-4ae3-a405-1ff37cbbcbb1",
+            "type": "manifest.request",
+            "timestamp": "2026-08-31T10:43:59.047Z"
+          },
+          {
+            "sessionId": "06c5bbb1-6592-4721-926f-08e103b7984a",
+            "accountId": "acc-allowed-001",
+            "deviceId": "cdn-leech-fase2",
+            "ip": "172.21.0.1",
+            "risk": {
+              "accountId": "acc-allowed-001",
+              "score": 0,
+              "reasons": [],
+              "lastUpdatedAt": "2026-08-31T10:43:58.977Z"
+            },
+            "id": "83605add-28a0-4f4e-b76c-1ffb4454b0e8",
+            "type": "playback.session_created",
+            "timestamp": "2026-08-31T10:43:59.001Z"
+          },
+          {
+            "accountId": "acc-allowed-001",
+            "deviceId": "cdn-leech-fase2",
+            "ip": "172.21.0.1",
+            "risk": {
+              "accountId": "acc-allowed-001",
+              "score": 0,
+              "reasons": [],
+              "lastUpdatedAt": "2026-08-31T10:43:58.977Z"
+            },
+            "id": "18d3ec8f-c461-443d-8a8f-0dc68383641e",
+            "type": "auth.success",
+            "timestamp": "2026-08-31T10:43:58.977Z"
+          }
+        ]
+      }
+    }
+  ]
+}

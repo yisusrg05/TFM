@@ -73,6 +73,7 @@
         manifestUrl: null,
         heartbeatTimer: null,
         deviceId: `lab-f1-${crypto.randomUUID()}`,
+        clientInstanceId: `audit-f1-${crypto.randomUUID()}`,
         events: []
       };
 
@@ -119,11 +120,16 @@
       player.getNetworkingEngine().registerRequestFilter((type, request) => {
         const requestType = shaka.net.NetworkingEngine.RequestType;
         if (type === requestType.LICENSE) request.headers['Content-Type'] = 'application/octet-stream';
-        if (state.playbackToken && (type === requestType.MANIFEST || type === requestType.LICENSE)) {
+        const protectedSegment = type === requestType.SEGMENT && request.uris.some((uri) => uri.startsWith(`${API_BASE}/content/`));
+        if (state.playbackToken && (type === requestType.MANIFEST || type === requestType.LICENSE || protectedSegment)) {
           request.headers.Authorization = `Bearer ${state.playbackToken}`;
           request.headers['X-Playback-Session-Id'] = state.sessionId;
           request.headers['X-Device-Id'] = state.deviceId;
-          addEvent(type === requestType.MANIFEST ? 'MANIFEST_REQUEST_WITH_TOKEN' : 'LICENSE_REQUEST_WITH_TOKEN', { uri: request.uris[0] });
+          request.headers['X-Client-Instance-Id'] = state.clientInstanceId;
+          const eventType = type === requestType.MANIFEST
+            ? 'MANIFEST_REQUEST_WITH_TOKEN'
+            : type === requestType.LICENSE ? 'LICENSE_REQUEST_WITH_TOKEN' : 'CONTENT_REQUEST_WITH_TOKEN';
+          addEvent(eventType, { uri: request.uris[0] });
         }
       });
 
@@ -141,7 +147,7 @@
         const playback = await requestJson('/playback/session', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${state.accessToken}` },
-          body: JSON.stringify({ assetId: 'sintel-widevine' })
+          body: JSON.stringify({ assetId: 'sintel-widevine', clientInstanceId: state.clientInstanceId })
         });
         state.playbackToken = playback.playbackToken;
         state.sessionId = playback.session.sessionId;
@@ -159,7 +165,7 @@
       async function heartbeat() {
         const data = await requestJson('/playback/heartbeat', {
           method: 'POST',
-          headers: { Authorization: `Bearer ${state.playbackToken}`, 'X-Playback-Session-Id': state.sessionId }
+          headers: { Authorization: `Bearer ${state.playbackToken}`, 'X-Playback-Session-Id': state.sessionId, 'X-Client-Instance-Id': state.clientInstanceId }
         });
         state.playbackToken = data.playbackToken;
       }
@@ -186,10 +192,10 @@
 
       async function negativeTests() {
         const noToken = await probe(state.manifestUrl);
-        const altered = await probe(state.manifestUrl, { Authorization: `Bearer ${state.playbackToken}x`, 'X-Playback-Session-Id': state.sessionId });
-        const wrongSession = await probe(state.manifestUrl, { Authorization: `Bearer ${state.playbackToken}`, 'X-Playback-Session-Id': 'wrong-session' });
+        const altered = await probe(state.manifestUrl, { Authorization: `Bearer ${state.playbackToken}x`, 'X-Playback-Session-Id': state.sessionId, 'X-Client-Instance-Id': state.clientInstanceId });
+        const wrongSession = await probe(state.manifestUrl, { Authorization: `Bearer ${state.playbackToken}`, 'X-Playback-Session-Id': 'wrong-session', 'X-Client-Instance-Id': state.clientInstanceId });
         const wrongAssetUrl = state.manifestUrl.replace('sintel-widevine', 'otro-activo');
-        const wrongAsset = await probe(wrongAssetUrl, { Authorization: `Bearer ${state.playbackToken}`, 'X-Playback-Session-Id': state.sessionId });
+        const wrongAsset = await probe(wrongAssetUrl, { Authorization: `Bearer ${state.playbackToken}`, 'X-Playback-Session-Id': state.sessionId, 'X-Client-Instance-Id': state.clientInstanceId });
         addEvent('NEGATIVE_TESTS', { noToken, alteredToken: altered, wrongSession, wrongAsset });
         const passed = noToken.status === 401 && altered.status === 401 && wrongSession.status === 409 && wrongAsset.status === 403;
         setStatus(passed ? 'Pruebas negativas superadas: 401, 401, 409 y 403.' : 'Alguna prueba negativa no produjo el resultado esperado.', passed ? 'ok' : 'bad');
@@ -197,7 +203,7 @@
 
       async function stop() {
         if (state.playbackToken) {
-          await requestJson('/playback/stop', { method: 'POST', headers: { Authorization: `Bearer ${state.playbackToken}`, 'X-Playback-Session-Id': state.sessionId } });
+          await requestJson('/playback/stop', { method: 'POST', headers: { Authorization: `Bearer ${state.playbackToken}`, 'X-Playback-Session-Id': state.sessionId, 'X-Client-Instance-Id': state.clientInstanceId } });
         }
         clearInterval(state.heartbeatTimer);
         await player.unload();

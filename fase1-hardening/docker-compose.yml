@@ -80,6 +80,23 @@ services:
       - ott-fase1-net
     restart: unless-stopped
 
+  key-leak-lab:
+    build:
+      context: ../cdn-leeching-lab
+    container_name: tfm-fase1-key-leak-lab
+    depends_on:
+      - cdn
+    environment:
+      - PORT=8080
+      - PHASE=fase1
+      - CDN_BASE_URL=http://cdn
+      - BROWSER_CDN_BASE_URL=http://localhost:9080
+    ports:
+      - "9302:8080"
+    networks:
+      - ott-fase1-net
+    restart: unless-stopped
+
 networks:
   ott-fase1-net:
     name: tfm-fase1-net

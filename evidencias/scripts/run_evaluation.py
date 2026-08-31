@@ -148,12 +148,19 @@ def request(
     }
 
 
-def bearer(token: str, session_id: str | None = None, origin: str | None = None) -> dict[str, str]:
+def bearer(
+    token: str,
+    session_id: str | None = None,
+    origin: str | None = None,
+    client_instance_id: str | None = None,
+) -> dict[str, str]:
     headers = {"Authorization": f"Bearer {token}"}
     if session_id:
         headers["X-Playback-Session-Id"] = session_id
     if origin:
         headers["Origin"] = origin
+    if client_instance_id:
+        headers["X-Client-Instance-Id"] = client_instance_id
     return headers
 
 
@@ -280,6 +287,7 @@ class FunctionalSuite:
         origin = PHASES[phase]["origin"]
         prefix = "F1" if phase == "fase1" else "F2"
         device_id = f"eval-{phase}-baseline"
+        client_instance_id = f"eval-instance-{phase}-baseline"
 
         health = request("GET", f"{base}/health")
         self.check(f"{prefix}-HEALTH", phase, "disponibilidad", "Health del plano de control", health, "HTTP 200", lambda r: r["status"] == 200)
@@ -294,58 +302,58 @@ class FunctionalSuite:
         denied = request("POST", f"{base}/auth/login", json_body={"email": "usuario-denegado@tfm.local", "password": "demo123", "deviceId": f"{device_id}-denied"}, headers={"Origin": origin})
         self.check(f"{prefix}-DENIED-LOGIN", phase, "autenticacion", "Login del usuario sin entitlement", denied, "HTTP 200", lambda r: r["status"] == 200)
         denied_token = denied["body"]["accessToken"]
-        denied_session = request("POST", f"{base}/playback/session", json_body={"assetId": "sintel-widevine"}, headers={**bearer(denied_token, origin=origin)})
+        denied_session = request("POST", f"{base}/playback/session", json_body={"assetId": "sintel-widevine", "clientInstanceId": f"{client_instance_id}-denied"}, headers={**bearer(denied_token, origin=origin)})
         self.check(f"{prefix}-DENIED-SESSION", phase, "autorizacion", "Usuario sin entitlement crea sesión", denied_session, "HTTP 403", lambda r: r["status"] == 403)
 
         if phase == "fase2":
             denied_admin = request("GET", f"{base}/admin/overview", headers={**bearer(denied_token, origin=origin)})
             self.check("F2-DENIED-ADMIN", phase, "administracion", "Usuario sin rol accede a observabilidad", denied_admin, "HTTP 403", lambda r: r["status"] == 403)
 
-        session = request("POST", f"{base}/playback/session", json_body={"assetId": "sintel-widevine"}, headers={**bearer(access_token, origin=origin)})
+        session = request("POST", f"{base}/playback/session", json_body={"assetId": "sintel-widevine", "clientInstanceId": client_instance_id}, headers={**bearer(access_token, origin=origin)})
         self.check(f"{prefix}-SESSION-OK", phase, "sesion", "Primera sesión de reproducción", session, "HTTP 201", lambda r: r["status"] == 201)
         playback_token = session["body"]["playbackToken"]
         session_id = session["body"]["session"]["sessionId"]
 
-        concurrent = request("POST", f"{base}/playback/session", json_body={"assetId": "sintel-widevine"}, headers={**bearer(access_token, origin=origin)})
+        concurrent = request("POST", f"{base}/playback/session", json_body={"assetId": "sintel-widevine", "clientInstanceId": f"{client_instance_id}-concurrent"}, headers={**bearer(access_token, origin=origin)})
         self.check(f"{prefix}-CONCURRENCY", phase, "concurrencia", "Segunda sesión simultánea", concurrent, "HTTP 409 CONCURRENCY_LIMIT", lambda r: r["status"] == 409 and (r["body"] or {}).get("error") == "CONCURRENCY_LIMIT")
 
         manifest_no_token = request("GET", f"{base}/manifest/sintel-widevine", headers={"Origin": origin})
         self.check(f"{prefix}-MANIFEST-NO-TOKEN", phase, "manifest", "Manifest sin token", manifest_no_token, "HTTP 401", lambda r: r["status"] == 401)
 
-        altered = request("GET", f"{base}/manifest/sintel-widevine", headers={**bearer(f"{playback_token}x", session_id, origin)})
+        altered = request("GET", f"{base}/manifest/sintel-widevine", headers={**bearer(f"{playback_token}x", session_id, origin, client_instance_id)})
         self.check(f"{prefix}-MANIFEST-ALTERED", phase, "manifest", "Manifest con token alterado", altered, "HTTP 401", lambda r: r["status"] == 401)
 
-        wrong_session = request("GET", f"{base}/manifest/sintel-widevine", headers={**bearer(playback_token, "wrong-session", origin)})
+        wrong_session = request("GET", f"{base}/manifest/sintel-widevine", headers={**bearer(playback_token, "wrong-session", origin, client_instance_id)})
         self.check(f"{prefix}-MANIFEST-WRONG-SESSION", phase, "binding", "Manifest con sesión distinta", wrong_session, "HTTP 409", lambda r: r["status"] == 409)
 
-        wrong_asset = request("GET", f"{base}/manifest/otro-activo", headers={**bearer(playback_token, session_id, origin)})
+        wrong_asset = request("GET", f"{base}/manifest/otro-activo", headers={**bearer(playback_token, session_id, origin, client_instance_id)})
         self.check(f"{prefix}-MANIFEST-WRONG-ASSET", phase, "binding", "Manifest de otro activo", wrong_asset, "HTTP 403", lambda r: r["status"] == 403)
 
-        manifest_ok = request("GET", f"{base}/manifest/sintel-widevine", headers={**bearer(playback_token, session_id, origin)})
+        manifest_ok = request("GET", f"{base}/manifest/sintel-widevine", headers={**bearer(playback_token, session_id, origin, client_instance_id)})
         self.check(f"{prefix}-MANIFEST-OK", phase, "manifest", "Manifest protegido legítimo", manifest_ok, "HTTP 200 DASH", lambda r: r["status"] == 200 and "dash+xml" in r["headers"].get("content-type", ""))
 
         content_no_token = request("GET", f"{base}/content/dash-known-key/stream.mpd", headers={"Origin": origin})
         self.check(f"{prefix}-CONTENT-NO-TOKEN", phase, "contenido", "Contenido local sin token", content_no_token, "HTTP 401", lambda r: r["status"] == 401)
 
-        content_wrong_asset = request("GET", f"{base}/content/dash-known-key/stream.mpd", headers={**bearer(playback_token, session_id, origin)})
+        content_wrong_asset = request("GET", f"{base}/content/dash-known-key/stream.mpd", headers={**bearer(playback_token, session_id, origin, client_instance_id)})
         self.check(f"{prefix}-CONTENT-WRONG-ASSET", phase, "binding", "Token Widevine intenta contenido de otro activo", content_wrong_asset, "HTTP 403", lambda r: r["status"] == 403)
 
         license_no_token = request("POST", f"{base}/license", binary_body=b"tfm-test", headers={"Content-Type": "application/octet-stream", "Origin": origin})
         self.check(f"{prefix}-LICENSE-NO-TOKEN", phase, "licencia", "Licencia sin token", license_no_token, "HTTP 401", lambda r: r["status"] == 401)
 
-        license_wrong_session = request("POST", f"{base}/license", binary_body=b"tfm-test", headers={**bearer(playback_token, "wrong-session", origin), "Content-Type": "application/octet-stream"})
+        license_wrong_session = request("POST", f"{base}/license", binary_body=b"tfm-test", headers={**bearer(playback_token, "wrong-session", origin, client_instance_id), "Content-Type": "application/octet-stream"})
         self.check(f"{prefix}-LICENSE-WRONG-SESSION", phase, "binding", "Licencia con sesión distinta", license_wrong_session, "HTTP 409", lambda r: r["status"] == 409)
 
         no_auth_without_token = request("POST", f"{base}/license/no_auth", binary_body=b"tfm-test", headers={"Content-Type": "application/octet-stream", "Origin": origin})
         self.check(f"{prefix}-NO-AUTH-UNAUTH", phase, "superficie", "Ruta heredada sin token", no_auth_without_token, "HTTP 401", lambda r: r["status"] == 401)
 
-        no_auth_with_token = request("POST", f"{base}/license/no_auth", binary_body=b"tfm-test", headers={**bearer(playback_token, session_id, origin), "Content-Type": "application/octet-stream"})
+        no_auth_with_token = request("POST", f"{base}/license/no_auth", binary_body=b"tfm-test", headers={**bearer(playback_token, session_id, origin, client_instance_id), "Content-Type": "application/octet-stream"})
         self.check(f"{prefix}-NO-AUTH-REMOVED", phase, "superficie", "Ruta heredada con token válido", no_auth_with_token, "HTTP 404", lambda r: r["status"] == 404)
 
-        stop = request("POST", f"{base}/playback/stop", headers={**bearer(playback_token, session_id, origin)})
+        stop = request("POST", f"{base}/playback/stop", headers={**bearer(playback_token, session_id, origin, client_instance_id)})
         self.check(f"{prefix}-STOP", phase, "sesion", "Parada explícita", stop, "HTTP 200", lambda r: r["status"] == 200)
 
-        after_stop = request("GET", f"{base}/manifest/sintel-widevine", headers={**bearer(playback_token, session_id, origin)})
+        after_stop = request("GET", f"{base}/manifest/sintel-widevine", headers={**bearer(playback_token, session_id, origin, client_instance_id)})
         self.check(f"{prefix}-TOKEN-AFTER-STOP", phase, "revocacion", "Token después de detener sesión", after_stop, "HTTP 401", lambda r: r["status"] == 401)
 
     def phase2_concurrency(self) -> None:
@@ -353,16 +361,17 @@ class FunctionalSuite:
         base = PHASES["fase2"]["base"]
         origin = PHASES["fase2"]["origin"]
         device_id = "eval-fase2-concurrency"
+        client_instance_id = "eval-instance-fase2-concurrency"
         login = request("POST", f"{base}/auth/login", json_body={"email": "usuario-permitido@tfm.local", "password": "demo123", "deviceId": device_id}, headers={"Origin": origin})
         access_token = login["body"]["accessToken"]
-        session = request("POST", f"{base}/playback/session", json_body={"assetId": "sintel-widevine"}, headers={**bearer(access_token, origin=origin)})
+        session = request("POST", f"{base}/playback/session", json_body={"assetId": "sintel-widevine", "clientInstanceId": client_instance_id}, headers={**bearer(access_token, origin=origin)})
         playback_token = session["body"]["playbackToken"]
         session_id = session["body"]["session"]["sessionId"]
 
         attempts: list[dict[str, Any]] = []
         scores: list[int] = []
         for index in range(1, 6):
-            response = request("POST", f"{base}/playback/session", json_body={"assetId": "sintel-widevine"}, headers={**bearer(access_token, origin=origin)})
+            response = request("POST", f"{base}/playback/session", json_body={"assetId": "sintel-widevine", "clientInstanceId": f"{client_instance_id}-{index}"}, headers={**bearer(access_token, origin=origin)})
             overview = request("GET", f"{base}/admin/overview", headers={**bearer(access_token, origin=origin)})
             score = overview["body"]["overview"]["risk"]["score"]
             scores.append(score)
@@ -391,24 +400,25 @@ class FunctionalSuite:
             bool(account_ban and account_ban.get("reason") == "AUTO_BAN:REPEATED_CONCURRENCY_VIOLATION"),
         )
 
-        manifest_after_ban = request("GET", f"{base}/manifest/sintel-widevine", headers={**bearer(playback_token, session_id, origin)})
+        manifest_after_ban = request("GET", f"{base}/manifest/sintel-widevine", headers={**bearer(playback_token, session_id, origin, client_instance_id)})
         self.check("F2-CONCURRENCY-MANIFEST-BLOCKED", "fase2", "respuesta", "Manifest tras ban de cuenta", manifest_after_ban, "HTTP 401", lambda r: r["status"] == 401)
 
         clear = request("POST", f"{base}/admin/bans/clear", json_body={"type": "account", "subjectId": "acc-allowed-001"}, headers={**bearer(access_token, origin=origin)})
         self.check("F2-CONCURRENCY-CLEAR", "fase2", "recuperacion", "Retirada administrativa del ban de cuenta", clear, "HTTP 200", lambda r: r["status"] == 200)
-        heartbeat = request("POST", f"{base}/playback/heartbeat", headers={**bearer(playback_token, session_id, origin)})
+        heartbeat = request("POST", f"{base}/playback/heartbeat", headers={**bearer(playback_token, session_id, origin, client_instance_id)})
         self.check("F2-CONCURRENCY-RECOVER", "fase2", "recuperacion", "Heartbeat tras retirar ban", heartbeat, "HTTP 200", lambda r: r["status"] == 200)
         renewed_token = heartbeat["body"].get("playbackToken") if heartbeat["status"] == 200 else playback_token
-        request("POST", f"{base}/playback/stop", headers={**bearer(renewed_token, session_id, origin)})
+        request("POST", f"{base}/playback/stop", headers={**bearer(renewed_token, session_id, origin, client_instance_id)})
 
     def phase2_device_ban(self) -> None:
         reset_phase2()
         base = PHASES["fase2"]["base"]
         origin = PHASES["fase2"]["origin"]
         device_id = "eval-fase2-device-ban"
+        client_instance_id = "eval-instance-fase2-device-ban"
         login = request("POST", f"{base}/auth/login", json_body={"email": "usuario-permitido@tfm.local", "password": "demo123", "deviceId": device_id}, headers={"Origin": origin})
         access_token = login["body"]["accessToken"]
-        session = request("POST", f"{base}/playback/session", json_body={"assetId": "sintel-widevine"}, headers={**bearer(access_token, origin=origin)})
+        session = request("POST", f"{base}/playback/session", json_body={"assetId": "sintel-widevine", "clientInstanceId": client_instance_id}, headers={**bearer(access_token, origin=origin)})
         playback_token = session["body"]["playbackToken"]
         session_id = session["body"]["session"]["sessionId"]
 
@@ -423,15 +433,15 @@ class FunctionalSuite:
         device_ban = next((ban for ban in bans if ban.get("type") == "device"), None)
         self.synthetic("F2-DEVICE-BAN", "fase2", "respuesta", "Ban de dispositivo por ráfaga de fallos", "AUTH_FAILURE_BURST", device_ban, bool(device_ban and device_ban.get("reason") == "AUTH_FAILURE_BURST"))
 
-        blocked = request("GET", f"{base}/manifest/sintel-widevine", headers={**bearer(playback_token, session_id, origin)})
+        blocked = request("GET", f"{base}/manifest/sintel-widevine", headers={**bearer(playback_token, session_id, origin, client_instance_id)})
         self.check("F2-DEVICE-MANIFEST-BLOCKED", "fase2", "respuesta", "Manifest tras ban de dispositivo", blocked, "HTTP 401", lambda r: r["status"] == 401)
 
         clear = request("POST", f"{base}/admin/bans/clear", json_body={"type": "device", "subjectId": device_id}, headers={**bearer(access_token, origin=origin)})
         self.check("F2-DEVICE-CLEAR", "fase2", "recuperacion", "Retirada administrativa del ban de dispositivo", clear, "HTTP 200", lambda r: r["status"] == 200)
-        heartbeat = request("POST", f"{base}/playback/heartbeat", headers={**bearer(playback_token, session_id, origin)})
+        heartbeat = request("POST", f"{base}/playback/heartbeat", headers={**bearer(playback_token, session_id, origin, client_instance_id)})
         self.check("F2-DEVICE-RECOVER", "fase2", "recuperacion", "Heartbeat tras retirar ban", heartbeat, "HTTP 200", lambda r: r["status"] == 200)
         renewed_token = heartbeat["body"].get("playbackToken") if heartbeat["status"] == 200 else playback_token
-        request("POST", f"{base}/playback/stop", headers={**bearer(renewed_token, session_id, origin)})
+        request("POST", f"{base}/playback/stop", headers={**bearer(renewed_token, session_id, origin, client_instance_id)})
 
     def topology(self) -> None:
         targets = {
@@ -509,16 +519,17 @@ def run_metrics(iterations: int) -> tuple[list[dict[str, Any]], list[dict[str, A
         login = request("POST", "http://localhost:9080/auth/login", json_body={"email": "usuario-permitido@tfm.local", "password": "demo123", "deviceId": f"metric-f1-{iteration}"}, headers={"Origin": origin})
         sample("fase1", "login", iteration, login, 200)
         access_token = login["body"]["accessToken"]
-        session = request("POST", "http://localhost:9080/playback/session", json_body={"assetId": "sintel-widevine"}, headers=bearer(access_token, origin=origin))
+        client_instance_id = f"metric-instance-f1-{iteration}"
+        session = request("POST", "http://localhost:9080/playback/session", json_body={"assetId": "sintel-widevine", "clientInstanceId": client_instance_id}, headers=bearer(access_token, origin=origin))
         sample("fase1", "autorizar_reproduccion", iteration, session, 201)
         playback_token = session["body"]["playbackToken"]
         session_id = session["body"]["session"]["sessionId"]
-        manifest = request("GET", "http://localhost:9080/manifest/sintel-widevine", headers=bearer(playback_token, session_id, origin))
+        manifest = request("GET", "http://localhost:9080/manifest/sintel-widevine", headers=bearer(playback_token, session_id, origin, client_instance_id))
         sample("fase1", "manifest", iteration, manifest, 200)
-        heartbeat = request("POST", "http://localhost:9080/playback/heartbeat", headers=bearer(playback_token, session_id, origin))
+        heartbeat = request("POST", "http://localhost:9080/playback/heartbeat", headers=bearer(playback_token, session_id, origin, client_instance_id))
         sample("fase1", "heartbeat", iteration, heartbeat, 200)
         playback_token = heartbeat["body"].get("playbackToken", playback_token)
-        stop = request("POST", "http://localhost:9080/playback/stop", headers=bearer(playback_token, session_id, origin))
+        stop = request("POST", "http://localhost:9080/playback/stop", headers=bearer(playback_token, session_id, origin, client_instance_id))
         sample("fase1", "detener_sesion", iteration, stop, 200)
 
     for iteration in range(1, iterations + 1):
@@ -527,16 +538,17 @@ def run_metrics(iterations: int) -> tuple[list[dict[str, Any]], list[dict[str, A
         login = request("POST", "http://localhost:9180/auth/login", json_body={"email": "usuario-permitido@tfm.local", "password": "demo123", "deviceId": f"metric-f2-{iteration}"}, headers={"Origin": origin})
         sample("fase2", "login", iteration, login, 200)
         access_token = login["body"]["accessToken"]
-        session = request("POST", "http://localhost:9180/playback/session", json_body={"assetId": "sintel-widevine"}, headers=bearer(access_token, origin=origin))
+        client_instance_id = f"metric-instance-f2-{iteration}"
+        session = request("POST", "http://localhost:9180/playback/session", json_body={"assetId": "sintel-widevine", "clientInstanceId": client_instance_id}, headers=bearer(access_token, origin=origin))
         sample("fase2", "autorizar_reproduccion", iteration, session, 201)
         playback_token = session["body"]["playbackToken"]
         session_id = session["body"]["session"]["sessionId"]
-        manifest = request("GET", "http://localhost:9180/manifest/sintel-widevine", headers=bearer(playback_token, session_id, origin))
+        manifest = request("GET", "http://localhost:9180/manifest/sintel-widevine", headers=bearer(playback_token, session_id, origin, client_instance_id))
         sample("fase2", "manifest", iteration, manifest, 200)
-        heartbeat = request("POST", "http://localhost:9180/playback/heartbeat", headers=bearer(playback_token, session_id, origin))
+        heartbeat = request("POST", "http://localhost:9180/playback/heartbeat", headers=bearer(playback_token, session_id, origin, client_instance_id))
         sample("fase2", "heartbeat", iteration, heartbeat, 200)
         playback_token = heartbeat["body"].get("playbackToken", playback_token)
-        stop = request("POST", "http://localhost:9180/playback/stop", headers=bearer(playback_token, session_id, origin))
+        stop = request("POST", "http://localhost:9180/playback/stop", headers=bearer(playback_token, session_id, origin, client_instance_id))
         sample("fase2", "detener_sesion", iteration, stop, 200)
 
     summary: list[dict[str, Any]] = []

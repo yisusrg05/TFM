@@ -26,7 +26,8 @@ Esta fase mantiene la proteccion de fase 1 y anade persistencia, eventos, riesgo
   - manuales desde la API admin.
 - Panel web de observabilidad en `http://localhost:9400`.
 - Laboratorio de auditoria y bloqueo en `http://localhost:9401`.
-- Manifest DASH y licencia protegidos por el mismo `playbackToken` efimero.
+- Laboratorio de Key Leak y CDN leeching en `http://localhost:9402`.
+- Manifest DASH, contenido local y licencia protegidos por el mismo `playbackToken` efimero y la misma instancia de cliente.
 
 ## Usuarios de prueba
 
@@ -39,6 +40,7 @@ Esta fase mantiene la proteccion de fase 1 y anade persistencia, eventos, riesgo
 
 - Cliente fase 2: `http://localhost:9400`
 - Laboratorio de auditoria y bloqueo: `http://localhost:9401`
+- Laboratorio de Key Leak / CDN leeching: `http://localhost:9402`
 - CDN fase 2: `http://localhost:9180`
 
 ## Arranque
@@ -70,14 +72,21 @@ Abre `http://localhost:9401` y utiliza `usuario-permitido@tfm.local` / `demo123`
 
 El registro del laboratorio conserva estados y claims utiles para la evidencia, pero no imprime el token completo ni las claves Widevine; estas ultimas permanecen dentro del CDM del navegador.
 
+### Laboratorio de Key Leak y CDN leeching
+
+Abre `http://localhost:9402`. El backend simula un cliente externo que no depende de CORS y permite comparar acceso sin token, origen web no permitido, reproduccion con clave conocida, concurrencia, copia entre instancias, cruce de activo y revocacion por parada.
+
+Una unica sesion valida puede reproducir el activo CENC con la clave conocida sin solicitar licencia. Tras el manifest y tres objetos de contenido, Fase 2 genera una vez por sesion `key_leak.pattern_detected` y suma 20 puntos con `POSSIBLE_KEY_LEAK_LICENSE_BYPASS`. No se aplica un ban inmediato porque una licencia previamente disponible produciria un patron similar. La segunda sesion recibe 409, una instancia distinta recibe 401, otro activo recibe 403 y el token detenido recibe 401.
+
 ## Lectura para el TFM
 
 Esta fase corresponde a la arquitectura defensiva completa:
 
 - Widevine no se usa de forma aislada.
-- La licencia esta condicionada a sesion, identidad, dispositivo, activo y riesgo.
+- Manifest, contenido y licencia estan condicionados a sesion, identidad, dispositivo, instancia, activo y riesgo.
 - El manifest exige el mismo token de reproduccion y deja de ser un punto de entrada publico.
 - El acceso al origen local conserva el binding entre la ruta solicitada y el activo del `playbackToken`.
 - El sistema produce evidencias medibles para el capitulo de evaluacion.
 - La respuesta activa permite bloquear cuenta/dispositivo ante abuso.
+- El consumo de contenido sin una licencia observada aporta una señal heuristica, pero no convierte CORS en un control de autenticacion ni elimina el restreaming desde una sesion legitima.
 - El plano administrativo valida un rol independiente y permanece disponible para observar y retirar un ban; el ban sigue bloqueando login, contenido, heartbeat y licencia.

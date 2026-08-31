@@ -37,6 +37,7 @@ services:
       - HEARTBEAT_GRACE_SECONDS=45
       - AUTO_BAN_THRESHOLD=100
       - EVENT_RETENTION=300
+      - KEY_LEAK_CONTENT_THRESHOLD=3
     networks:
       - ott-fase2-net
     restart: unless-stopped
@@ -89,6 +90,23 @@ services:
       - "9401:80"
     volumes:
       - ./audit-lab:/usr/share/nginx/html:ro
+    networks:
+      - ott-fase2-net
+    restart: unless-stopped
+
+  key-leak-lab:
+    build:
+      context: ../cdn-leeching-lab
+    container_name: tfm-fase2-key-leak-lab
+    depends_on:
+      - cdn
+    environment:
+      - PORT=8080
+      - PHASE=fase2
+      - CDN_BASE_URL=http://cdn
+      - BROWSER_CDN_BASE_URL=http://localhost:9180
+    ports:
+      - "9402:8080"
     networks:
       - ott-fase2-net
     restart: unless-stopped

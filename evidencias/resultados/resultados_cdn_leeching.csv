@@ -1,0 +1,28 @@
+﻿id,phase,description,expected,observed,passed
+CDN-F0-MANIFEST-PUBLIC,fase0,Manifest local sin token,HTTP 200,200,True
+CDN-F0-INIT-PUBLIC,fase0,Inicialización sin token,HTTP 200,200,True
+CDN-F0-SEGMENT-PUBLIC,fase0,Segmento cifrado sin token,HTTP 200,200,True
+CDN-F1-MANIFEST-NO-TOKEN,fase1,Manifest sin playbackToken,HTTP 401,401,True
+CDN-F1-SEGMENT-NO-TOKEN,fase1,Segmento sin playbackToken,HTTP 401,401,True
+CDN-F1-SESSION-VALID,fase1,Única sesión externa autorizada,HTTP 201,201,True
+CDN-F1-MANIFEST-VALID,fase1,Cliente no sujeto a CORS con token válido,HTTP 200 DASH,200,True
+CDN-F1-CORS-HOSTILE,fase1,Origen web externo no autorizado,ACAO distinto del origen atacante,"{""status"": 200, ""origin"": ""http://localhost:9302"", ""allowOrigin"": ""http://localhost:9300""}",True
+CDN-F1-CONTENT-VALID,fase1,Tres objetos de contenido con token válido,HTTP 200/200/200,"[200, 200, 200]",True
+CDN-F1-SECOND-SESSION,fase1,Segunda sesión para la misma cuenta,HTTP 409,409,True
+CDN-F1-CLONED-INSTANCE,fase1,Mismo token desde otra instancia,HTTP 401,401,True
+CDN-F1-CROSS-ASSET,fase1,Token del canal local aplicado a otro activo,HTTP 403,403,True
+CDN-F1-STOP,fase1,Parada explícita de la sesión externa,HTTP 200,200,True
+CDN-F1-AFTER-STOP,fase1,Segmento tras detener la sesión,HTTP 401,401,True
+CDN-F2-MANIFEST-NO-TOKEN,fase2,Manifest sin playbackToken,HTTP 401,401,True
+CDN-F2-SEGMENT-NO-TOKEN,fase2,Segmento sin playbackToken,HTTP 401,401,True
+CDN-F2-SESSION-VALID,fase2,Única sesión externa autorizada,HTTP 201,201,True
+CDN-F2-MANIFEST-VALID,fase2,Cliente no sujeto a CORS con token válido,HTTP 200 DASH,200,True
+CDN-F2-CORS-HOSTILE,fase2,Origen web externo no autorizado,ACAO distinto del origen atacante,"{""status"": 200, ""origin"": ""http://localhost:9402"", ""allowOrigin"": ""http://localhost:9400""}",True
+CDN-F2-CONTENT-VALID,fase2,Tres objetos de contenido con token válido,HTTP 200/200/200,"[200, 200, 200]",True
+CDN-F2-SECOND-SESSION,fase2,Segunda sesión para la misma cuenta,HTTP 409,409,True
+CDN-F2-CLONED-INSTANCE,fase2,Mismo token desde otra instancia,HTTP 401,401,True
+CDN-F2-CROSS-ASSET,fase2,Token del canal local aplicado a otro activo,HTTP 403,403,True
+CDN-F2-KEY-LEAK-RISK,fase2,Contenido sin licencia genera riesgo una vez,+20 y razón específica,"{""score"": 20, ""reasons"": [""POSSIBLE_KEY_LEAK_LICENSE_BYPASS""], ""events"": 1}",True
+CDN-F2-RISK-ONCE,fase2,La señal no se duplica en la misma sesión,Score permanece en 20,20,True
+CDN-F2-STOP,fase2,Parada explícita de la sesión externa,HTTP 200,200,True
+CDN-F2-AFTER-STOP,fase2,Segmento tras detener la sesión,HTTP 401,401,True
