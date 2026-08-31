@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="660" viewBox="0 0 1200 660" role="img" aria-labelledby="title desc">
+  <title id="title">Flujo general de distribución OTT con DRM</title>
+  <desc id="desc">Cadena desde la codificación y el empaquetado hasta el origen, la CDN, el reproductor y el servidor de licencias.</desc>
+  <defs>
+    <marker id="arrow-o" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#333333"/>
+    </marker>
+    <style>
+      text { font-family: Arial, Helvetica, sans-serif; fill: #111111; }
+      .box { fill: #FFFFFF; stroke: #3F3F3F; stroke-width: 1.5; }
+      .connector { stroke: #333333; stroke-width: 1.5; fill: none; marker-end: url(#arrow-o); }
+      .secondary { stroke: #555555; stroke-width: 1.4; stroke-dasharray: 7 6; fill: none; marker-end: url(#arrow-o); }
+      .heading { font-size: 25px; font-weight: 700; }
+      .body { font-size: 20px; font-weight: 400; }
+      .label { font-size: 19px; font-weight: 700; fill: #333333; }
+    </style>
+  </defs>
+
+  <rect width="1200" height="660" fill="#FFFFFF"/>
+
+  <g aria-label="Encoder y transcoder">
+    <rect class="box" x="25" y="70" width="200" height="200" rx="3" fill="#F7F7F7"/>
+    <text class="heading" x="125" y="123" text-anchor="middle">Encoder /</text>
+    <text class="heading" x="125" y="155" text-anchor="middle">Transcoder</text>
+    <line x1="50" y1="180" x2="200" y2="180" stroke="#B7B7B7" stroke-width="1.2"/>
+    <text class="body" x="125" y="219" text-anchor="middle">Codifica y adapta</text>
+    <text class="body" x="125" y="247" text-anchor="middle">el bitrate</text>
+  </g>
+
+  <path class="connector" d="M225 170 H255"/>
+
+  <g aria-label="Packager">
+    <rect class="box" x="260" y="70" width="200" height="200" rx="3"/>
+    <text class="heading" x="360" y="139" text-anchor="middle">Packager</text>
+    <line x1="285" y1="180" x2="435" y2="180" stroke="#B7B7B7" stroke-width="1.2"/>
+    <text class="body" x="360" y="219" text-anchor="middle">Segmenta y aplica</text>
+    <text class="body" x="360" y="247" text-anchor="middle">CENC / DRM</text>
+  </g>
+
+  <path class="connector" d="M460 170 H490"/>
+
+  <g aria-label="Servidor de origen">
+    <rect class="box" x="495" y="70" width="200" height="200" rx="3" fill="#F7F7F7"/>
+    <text class="heading" x="595" y="123" text-anchor="middle">Servidor</text>
+    <text class="heading" x="595" y="155" text-anchor="middle">de origen</text>
+    <line x1="520" y1="180" x2="670" y2="180" stroke="#B7B7B7" stroke-width="1.2"/>
+    <text class="body" x="595" y="232" text-anchor="middle">Alojamiento</text>
+    <text class="body" x="595" y="260" text-anchor="middle">de contenido</text>
+  </g>
+
+  <path class="connector" d="M695 170 H725"/>
+
+  <g aria-label="CDN">
+    <rect class="box" x="730" y="70" width="200" height="200" rx="3"/>
+    <text class="heading" x="830" y="139" text-anchor="middle">CDN</text>
+    <line x1="755" y1="180" x2="905" y2="180" stroke="#B7B7B7" stroke-width="1.2"/>
+    <text class="body" x="830" y="232" text-anchor="middle">Distribución</text>
+    <text class="body" x="830" y="260" text-anchor="middle">escalable</text>
+  </g>
+
+  <path class="connector" d="M930 170 H960"/>
+
+  <g aria-label="Player">
+    <rect class="box" x="965" y="70" width="210" height="200" rx="3" fill="#F7F7F7"/>
+    <text class="heading" x="1070" y="139" text-anchor="middle">Player</text>
+    <line x1="990" y1="180" x2="1150" y2="180" stroke="#B7B7B7" stroke-width="1.2"/>
+    <text class="body" x="1070" y="232" text-anchor="middle">Reproduce</text>
+    <text class="body" x="1070" y="260" text-anchor="middle">DASH / HLS</text>
+  </g>
+
+  <g aria-label="Servidor de licencias">
+    <rect class="box" x="780" y="430" width="275" height="155" rx="3"/>
+    <text class="heading" x="917" y="480" text-anchor="middle">Servidor de licencias</text>
+    <line x1="815" y1="505" x2="1020" y2="505" stroke="#B7B7B7" stroke-width="1.2"/>
+    <text class="body" x="917" y="548" text-anchor="middle">Autoriza el acceso a claves</text>
+  </g>
+
+  <path class="secondary" d="M360 270 V370 H740 V520 H773"/>
+  <text class="label" x="565" y="357" text-anchor="middle">DRM / claves de contenido</text>
+
+  <path class="secondary" d="M1015 270 V423"/>
+  <text class="label" x="995" y="350" text-anchor="end">Solicitud de licencia</text>
+  <path class="secondary" d="M1055 545 H1160 V277"/>
+  <text class="label" x="1148" y="410" text-anchor="end">Licencia /</text>
+  <text class="label" x="1148" y="436" text-anchor="end">claves</text>
+</svg>

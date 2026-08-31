@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+  <title id="title">Flujo de detección y respuesta de Fase 2</title>
+  <desc id="desc">Las señales se almacenan en Redis, se evalúan mediante reglas y generan una respuesta, con un plano administrativo separado.</desc>
+  <defs>
+    <marker id="arrow-d" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#333333"/>
+    </marker>
+    <style>
+      text { font-family: Arial, Helvetica, sans-serif; fill: #111111; }
+      .box { stroke: #3F3F3F; stroke-width: 1.5; }
+      .response { stroke: #333333; stroke-width: 2; }
+      .connector { stroke: #333333; stroke-width: 1.5; fill: none; marker-end: url(#arrow-d); }
+      .heading { font-size: 28px; font-weight: 700; }
+      .body { font-size: 21px; font-weight: 400; }
+      .rule { font-size: 20px; font-weight: 400; }
+      .note { font-size: 20px; font-weight: 400; fill: #333333; }
+    </style>
+  </defs>
+
+  <rect width="1200" height="720" fill="#FFFFFF"/>
+
+  <g aria-label="Señales">
+    <rect class="box" x="30" y="75" width="240" height="280" rx="3" fill="#FFFFFF"/>
+    <text class="heading" x="150" y="121" text-anchor="middle">Señales</text>
+    <text class="body" x="56" y="160">Login correcto / fallido</text>
+    <text class="body" x="56" y="195">Rechazo concurrencia</text>
+    <text class="body" x="56" y="230">Manifest · contenido</text>
+    <text class="body" x="56" y="265">Licencia · heartbeat</text>
+    <text class="body" x="56" y="300">Eventos admin</text>
+  </g>
+
+  <path class="connector" d="M270 215 H300"/>
+
+  <g aria-label="Estado en Redis">
+    <rect class="box" x="305" y="75" width="240" height="280" rx="3" fill="#F7F7F7"/>
+    <text class="heading" x="425" y="121" text-anchor="middle">Estado en Redis</text>
+    <text class="body" x="331" y="160">Sesiones</text>
+    <text class="body" x="331" y="195">Índice por cuenta</text>
+    <text class="body" x="331" y="230">Lista de 300 eventos</text>
+    <text class="body" x="331" y="265">Contadores con TTL</text>
+    <text class="body" x="331" y="300">Score · razones · bans</text>
+  </g>
+
+  <path class="connector" d="M545 215 H575"/>
+
+  <g aria-label="Reglas">
+    <rect class="box" x="580" y="45" width="315" height="350" rx="3" fill="#FFFFFF"/>
+    <text class="heading" x="737" y="99" text-anchor="middle">Reglas</text>
+    <text class="rule" x="606" y="140">3 IP / 10 min → +30</text>
+    <text class="rule" x="606" y="174">Concurrencia: 2 / 10 min → +25</text>
+    <text class="rule" x="606" y="208">Licencias: 6 / 5 min → +20</text>
+    <text class="rule" x="606" y="242">Contenido: 40 / min → +15</text>
+    <text class="rule" x="606" y="276">Heartbeat: 8 / min → +10</text>
+    <text class="rule" x="606" y="310">Fallos auth: 8 / 5 min</text>
+    <text class="rule" x="606" y="337">→ ban de dispositivo</text>
+    <text class="rule" x="606" y="372">Score ≥ 100 → ban de cuenta</text>
+  </g>
+
+  <path class="connector" d="M895 215 H925"/>
+
+  <g aria-label="Respuesta">
+    <rect class="box response" x="930" y="75" width="240" height="280" rx="3" fill="#F7F7F7"/>
+    <text class="heading" x="1050" y="121" text-anchor="middle">Respuesta</text>
+    <text class="body" x="956" y="170">Rechazo de login</text>
+    <text class="body" x="956" y="212">Manifest bloqueado</text>
+    <text class="body" x="956" y="254">Heartbeat y licencia</text>
+    <text class="body" x="956" y="296">Contenido denegado</text>
+  </g>
+
+  <path class="connector" d="M1050 355 V408 H960 V445"/>
+  <path class="connector" d="M240 445 V408 H150 V360"/>
+
+  <g aria-label="Plano administrativo">
+    <rect class="box" x="190" y="445" width="820" height="145" rx="3" fill="#FFFFFF"/>
+    <text class="heading" x="600" y="491" text-anchor="middle">Plano administrativo separado</text>
+    <text class="body" x="600" y="532" text-anchor="middle">Consulta eventos, sesiones, riesgo y bans mediante un access token con rol admin.</text>
+    <text class="body" x="600" y="568" text-anchor="middle">Permite crear o retirar bans sin depender del plano de reproducción.</text>
+  </g>
+
+  <line x1="205" y1="644" x2="995" y2="644" stroke="#B7B7B7" stroke-width="1.2"/>
+  <text class="note" x="600" y="679" text-anchor="middle">Umbrales de laboratorio orientados a reproducibilidad, no a calibración de producción.</text>
+</svg>

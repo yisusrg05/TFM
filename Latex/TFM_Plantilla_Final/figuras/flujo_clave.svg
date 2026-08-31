@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">Flujo de reproducción y obtención de claves DRM</title>
+  <desc id="desc">Interacción entre reproductor, EME, CDM, renderizador, CDN y servidor de licencias.</desc>
+  <defs>
+    <marker id="arrow-k" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#333333"/>
+    </marker>
+    <style>
+      text { font-family: Arial, Helvetica, sans-serif; fill: #111111; }
+      .boundary { fill: none; stroke: #8A8A8A; stroke-width: 1.2; stroke-dasharray: 7 6; }
+      .box { fill: #FFFFFF; stroke: #3F3F3F; stroke-width: 1.5; }
+      .connector { stroke: #333333; stroke-width: 1.5; fill: none; marker-end: url(#arrow-k); }
+      .external { stroke: #555555; stroke-width: 1.4; stroke-dasharray: 7 6; fill: none; marker-end: url(#arrow-k); }
+      .zone { font-size: 21px; font-weight: 700; letter-spacing: 0.3px; }
+      .heading { font-size: 27px; font-weight: 700; }
+      .body { font-size: 21px; font-weight: 400; }
+      .label { font-size: 19px; font-weight: 700; fill: #333333; }
+    </style>
+  </defs>
+
+  <rect width="1200" height="760" fill="#FFFFFF"/>
+
+  <rect class="boundary" x="35" y="35" width="1130" height="315" rx="3"/>
+  <rect x="58" y="21" width="292" height="29" fill="#FFFFFF"/>
+  <text class="zone" x="70" y="43">ENTORNO DEL DISPOSITIVO</text>
+
+  <g aria-label="Reproductor">
+    <rect class="box" x="205" y="95" width="190" height="190" rx="3" fill="#F7F7F7"/>
+    <text class="heading" x="300" y="143" text-anchor="middle">Reproductor</text>
+    <text class="heading" x="300" y="177" text-anchor="middle">JS / app</text>
+    <line x1="230" y1="202" x2="370" y2="202" stroke="#B7B7B7" stroke-width="1.2"/>
+    <text class="body" x="300" y="239" text-anchor="middle">Inicia y coordina</text>
+    <text class="body" x="300" y="268" text-anchor="middle">la reproducción</text>
+  </g>
+
+  <path class="connector" d="M395 190 H445"/>
+
+  <g aria-label="EME">
+    <rect class="box" x="450" y="95" width="190" height="190" rx="3"/>
+    <text class="heading" x="545" y="160" text-anchor="middle">EME</text>
+    <line x1="475" y1="202" x2="615" y2="202" stroke="#B7B7B7" stroke-width="1.2"/>
+    <text class="body" x="545" y="239" text-anchor="middle">Interfaz DRM</text>
+    <text class="body" x="545" y="268" text-anchor="middle">del navegador</text>
+  </g>
+
+  <path class="connector" d="M640 190 H690"/>
+
+  <g aria-label="CDM">
+    <rect class="box" x="695" y="95" width="190" height="190" rx="3" fill="#F7F7F7"/>
+    <text class="heading" x="790" y="160" text-anchor="middle">CDM</text>
+    <line x1="720" y1="202" x2="860" y2="202" stroke="#B7B7B7" stroke-width="1.2"/>
+    <text class="body" x="790" y="239" text-anchor="middle">Gestiona licencias</text>
+    <text class="body" x="790" y="268" text-anchor="middle">y descifrado</text>
+  </g>
+
+  <path class="connector" d="M885 190 H935"/>
+  <text class="label" x="912" y="75" text-anchor="middle">Contenido descifrado</text>
+
+  <g aria-label="Renderizador">
+    <rect class="box" x="940" y="95" width="190" height="190" rx="3"/>
+    <text class="heading" x="1035" y="160" text-anchor="middle">Renderizador</text>
+    <line x1="965" y1="202" x2="1105" y2="202" stroke="#B7B7B7" stroke-width="1.2"/>
+    <text class="body" x="1035" y="239" text-anchor="middle">Muestra audio</text>
+    <text class="body" x="1035" y="268" text-anchor="middle">y vídeo</text>
+  </g>
+
+  <rect class="boundary" x="35" y="445" width="1130" height="270" rx="3"/>
+  <rect x="58" y="431" width="205" height="29" fill="#FFFFFF"/>
+  <text class="zone" x="70" y="453">PLATAFORMA OTT</text>
+
+  <g aria-label="CDN">
+    <rect class="box" x="390" y="495" width="220" height="160" rx="3" fill="#F7F7F7"/>
+    <text class="heading" x="500" y="545" text-anchor="middle">CDN</text>
+    <line x1="420" y1="566" x2="580" y2="566" stroke="#B7B7B7" stroke-width="1.2"/>
+    <text class="body" x="500" y="604" text-anchor="middle">Entrega manifest</text>
+    <text class="body" x="500" y="633" text-anchor="middle">y segmentos</text>
+  </g>
+
+  <g aria-label="Servidor de licencias">
+    <rect class="box" x="795" y="495" width="245" height="160" rx="3"/>
+    <text class="heading" x="917" y="532" text-anchor="middle">Servidor de</text>
+    <text class="heading" x="917" y="562" text-anchor="middle">licencias</text>
+    <line x1="825" y1="582" x2="1010" y2="582" stroke="#B7B7B7" stroke-width="1.2"/>
+    <text class="body" x="917" y="624" text-anchor="middle">Emite la licencia</text>
+  </g>
+
+  <path class="external" d="M360 285 V535 H383"/>
+  <text class="label" x="350" y="520" text-anchor="end">Solicitud de medios</text>
+  <path class="external" d="M550 495 V400 H420 V240 H402"/>
+  <text class="label" x="538.9" y="390" text-anchor="middle">Manifest y segmentos</text>
+
+  <path class="external" d="M735 285 V535 H788"/>
+  <text class="label" x="725" y="475" text-anchor="end">Solicitud</text>
+  <text class="label" x="725" y="500" text-anchor="end">de licencia</text>
+  <path class="external" d="M1040 590 H1090 V400 H910 V240 H892"/>
+  <text class="label" x="1000" y="390" text-anchor="middle">Licencia / claves</text>
+</svg>
