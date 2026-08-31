@@ -1,15 +1,85 @@
-% !TEX root = A0.MiTFG.tex
+% !TEX root = A0.MiTFM.tex
 
 \chapter{Conclusiones}
 
 \section{Conclusiones generales}
-\apartadoPendiente
+
+El trabajo realizado ha permitido responder a la pregunta de investigación planteada: desplegar Widevine DRM de forma aislada no proporciona seguridad suficiente frente al abuso de distribución en una plataforma OTT. Widevine aporta una protección necesaria sobre las claves, las licencias y el descifrado dentro del CDM, pero no decide por sí mismo quién puede iniciar una reproducción, cuántas sesiones puede mantener una cuenta, desde qué contexto se reutiliza un token o si el contenido se está consumiendo de una forma compatible con la política del servicio. Estas decisiones pertenecen a la plataforma y deben aplicarse de manera coherente en toda la cadena.
+
+La Fase~0 ha evidenciado esta diferencia. El cliente oficial disponía de autenticación y \textit{entitlements}, pero la existencia de rutas alternativas permitía alcanzar el origen o el proxy de licencia sin conservar ese contexto. La demostración ClearKey ha mostrado además que, cuando una clave ya es conocida, proteger únicamente la aplicación o el formulario de acceso no impide recuperar el manifiesto y los segmentos desde otro cliente. El sistema podía funcionar correctamente para un usuario legítimo y seguir siendo vulnerable fuera del recorrido previsto por la interfaz.
+
+Fase~1 ha corregido este problema mediante controles preventivos. El origen y el servidor de licencias han dejado de estar publicados, y el manifiesto, el contenido local, el heartbeat y la licencia han pasado a depender de una sesión efímera ligada a cuenta, dispositivo, instancia de cliente y activo. La concurrencia se ha limitado en el plano de control y una sesión detenida ha dejado de ser utilizable aunque el token aún no hubiera alcanzado su expiración criptográfica. La mejora fundamental no ha consistido en añadir otro cifrado, sino en extender la autorización desde la aplicación hasta los recursos que hacen posible la reproducción.
+
+Fase~2 ha añadido una segunda capacidad: recordar y relacionar lo que sucede. Los eventos, los contadores temporales, la puntuación de riesgo y los bans han permitido transformar rechazos aislados en una respuesta observable. Los escenarios de concurrencia y fallos de autenticación han demostrado el bloqueo automático de cuenta y dispositivo, mientras que la prueba de Key Leak ha incorporado como señal el consumo de contenido sin una licencia observada en la sesión. La batería completa ha terminado con 65 de 65 comprobaciones generales y 27 de 27 comprobaciones complementarias superadas.
+
+Estos resultados confirman que la protección no puede limitarse al nivel de aplicación. Debe abarcar el cliente, la identidad, los tokens, el ciclo de vida de las sesiones, la CDN, el origen, el servidor de licencias, la observabilidad y la capacidad de revocación. Si una sola ruta equivalente queda fuera de la política, un atacante puede evitar las capas anteriores sin necesidad de romper el DRM. Del mismo modo, CORS puede limitar un navegador de origen ajeno, pero no autentica un reproductor nativo ni un backend IPTV. La decisión efectiva debe mantenerse en el servidor y repetirse en cada recurso sensible.
+
+La arquitectura propuesta es amplia dentro del alcance experimental, pero no constituye una solución perfecta. El caso positivo de CDN leeching resulta especialmente importante: una única sesión válida, con un token vigente y una clave conocida, todavía puede reproducir un canal desde un cliente externo. Fase~2 ha registrado el patrón y ha añadido riesgo, pero no lo ha bloqueado de inmediato porque una licencia previamente disponible podría producir una secuencia parecida. Esta limitación no invalida el sistema; muestra que la seguridad real exige equilibrar prevención, detección, continuidad del servicio y falsos positivos.
+
+Esta necesidad es aún mayor en el contenido en directo. El valor de una retransmisión se concentra en una ventana temporal corta y un abuso puede materializarse antes de que termine un proceso manual de análisis. Protegerla requiere esfuerzos de ciberseguridad constantes: revisar rutas y configuraciones, rotar claves y secretos, observar nuevas formas de automatización, ajustar umbrales, investigar alertas y comprobar que los mecanismos de revocación siguen funcionando. La arquitectura no debe entenderse como una configuración que se instala una vez, sino como un proceso operativo que evoluciona con las amenazas.
+
+En este sentido, las tres fases constituyen el inicio de un modelo de madurez para plataformas OTT. Fase~0 representa un servicio funcional apoyado principalmente en DRM; Fase~1 introduce gobierno preventivo del acceso; y Fase~2 incorpora observabilidad, riesgo y respuesta. El valor del modelo no reside únicamente en sus controles concretos, sino en ofrecer una ruta incremental y evaluable para avanzar desde la protección del contenido hacia la protección del sistema completo.
 
 \section{Cumplimiento de objetivos}
-\apartadoPendiente
+
+El objetivo general se ha cumplido dentro del alcance de laboratorio. Se ha diseñado, implementado y auditado un entorno OTT reproducible con Widevine, contenido CENC local y una arquitectura de defensa en profundidad. La comparación entre las tres fases ha permitido observar la diferencia entre protección criptográfica, autorización preventiva y respuesta basada en comportamiento.
+
+El cumplimiento de los objetivos específicos puede resumirse de la siguiente manera:
+
+\begin{enumerate}
+    \item \textbf{Despliegue de la infraestructura OTT.} Se ha construido una cadena contenerizada con cliente, CDN basada en Varnish, plano de control, origen, proxy de licencia y laboratorios de auditoría. El contenido Widevine público ha permitido verificar el flujo DRM real y el activo CENC local ha hecho observable la autorización sobre manifiesto, inicializaciones y segmentos.
+
+    \item \textbf{Auditoría del ecosistema DRM.} Se han estudiado el intercambio de licencias, las rutas oficiales y alternativas y el comportamiento de un cliente externo. La auditoría no ha pretendido romper la criptografía de Widevine, sino comprobar si la plataforma conservaba identidad y autorización en todos los caminos equivalentes. Los PCAP, capturas y JSON del directorio de evidencias permiten reconstruir los escenarios.
+
+    \item \textbf{Autorización dinámica.} Se ha implementado un proxy protegido que valida identidad, \textit{entitlement}, activo, sesión, dispositivo e instancia antes de entregar manifiesto, contenido o licencia. El prototipo utiliza tokens firmados mediante HMAC con un formato simplificado de dos segmentos, por lo que no debe presentarse como una implementación JWT completa. La IP se ha empleado como señal de correlación y no se ha realizado geolocalización. El objetivo se ha alcanzado en su función de autorización contextual, aunque estas dos características concretas han quedado acotadas respecto a la formulación inicial.
+
+    \item \textbf{Control de abuso y respuesta.} Se han materializado límites de concurrencia, contadores temporales, detección de patrones, puntuación de riesgo, eventos y bans de cuenta o dispositivo. Se ha descartado el bloqueo automático por IP como respuesta principal, dado que una dirección puede ser compartida o cambiar. La Fase~2 ha demostrado tanto la activación de los bloqueos como su retirada administrativa y la conservación de la trazabilidad.
+\end{enumerate}
+
+La metodología incremental también se ha cumplido. Cada fase ha partido de la anterior, ha introducido controles identificables y ha sido sometida a una regresión. La incidencia encontrada en el binding de sesión de \texttt{/license} durante la campaña ha demostrado la utilidad de este enfoque: la primera ejecución detectó el defecto, se corrigió la validación y se repitieron los 65 casos antes de aceptar el resultado final.
 
 \section{Limitaciones del trabajo}
-\apartadoPendiente
+
+La primera limitación deriva del carácter experimental del entorno. Los servicios utilizan HTTP local, credenciales y secretos de demostración y una única máquina Docker. Un despliegue de producción requeriría TLS extremo a extremo, custodia externa de secretos, rotación de claves, aislamiento más estricto y alta disponibilidad. Las mediciones temporales describen únicamente el equipo utilizado y no constituyen una prueba de carga o escalabilidad.
+
+El activo Widevine y el servicio CWIP proceden de infraestructura pública de pruebas. Sus segmentos no atraviesan el origen privado del laboratorio, por lo que esa parte de la evaluación se ha concentrado en la protección del manifiesto y la licencia. El activo CENC local ha permitido estudiar el acceso a segmentos de manera controlada, pero su duración, volumen y patrón de consumo son menores que los de una emisión en directo real.
+
+Los identificadores de dispositivo e instancia se generan en el cliente y no equivalen a una atestación criptográfica de hardware. Un atacante con control suficiente sobre el cliente podría reproducir esos valores. Tampoco se han evaluado la robustez del CDM, HDCP, la seguridad del sistema operativo, la captura de pantalla o la extracción de la salida ya descifrada. Ningún control de acceso elimina por completo el denominado \textit{analog hole}.
+
+Las reglas de riesgo se han configurado para producir escenarios reproducibles, no a partir de tráfico real de una población de usuarios. No se ha calculado una tasa de falsos positivos ni se han estudiado comportamientos por región, dispositivo, tipo de conexión o perfil de consumo. Redis se ha desplegado sin persistencia ni replicación para poder reiniciar el laboratorio en un estado conocido.
+
+Finalmente, la detección de Key Leak es heurística. La ausencia de una petición de licencia puede indicar que la clave es conocida o que el cliente dispone de material válido obtenido anteriormente. Por este motivo, el patrón añade riesgo pero no genera un ban por sí solo. Un ataque lento, distribuido entre varias cuentas o limitado a una reproducción serial podría permanecer por debajo de los umbrales. La arquitectura reduce superficie y aumenta visibilidad, pero no puede garantizar la eliminación de toda redistribución no autorizada.
 
 \section{Líneas futuras}
-\apartadoPendiente
+
+La primera línea de evolución consiste en aproximar el laboratorio a una infraestructura de producción. Esto implica incorporar TLS en el perímetro y mTLS entre servicios, un proveedor de identidad con tokens estándar, gestión centralizada de secretos, rotación de claves y políticas de licencia Widevine reales. La CDN debería utilizar URLs o cookies firmadas de alcance reducido, autorización sobre todos los segmentos y controles que impidan el acceso directo al origen.
+
+La identidad del dispositivo puede reforzarse mediante claves no exportables, atestación y señales proporcionadas por el SDK DRM. Estas medidas deberían combinarse con watermarking forense individualizado, ya que la marca visible utilizada en el prototipo aporta atribución limitada. La rotación de claves por canal o periodo reduciría el valor temporal de una clave filtrada, especialmente en emisiones en directo.
+
+En Fase~2, la evolución natural es desacoplar la observabilidad del plano de control y enviar los eventos a una plataforma externa. Un SIEM permitiría retención, consultas históricas, correlación entre regiones y alertas operativas. Los umbrales deberían calibrarse con tráfico real, cohortes y métricas de falsos positivos. La velocidad de descarga, el número de canales accedidos, los cambios de instancia y los patrones de licencia podrían formar una señal conjunta más robusta que cualquiera de ellos por separado.
+
+También sería necesario evaluar disponibilidad y resistencia a ataques contra la propia defensa. Rate limiting distribuido, WAF, mitigación DDoS, colas de eventos y Redis persistente y replicado permitirían estudiar qué sucede cuando Varnish, el plano de control o el almacén de estado reciben carga hostil. La seguridad no debería introducir un punto único de fallo que interrumpa una emisión legítima.
+
+\subsection{Evolución hacia un modelo de madurez}
+
+Como continuación del trabajo, las fases pueden formalizarse como un modelo de madurez aplicable a plataformas OTT. La Tabla~\ref{tab:modelo-madurez-ott} propone una primera estructura que debería validarse posteriormente en entornos y organizaciones diferentes.
+
+\begin{table}[H]
+\centering
+\caption{Propuesta inicial de niveles de madurez para la protección OTT}
+\label{tab:modelo-madurez-ott}
+\begin{tabularx}{\textwidth}{p{0.13\textwidth}p{0.24\textwidth}Y}
+\toprule
+\textbf{Nivel} & \textbf{Enfoque} & \textbf{Capacidades principales} \\
+\midrule
+0 & Protección funcional & DRM y reproducción legítima, con controles concentrados en la aplicación. \\
+1 & Prevención integral & Origen interno, licencia protegida, token efímero, binding contextual, autorización de CDN y concurrencia. \\
+2 & Detección y respuesta & Estado compartido, eventos, reglas de riesgo, bans, revocación y recuperación administrativa. \\
+3 & Operación adaptativa & Telemetría externa, inteligencia de amenazas, calibración continua, atestación, watermarking forense, alta disponibilidad y respuesta coordinada. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+La progresión no debería evaluarse como una lista de productos instalados, sino mediante propiedades verificables. Una plataforma madura debe poder demostrar que no existen rutas equivalentes sin autorización, que puede atribuir una reproducción a un contexto, que detecta desviaciones, que revoca sin depender del cliente y que aprende de los incidentes. El laboratorio y su batería de evidencias ofrecen un punto de partida para definir pruebas y criterios de paso entre niveles.
+
+Desde una perspectiva de ingeniería, trabajos preventivos como el desarrollado resultan más útiles como medida principal que confiar en el bloqueo posterior de contenidos o infraestructuras ilícitas, incluidos los bloqueos dinámicos de dominios y direcciones IP empleados en la estrategia antipiratería de LaLiga \cite{laliga2025bloqueos}. Estos bloqueos pueden complementar la respuesta frente a una retransmisión ya localizada, pero actúan cuando el contenido ha salido del sistema, no corrigen una licencia expuesta, un token reutilizable o una CDN mal autorizada y exigen especial precisión cuando una dirección comparte servicios heterogéneos. La prioridad debería ser impedir y detectar la extracción en el origen; el bloqueo externo puede permanecer como apoyo, pero no sustituir a una arquitectura segura ni al esfuerzo continuo de ciberseguridad.
