@@ -1,4 +1,222 @@
-% !TEX root = A0.MiTFG.tex
+% !TEX root = A0.MiTFM.tex
 
-% Apéndice opcional.
+\chapter{Organización, conservación y reproducción de las evidencias}
+\label{app:evidencias}
+
+Este apéndice describe la organización del directorio \path{evidencias}, que conserva los artefactos utilizados para respaldar la auditoría de Fase~0 y la evaluación comparativa de las fases endurecidas. Su finalidad no es repetir la interpretación desarrollada en los Capítulos~4 y~7, sino explicar cómo se relacionan las capturas de pantalla, las capturas de red, los estados exportados, los resultados automatizados y los scripts que permiten reproducir la campaña.
+
+La estructura se ha diseñado atendiendo a tres requisitos. En primer lugar, cada afirmación relevante debe poder asociarse a un artefacto concreto. En segundo lugar, los datos originales deben mantenerse separados de los resúmenes derivados para que sea posible volver a analizarlos. Finalmente, la campaña debe poder repetirse sin depender de una secuencia manual no documentada. Por este motivo, cada fase dispone de su propio directorio y el nivel superior contiene los resultados comparativos, las herramientas de automatización y un inventario global de integridad.
+
+\section{Estructura general del directorio}
+
+La organización principal se muestra en el Listado~\ref{lst:arbol-evidencias}. Se han omitido los nombres individuales de las evidencias para mantener legible el árbol; estos se detallan en las secciones posteriores.
+
+\begin{lstlisting}[
+    basicstyle=\ttfamily\footnotesize,
+    frame=single,
+    breaklines=true,
+    caption={Estructura simplificada del directorio de evidencias},
+    label={lst:arbol-evidencias}
+]
+evidencias/
+|-- fase0/
+|   |-- capturas/
+|   |-- json/
+|   |-- pcap/
+|   |-- README.md
+|   `-- SHA256SUMS.txt
+|-- fase1/
+|   |-- capturas/
+|   |-- json/
+|   |-- logs/
+|   |-- pcap/
+|   |-- README.md
+|   `-- SHA256SUMS.txt
+|-- fase2/
+|   |-- capturas/
+|   |-- json/
+|   |-- logs/
+|   |-- pcap/
+|   |-- README.md
+|   `-- SHA256SUMS.txt
+|-- resultados/
+|-- scripts/
+|-- README.md
+`-- SHA256SUMS.txt
+\end{lstlisting}
+
+Los directorios \path{fase0}, \path{fase1} y \path{fase2} responden a la evolución del sistema descrita en la memoria. Esta separación evita mezclar la evidencia de una vulnerabilidad de la línea base con el rechazo producido por una fase posterior. Los ficheros \path{README.md} actúan como inventarios breves orientados a la consulta directa desde el repositorio, mientras que este apéndice ofrece una visión conjunta y explica las relaciones entre los distintos formatos.
+
+\subsection{Convención de nombres}
+
+Los artefactos específicos de un escenario siguen, siempre que resulta aplicable, el patrón \texttt{faseN\_XX\_descripcion.ext}. El primer campo identifica la fase; el segundo establece el orden de adquisición dentro de ella; y el tercero resume el comportamiento observado. Por ejemplo, \path{fase2_02_fallos_auth_y_ban_device.pcap} corresponde al segundo escenario de red de Fase~2 y documenta el bloqueo de dispositivo tras una ráfaga de autenticaciones incorrectas.
+
+Los ficheros cuyo índice es \texttt{00} agregan varios escenarios. No constituyen una nueva ejecución, sino una vista conjunta destinada a facilitar la apertura en Wireshark. Los nombres terminados en \texttt{\_http.json} identifican resúmenes generados a partir de un PCAP; por tanto, no deben confundirse con las exportaciones del estado de aplicación, que contienen sesiones, puntuaciones, bloqueos y eventos.
+
+\subsection{Tipos de artefacto}
+
+La Tabla~\ref{tab:tipos-evidencia} resume la función de cada formato. La campaña combina fuentes diferentes porque una captura visual, por sí sola, no permite demostrar qué solicitud ha aceptado el servidor, y un código HTTP aislado tampoco acredita que el vídeo se haya reproducido realmente.
+
+\begin{table}[H]
+\centering
+\caption{Tipos de artefacto conservados}
+\label{tab:tipos-evidencia}
+\begin{tabularx}{\textwidth}{p{0.16\textwidth}p{0.23\textwidth}Y}
+\toprule
+\textbf{Formato} & \textbf{Ubicación habitual} & \textbf{Finalidad} \\
+\midrule
+PNG & \path{capturas/} & Acreditar el resultado visible: reproducción, rechazo, puntuación o bloqueo mostrado por el laboratorio. \\
+PCAP / PCAPNG & \path{pcap/} & Conservar el tráfico HTTP observado en el punto de entrada de la fase y permitir un análisis posterior con Wireshark o TShark. \\
+JSON HTTP & \path{json/*_http.json} & Ofrecer una vista consultable del PCAP sin exportar la cabecera \texttt{Authorization}. Incluye recuentos, rutas, métodos y códigos. \\
+JSON de estado & \path{fase2/json/} & Conservar sesiones, riesgo, bans y eventos de Redis asociados a un escenario con estado. \\
+CSV / JSON & \path{resultados/} & Recoger la matriz de pruebas y las métricas en formatos adecuados tanto para lectura automática como para inspección manual. \\
+LOG & \path{logs/} & Mantener la salida de los planos de control, servidores internos de licencia y laboratorios de CDN leeching. \\
+SHA-256 & \path{SHA256SUMS.txt} & Permitir la comprobación de integridad de los artefactos después de su adquisición. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Las capturas y los PCAP se consideran evidencias primarias de interfaz y red. Los JSON terminados en \texttt{\_http} son artefactos derivados, ya que se generan leyendo los PCAP con TShark. Las matrices de resultados también son derivadas, pero conservan para cada caso la condición esperada, el valor observado y el resultado booleano. Esta distinción permite volver a producir los resúmenes sin modificar la captura original.
+
+\section{Evidencias de Fase 0}
+
+El directorio \path{fase0} contiene la línea base de la auditoría descrita en el Capítulo~4. Se han conservado tres escenarios, cada uno con captura visual, PCAP y resumen HTTP. La Tabla~\ref{tab:evidencias-fase0} presenta su correspondencia.
+
+\begin{table}[H]
+\centering
+\caption{Escenarios documentados en Fase~0}
+\label{tab:evidencias-fase0}
+\begin{tabularx}{\textwidth}{p{0.24\textwidth}p{0.27\textwidth}Y}
+\toprule
+\textbf{Escenario} & \textbf{Artefactos principales} & \textbf{Comportamiento acreditado} \\
+\midrule
+Flujo oficial Widevine & \texttt{fase0\_01\_*} & El usuario autorizado inicia sesión, obtiene la configuración y solicita dos licencias por la ruta oficial antes de reproducir. \\
+Bypass Widevine & \texttt{fase0\_02\_*} & El cliente externo alcanza \texttt{/license/no\_auth} sin login ni configuración de reproducción previa. \\
+ClearKey con clave conocida & \texttt{fase0\_03\_*} & El MPD, las inicializaciones y los primeros segmentos se recuperan sin invocar una ruta de licencia, y la reproducción externa resulta visible. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+El fichero \path{fase0_00_auditoria_completa.pcapng} agrega los tres PCAP para facilitar una revisión conjunta. Los archivos individuales se mantienen porque permiten aplicar filtros sin mezclar los caminos oficial, alternativo y ClearKey. En el escenario ClearKey cada recurso puede aparecer en ambos lados de Varnish: una entrada corresponde a la solicitud recibida y otra al reenvío hacia el origen. Esta duplicación deriva del punto de captura y no representa dos reproducciones independientes.
+
+La carpeta \path{fase0/json} contiene los resúmenes seguros de las capturas. Estos incluyen número de trama, tiempo, IP de origen y destino, método, host, URI, código de respuesta y longitud declarada. No se exporta \texttt{Authorization}. Los PCAP brutos sí pueden conservar credenciales efímeras del laboratorio, por lo que requieren una revisión específica antes de compartirse fuera del ámbito del TFM.
+
+\section{Evidencias de Fase 1}
+
+Fase~1 incorpora autorización sobre el manifiesto, el contenido local y la licencia. Su directorio conserva dos bloques de evidencia. El primero corresponde al laboratorio general y el segundo a la ampliación de Key Leak y CDN leeching.
+
+La evidencia \path{fase1_01_laboratorio_protegido.pcap} registra el login, la creación de sesión, la obtención del manifiesto, dos solicitudes de licencia, cuatro casos negativos y la parada. La captura \path{fase1_01_pruebas_manifest.png} muestra en la interfaz los rechazos 401, 401, 409 y 403 correspondientes, respectivamente, a ausencia de token, token alterado, sesión distinta y activo diferente. El resumen HTTP permite comprobar la misma distribución sin abrir Wireshark.
+
+El segundo bloque utiliza el activo \texttt{local-cenc-clearkey}. \path{fase1_02_cdn_leeching.pcap} demuestra que el acceso anónimo queda rechazado y que una sesión válida puede recuperar contenido desde un cliente externo controlado. El JSON de escenario conserva los códigos, el volumen servido, las latencias de los objetos de contenido, el resultado de CORS y la ausencia de solicitudes de licencia. Las pruebas de contexto añaden la segunda sesión, la instancia copiada, el cruce de activo y el acceso después de detener la reproducción.
+
+La carpeta \path{logs} completa la trazabilidad con la salida de \texttt{control-plane}, \texttt{license-server} y \texttt{key-leak-lab}. Estos registros son útiles para confirmar el arranque y detectar errores de aplicación, pero no sustituyen al PCAP: describen la perspectiva de cada proceso y no necesariamente todo el tráfico observado en el frontal.
+
+\section{Evidencias de Fase 2}
+
+Fase~2 conserva los controles preventivos y añade estado en Redis, puntuación de riesgo y respuesta. Por ello, sus escenarios combinan cuatro perspectivas: interfaz, red, estado exportado y logs. Esta fase contiene tres bloques principales.
+
+El escenario \texttt{fase2\_01} documenta la concurrencia y el ban de cuenta. Se crea una sesión y se realizan cinco intentos adicionales, que devuelven 409. El JSON de estado conserva la progresión de riesgo 0, 25, 50, 75 y 100, los eventos \texttt{risk.incremented}, la creación del ban, su retirada administrativa y la parada final. El PCAP permite contrastar que se han producido una respuesta 201 y cinco conflictos para \texttt{/playback/session}.
+
+El escenario \texttt{fase2\_02} documenta ocho autenticaciones incorrectas desde el mismo dispositivo. La evidencia recoge las respuestas 401, la creación de \texttt{AUTH\_FAILURE\_BURST}, el rechazo posterior del manifiesto y la recuperación tras retirar el ban. En este caso la respuesta se aplica directamente al dispositivo y no depende de que exista una cuenta autenticada desde la que acumular puntuación.
+
+El escenario \texttt{fase2\_03} corresponde a Key Leak y CDN leeching. La captura positiva muestra que una única sesión válida, un token vigente y la clave conocida permiten reproducir el activo local. El estado exportado conserva 253.023 bytes servidos sin solicitud de licencia, el evento \texttt{key\_leak.pattern\_detected} y el incremento de 20 puntos aplicado una sola vez a la sesión. La segunda captura reúne los controles de CORS, concurrencia, instancia, activo y ausencia de token.
+
+Los dos primeros PCAP se agregan en \path{fase2_00_evaluacion_completa.pcapng}. El PCAP de CDN leeching se conserva aparte porque procede de una ampliación posterior con objetivos y métricas diferentes. Mantenerlo separado evita presentar el agregado original como si hubiera sido adquirido en una única ejecución con el nuevo escenario.
+
+\section{Resultados comparativos}
+
+El directorio \path{resultados} concentra los datos que alimentan las tablas y la discusión del Capítulo~7. La Tabla~\ref{tab:resultados-evidencias} resume su contenido.
+
+\begin{table}[H]
+\centering
+\caption{Ficheros del directorio de resultados}
+\label{tab:resultados-evidencias}
+\begin{tabularx}{\textwidth}{p{0.36\textwidth}Y}
+\toprule
+\textbf{Fichero} & \textbf{Contenido} \\
+\midrule
+\path{resultados_funcionales.json/.csv} & Matriz de 65 comprobaciones generales, con identificador, fase, categoría, condición esperada, observación y resultado. \\
+\path{resultados_cdn_leeching.json/.csv} & Batería complementaria de 27 comprobaciones y resúmenes específicos de las tres fases. \\
+\path{metricas_raw.csv} & 240 observaciones temporales individuales, obtenidas con 20 repeticiones por combinación de fase y operación. \\
+\path{metricas_resumen.json/.csv} & Media, mediana, percentil 95, mínimo, máximo y desviación típica calculados a partir de las observaciones. \\
+\path{entorno_ejecucion.json} & Plataforma, versión de Docker, revisión Git, contenedores activos y consumo puntual de CPU y memoria. \\
+\path{incidencia_binding_licencia_fase2.json} & Registro de la desviación encontrada en \texttt{/license}, su corrección y el resultado de la regresión posterior. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+La conservación de la incidencia resulta especialmente importante. La primera ejecución general superó 64 de 65 casos y descubrió que Fase~2 no contrastaba la cabecera de sesión antes de reenviar una licencia. Después de corregirla, la regresión completa terminó en 65 de 65. El fichero de incidencia evita que el resultado final oculte el defecto encontrado durante la propia evaluación y documenta cómo la batería ha influido en la implementación.
+
+La batería complementaria se mantiene separada de la general. De esta forma, las 240 mediciones temporales y los 65 casos previos no se han recalculado al introducir CDN leeching. El resultado agregado de 92 comprobaciones se obtiene sumando ambas campañas, pero cada una conserva su fecha, su estructura y sus variables específicas.
+
+\section{Scripts de adquisición y tratamiento}
+
+Los seis programas del directorio \path{scripts} automatizan tareas distintas. No se ha reunido todo en un único ejecutable para poder regenerar un resumen o las huellas sin repetir las pruebas de reproducción. Su función se recoge en la Tabla~\ref{tab:scripts-evidencias}.
+
+\begin{table}[H]
+\centering
+\caption{Herramientas de reproducción y tratamiento de evidencias}
+\label{tab:scripts-evidencias}
+\begin{tabularx}{\textwidth}{p{0.29\textwidth}p{0.28\textwidth}Y}
+\toprule
+\textbf{Script} & \textbf{Entrada o requisito} & \textbf{Salida principal} \\
+\midrule
+\path{run_evaluation.py} & Fases levantadas; modos \texttt{functional} o \texttt{metrics}. & Matriz funcional y CSV/JSON de métricas. Reinicia el estado cuando el escenario lo requiere. \\
+\path{run_cdn_leeching.py} & Fase concreta o \texttt{all}; opción \texttt{--skip-reset}. & 27 comprobaciones complementarias y resúmenes de contenido, CORS, contexto y riesgo. \\
+\path{export_phase2_state.py} & Nombre del escenario y Redis de Fase~2 activo. & JSON con riesgo, bans, sesiones y eventos presentes en Redis. \\
+\path{summarize_pcaps.py} & PCAP existentes y contenedor \texttt{nicolaka/netshoot}. & JSON HTTP seguro, recuentos de solicitudes/respuestas y SHA-256 de la captura fuente. \\
+\path{collect_environment.py} & Docker activo y contenedores \texttt{tfm-*}. & Inventario del entorno, estadísticas puntuales y logs normalizados. \\
+\path{generate_hashes.py} & Campaña ya finalizada. & Inventarios \path{SHA256SUMS.txt} de Fase~1, Fase~2 y del conjunto. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Orden recomendado de ejecución}
+
+Una repetición completa parte de las fases Docker levantadas y disponibles. El orden recomendado se muestra en el Listado~\ref{lst:repeticion-evidencias}. Los comandos deben ejecutarse desde la raíz del repositorio.
+
+\begin{lstlisting}[
+    basicstyle=\ttfamily\footnotesize,
+    frame=single,
+    breaklines=true,
+    caption={Secuencia para regenerar los resultados derivados},
+    label={lst:repeticion-evidencias}
+]
+python evidencias/scripts/run_evaluation.py functional
+python evidencias/scripts/run_evaluation.py metrics --iterations 20
+python evidencias/scripts/run_cdn_leeching.py all
+python evidencias/scripts/summarize_pcaps.py
+python evidencias/scripts/collect_environment.py
+python evidencias/scripts/generate_hashes.py
+\end{lstlisting}
+
+La adquisición de los PCAP no se inicia automáticamente dentro de esta secuencia. Debe arrancarse antes del escenario correspondiente, compartiendo el espacio de red del contenedor CDN, y detenerse después de que finalicen las solicitudes. Cuando el estado ya se ha reiniciado y se desea evitar tráfico de arranque dentro del PCAP, \path{run_cdn_leeching.py} admite \texttt{--skip-reset}. Esta opción no omite controles funcionales; únicamente evita reiniciar de nuevo el servicio justo después de iniciar la captura.
+
+El orden también responde a la dependencia entre artefactos. \path{summarize_pcaps.py} necesita que las capturas ya existan; \path{collect_environment.py} debe ejecutarse con los contenedores activos; y \path{generate_hashes.py} debe ser el último paso, pues cualquier modificación posterior cambiaría las huellas. Si se repite una prueba, deben regenerarse los resúmenes y los inventarios relacionados para no conservar hashes o recuentos de una versión anterior.
+
+\section{Integridad, confidencialidad y publicación}
+
+Los inventarios \path{SHA256SUMS.txt} contienen una huella SHA-256 por fichero. Existen inventarios específicos en Fase~1 y Fase~2, además del inventario global. Fase~0 conserva también su propio fichero de huellas. Estos valores no demuestran por sí solos quién ha adquirido una evidencia, pero permiten comprobar que el contenido revisado posteriormente coincide bit a bit con el utilizado durante la redacción.
+
+Los JSON y CSV generados por las baterías sustituyen los tokens completos por \texttt{<redacted>}. Del mismo modo, los resúmenes de PCAP no exportan \texttt{Authorization}. Esta sanitización reduce el riesgo de reutilización accidental y permite consultar las rutas y códigos sin exponer la credencial.
+
+La precaución no debe extenderse de forma automática a los PCAP brutos. Como el laboratorio utiliza HTTP local, una captura puede contener tokens de acceso o reproducción mientras siguen vigentes. Por este motivo, los PCAP se consideran material técnico de auditoría y no deberían publicarse sin inspección previa. Las claves empleadas en ClearKey pertenecen exclusivamente al contenido generado para el laboratorio; no se han capturado ni extraído claves Widevine de un servicio real.
+
+También se ha evitado presentar los logs como una fuente libre de información sensible. Aunque no imprimen deliberadamente los tokens completos, pueden incluir identificadores de cuenta, dispositivo, sesión, direcciones internas y marcas temporales. Antes de incorporar un fragmento a la memoria o compartirlo, debe reducirse al mínimo necesario para justificar el comportamiento estudiado.
+
+\section{Método de consulta y trazabilidad}
+
+Para revisar un resultado se recomienda seguir una secuencia de tres niveles. Primero se consulta el registro general en \path{resultados}, donde aparece el identificador de prueba, la condición esperada y el resultado. Después se abre el JSON HTTP o el estado de Fase~2 para localizar el código, evento o cambio de riesgo. Finalmente, cuando sea necesario comprobar la secuencia exacta, se revisa el PCAP fuente y la captura de interfaz asociada.
+
+Esta triangulación permite diferenciar tres afirmaciones que no son equivalentes: que la interfaz muestre un rechazo, que el servidor devuelva efectivamente un 401 o 409 y que el estado antifraude conserve una señal. En Fase~2, por ejemplo, la captura de concurrencia documenta el resultado visible; el PCAP acredita las cinco respuestas 409; y el JSON de Redis conserva los incrementos hasta 100 y la creación del ban. Del mismo modo, en CDN leeching la captura positiva demuestra reproducción, el PCAP conserva los objetos entregados y el estado exportado muestra la puntuación aplicada sin solicitud de licencia.
+
+Los README de cada fase ofrecen filtros de Wireshark y recuentos rápidos. Se mantienen como documentación próxima al dato, mientras que el Capítulo~7 contiene la comparación y este apéndice explica el sistema de conservación. Esta separación evita que una modificación en el inventario obligue a reescribir la interpretación académica, pero mantiene una ruta clara desde cada conclusión hasta su evidencia.
+
+\section{Alcance y limitaciones de la evidencia}
+
+La campaña se ha ejecutado en un único equipo, sobre HTTP local y con contenedores Docker. Las marcas temporales, estadísticas de CPU y consumo de memoria describen ese entorno concreto. No constituyen una prueba de carga, una certificación de seguridad ni una estimación directa del comportamiento de una plataforma OTT comercial.
+
+Parte del flujo Widevine depende de los activos y del servicio CWIP público de Shaka. El PCAP local permite estudiar el acceso al plano de control y al proxy, pero no descifra el tráfico HTTPS externo. El activo CENC local se ha incorporado precisamente para observar de forma controlada la entrega de manifiesto y segmentos cuando la clave de laboratorio ya es conocida.
+
+Finalmente, la reproducibilidad no implica que dos ejecuciones tengan tiempos idénticos. La planificación de Docker, el estado del equipo y la disponibilidad del servicio externo pueden variar. Lo que debe mantenerse es la semántica de los casos: recursos autorizados o rechazados con los códigos previstos, creación de eventos, evolución de la puntuación y aplicación o retirada de los bloqueos. Las evidencias conservadas permiten comprobar esas propiedades y volver a calcular los resúmenes sin depender exclusivamente de las tablas incluidas en la memoria.
 
