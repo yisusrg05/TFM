@@ -1,0 +1,27 @@
+% !TEX root = A0.MiTFM.tex
+
+\pagestyle{fancy}
+\renewcommand{\headrulewidth}{0pt}
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+
+The distribution of audiovisual content, particularly live broadcasts, increasingly relies on Over-The-Top (OTT) platforms and digital rights management systems. Widevine DRM holds a prominent position due to its integration with Android and Chromium-based browsers. However, the cryptographic protection of content keys does not cover the entire chain of trust on its own. Authentication, authorization, CDN delivery, and session control can also expose avenues for unauthorized redistribution, including Key Leak, CDN leeching, and restreaming.
+
+This Master's Thesis designs, implements, and audits an experimental streaming environment to study the role of Widevine in a defense-in-depth architecture. Phase~0 establishes a baseline protected with Widevine and Common Encryption (CENC) and examines the exposure of the manifest, content, and licenses. Phase~1 introduces authentication, per-asset authorization, short-lived playback tokens, contextual validation, and concurrency control. Phase~2 adds shared state in Redis, events, risk scoring, and blocking and revocation mechanisms.
+
+The incremental and iterative methodology combines design, Docker deployment, and controlled experiments. The implementation integrates Varnish, Node.js, Nginx, Redis, and Shaka Player with laboratories for auditing, key leakage, and external CDN usage. The evaluation comprises automated tests, browser playback, timing measurements, and PCAP, JSON, and screenshot evidence. The thesis thus documents the DRM flow and its additional protective layers as a basis for studying security maturity in OTT platforms.
+
+\mbox{} \bigskip
+
+\noindent \textbf{Keywords}:
+\begin{compactitem}
+    \item OTT streaming.
+    \item Widevine DRM.
+    \item Defense in depth.
+    \item Access control.
+    \item CDN leeching.
+    \item Anomaly detection.
+\end{compactitem}
+
+\blankpage
+

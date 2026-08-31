@@ -1,0 +1,25 @@
+% !TEX root = A0.MiTFM.tex
+
+\pagestyle{fancy}
+\renewcommand{\headrulewidth}{0pt}
+\chapter*{Resumen}
+\addcontentsline{toc}{chapter}{Resumen}
+
+La distribución de contenidos audiovisuales, especialmente en directo, se apoya cada vez más en plataformas \textit{Over-The-Top} (OTT) y sistemas de gestión de derechos digitales. Widevine DRM ocupa una posición destacada por su integración en Android y navegadores basados en Chromium. Sin embargo, la protección criptográfica de las claves no cubre por sí sola toda la cadena de confianza. La autenticación, la autorización, la CDN y las sesiones también pueden exponer vías de redistribución no autorizada, como el \textit{Key Leak}, el \textit{CDN leeching} y el \textit{restreaming}.
+
+Este Trabajo Fin de Máster diseña, implementa y audita un entorno experimental de \textit{streaming} para estudiar el papel de Widevine en una arquitectura de defensa en profundidad. La Fase~0 establece una línea base protegida con Widevine y Common Encryption (CENC) y examina la exposición del manifiesto, el contenido y las licencias. La Fase~1 incorpora autenticación, autorización por activo, tokens de reproducción efímeros, validación contextual y control de concurrencia. La Fase~2 añade estado compartido en Redis, eventos, puntuación de riesgo y mecanismos de bloqueo y revocación.
+
+La metodología incremental e iterativa combina el diseño, el despliegue con Docker y experimentos controlados. La implementación integra Varnish, Node.js, Nginx, Redis y Shaka Player, junto con laboratorios de auditoría, filtración de claves y uso externo de la CDN. La evaluación reúne pruebas automatizadas, reproducciones en navegador, mediciones temporales y evidencias PCAP, JSON y capturas. La memoria documenta así el flujo DRM y las capas adicionales aplicadas a su alrededor como base para estudiar la madurez de la protección en plataformas OTT.
+
+\mbox{} \bigskip
+
+\noindent \textbf{Palabras clave}:
+\begin{compactitem}
+    \item \textit{Streaming} OTT.
+    \item Widevine DRM.
+    \item Defensa en profundidad.
+    \item Control de acceso.
+    \item \textit{CDN leeching}.
+    \item Detección de anomalías.
+\end{compactitem}
+
