@@ -111,7 +111,7 @@ Antes de enviar la petición al backend, Varnish comprueba que la ruta pertenezc
 
 \subsection{Tokens firmados y \textit{claims}}
 
-La función de firma serializa un único objeto JSON, lo codifica como Base64URL y calcula un HMAC-SHA256. La verificación vuelve a calcular la firma y utiliza una comparación de tiempo constante antes de interpretar la carga. El formato resultante tiene dos segmentos y, como se indicó en el capítulo anterior, no es un JWT RFC~7519 completo.
+La función de firma serializa un único objeto JSON, lo codifica como Base64URL y calcula un HMAC-SHA256. La verificación vuelve a calcular la firma y utiliza una comparación de tiempo constante antes de interpretar la carga. El formato resultante tiene dos segmentos y, como se ha indicado en el capítulo anterior, no es un JWT RFC~7519 completo.
 
 El token de acceso contiene \texttt{typ}, \texttt{sub}, \texttt{accountId}, \texttt{deviceId}, plan, entitlements, \texttt{jti} y expiración. Fase~2 añade los roles. El token de reproducción sustituye plan y permisos generales por \texttt{assetId}, \texttt{sessionId} y los ámbitos \texttt{manifest:read}, \texttt{content:read}, \texttt{license:request} y \texttt{heartbeat:write}. Los secretos de acceso y reproducción son distintos para impedir que una credencial de un tipo pueda validarse con la clave del otro.
 

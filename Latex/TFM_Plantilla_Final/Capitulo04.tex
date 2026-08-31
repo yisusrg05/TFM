@@ -8,51 +8,51 @@ La distinción es esencial para interpretar los resultados. Widevine protege el 
 
 \section{Metodología de auditoría}
 
-La auditoría se realizó mediante un enfoque mixto de caja negra y caja gris. La perspectiva de caja negra permitió observar el sistema como lo haría un usuario o un tercero con acceso a las URLs públicas. La perspectiva de caja gris añadió el conocimiento de la topología Docker, las rutas de Varnish y la lógica del servidor para explicar por qué cada comportamiento era posible. La combinación de ambas evita limitar el análisis a una mera revisión de código y, al mismo tiempo, permite relacionar cada resultado observable con una decisión concreta de arquitectura.
+La auditoría se ha realizado mediante un enfoque mixto de caja negra y caja gris. La perspectiva de caja negra ha permitido observar el sistema como lo haría un usuario o un tercero con acceso a las URLs públicas. Por su parte, la perspectiva de caja gris ha incorporado el conocimiento de la topología Docker, las rutas de Varnish y la lógica del servidor para explicar por qué ha sido posible cada comportamiento. La combinación de ambas evita limitar el análisis a una mera revisión de código y, al mismo tiempo, permite relacionar cada resultado observable con una decisión concreta de arquitectura.
 
-El alcance quedó restringido a los componentes de Fase~0: cliente oficial, reproductor externo, laboratorio DRM, demostración de clave conocida, Varnish, Nginx y proxy de licencias. Se utilizaron exclusivamente usuarios, claves y activos de laboratorio. El contenido Widevine y el servicio de licencias aguas arriba corresponden a recursos públicos de prueba del ecosistema Shaka; no se emplearon contenidos comerciales, credenciales de terceros ni técnicas de extracción de claves.
+El alcance se ha restringido a los componentes de Fase~0: cliente oficial, reproductor externo, laboratorio DRM, demostración de clave conocida, Varnish, Nginx y proxy de licencias. Se han utilizado exclusivamente usuarios, claves y activos de laboratorio. El contenido Widevine y el servicio de licencias aguas arriba corresponden a recursos públicos de prueba del ecosistema Shaka; no se han empleado contenidos comerciales, credenciales de terceros ni técnicas de extracción de claves.
 
-La matriz experimental comenzó estableciendo el comportamiento legítimo de referencia. Se comprobó la reproducción de los dos activos con el usuario autorizado y el rechazo del usuario sin permisos. Después se repitieron las solicitudes desde clientes ajenos a la plataforma y mediante rutas alternativas. Este orden permite atribuir los resultados a las decisiones de seguridad de Fase~0 y no a una falta de funcionalidad del laboratorio.
+La matriz experimental se ha iniciado estableciendo el comportamiento legítimo de referencia. En primer lugar, se ha comprobado la reproducción de los dos activos con el usuario autorizado y el rechazo del usuario sin permisos. A continuación, se han repetido las solicitudes desde clientes ajenos a la plataforma y mediante rutas alternativas. Este orden permite atribuir los resultados a las decisiones de seguridad de Fase~0 y no a una falta de funcionalidad del laboratorio.
 
 \subsection{Caja negra}
 
-El análisis de caja negra partió de las interfaces expuestas en el equipo anfitrión. El cliente oficial se publicó en el puerto \texttt{3000}; el reproductor externo, el laboratorio DRM y la demostración de clave conocida se publicaron respectivamente en los puertos \texttt{3001}, \texttt{3002} y \texttt{3003}. Varnish actuó como CDN en el puerto \texttt{8080}, mientras que el origen y el servicio de licencias también quedaron accesibles directamente en \texttt{8081} y \texttt{8082}.
+El análisis de caja negra ha partido de las interfaces expuestas en el equipo anfitrión. El cliente oficial se ha publicado en el puerto \texttt{3000}; el reproductor externo, el laboratorio DRM y la demostración de clave conocida se han publicado, respectivamente, en los puertos \texttt{3001}, \texttt{3002} y \texttt{3003}. Varnish ha actuado como CDN en el puerto \texttt{8080}, mientras que el origen y el servicio de licencias también han permanecido accesibles directamente en \texttt{8081} y \texttt{8082}.
 
-Desde esta perspectiva se plantearon tres perfiles. El primero fue un usuario autenticado y autorizado, utilizado para establecer el comportamiento legítimo. El segundo fue un usuario autenticado sin \textit{entitlement}, con el que se comprobó si la plataforma impedía obtener la configuración del activo. El tercero fue un cliente externo sin sesión en la plataforma, que únicamente disponía de la URL del MPD y de una dirección de licencia observables.
+Desde esta perspectiva se han planteado tres perfiles. El primero ha correspondido a un usuario autenticado y autorizado, utilizado para establecer el comportamiento legítimo. El segundo ha sido un usuario autenticado sin \textit{entitlement}, con el que se ha comprobado si la plataforma impedía obtener la configuración del activo. El tercero ha correspondido a un cliente externo sin sesión en la plataforma, que únicamente disponía de la URL del MPD y de una dirección de licencia observables.
 
-Las pruebas verificaron códigos HTTP, estados visibles del reproductor, disponibilidad de botones, avance temporal del vídeo y posibilidad de acceder a rutas alternativas. Se consideró que una reproducción había comenzado realmente cuando el elemento de vídeo no estaba pausado, su tiempo de reproducción avanzaba y el navegador informaba de datos multimedia disponibles. Esta comprobación impidió confundir la mera aparición de un mensaje de éxito en la interfaz con una reproducción efectiva.
+Las pruebas han permitido verificar los códigos HTTP, los estados visibles del reproductor, la disponibilidad de los botones, el avance temporal del vídeo y la posibilidad de acceder a rutas alternativas. Una reproducción solo se ha considerado iniciada cuando el elemento de vídeo no estaba pausado, su tiempo de reproducción avanzaba y el navegador informaba de datos multimedia disponibles. Esta comprobación ha evitado confundir la mera aparición de un mensaje de éxito en la interfaz con una reproducción efectiva.
 
 \subsection{Caja gris}
 
-El análisis de caja gris revisó la configuración de contenedores, las reglas de Varnish y la lógica del servidor de Fase~0. En particular, se examinó qué servicios se publicaban en el anfitrión, qué rutas se enviaban al origen o al proxy de licencias, cómo se generaban los tokens de acceso y qué validaciones se ejecutaban antes de reenviar un \textit{challenge} Widevine.
+El análisis de caja gris ha incluido la revisión de la configuración de los contenedores, las reglas de Varnish y la lógica del servidor de Fase~0. En particular, se ha examinado qué servicios se publicaban en el anfitrión, qué rutas se enviaban al origen o al proxy de licencias, cómo se generaban los tokens de acceso y qué validaciones se ejecutaban antes de reenviar un \textit{challenge} Widevine.
 
-Esta revisión mostró que la plataforma mantiene dos caminos de licencia. El camino oficial, \texttt{/platform/license}, exige un token de acceso y comprueba que el usuario disponga del activo indicado. El camino alternativo, \texttt{/license/no\_auth}, reenvía el mismo tipo de mensaje binario sin exigir identidad ni autorización. La coexistencia de ambos caminos es intencionada en Fase~0 y permite demostrar que un control correcto en la aplicación pierde eficacia si permanece disponible una ruta equivalente que no aplica la misma política.
+Esta revisión ha evidenciado que la plataforma mantiene dos caminos de licencia. El camino oficial, \texttt{/platform/license}, exige un token de acceso y comprueba que el usuario disponga del activo indicado. El camino alternativo, \texttt{/license/no\_auth}, reenvía el mismo tipo de mensaje binario sin exigir identidad ni autorización. La coexistencia de ambos caminos es intencionada en Fase~0 y permite demostrar que un control correcto en la aplicación pierde eficacia si permanece disponible una ruta equivalente que no aplica la misma política.
 
-La caja gris también permitió comprobar que los tokens de acceso son identificadores UUID almacenados en memoria. No contienen expiración, ámbito, activo, dispositivo o identificador de sesión, y permanecen aceptados hasta que el proceso se reinicia. Asimismo, el origen y el servidor de licencias se publican directamente en el anfitrión, de modo que el paso por Varnish no es obligatorio.
+La revisión de caja gris también ha permitido comprobar que los tokens de acceso son identificadores UUID almacenados en memoria. No contienen expiración, ámbito, activo, dispositivo o identificador de sesión, y permanecen aceptados hasta que el proceso se reinicia. Asimismo, el origen y el servidor de licencias se publican directamente en el anfitrión, de modo que el paso por Varnish no es obligatorio.
 
 \subsection{Análisis de tráfico}
 
-El tráfico se observó en tres niveles complementarios. En el navegador se registraron las peticiones de manifiesto y licencia generadas por Shaka Player. En la capa HTTP se inspeccionaron códigos de estado y cabeceras de respuesta. Finalmente, los registros de los contenedores permitieron confirmar las solicitudes recibidas por Nginx durante la descarga del MPD, la inicialización y los segmentos locales.
+El tráfico se ha observado en tres niveles complementarios. En el navegador se han registrado las peticiones de manifiesto y licencia generadas por Shaka Player. En la capa HTTP se han inspeccionado los códigos de estado y las cabeceras de respuesta. Finalmente, los registros de los contenedores han permitido confirmar las solicitudes recibidas por Nginx durante la descarga del MPD, la inicialización y los segmentos locales.
 
-El flujo externo Widevine produjo una solicitud al MPD público, dos solicitudes al endpoint \texttt{/license/no\_auth} y dos respuestas binarias de licencia de 714 y 1229 bytes. El laboratorio registró después el evento \texttt{PLAYBACK\_STARTED}, y el elemento de vídeo alcanzó estado de reproducción con datos suficientes. En el activo CENC local, los logs del origen mostraron solicitudes al fichero de inicialización y a los segmentos \texttt{m4s}, sin que se produjera ninguna petición a un servidor de licencias.
+En el flujo externo Widevine se ha registrado una solicitud al MPD público, dos solicitudes al endpoint \texttt{/license/no\_auth} y dos respuestas binarias de licencia de 714 y 1229 bytes. A continuación, el laboratorio ha registrado el evento \texttt{PLAYBACK\_STARTED} y el elemento de vídeo ha alcanzado el estado de reproducción con datos suficientes. En el activo CENC local, los logs del origen han mostrado solicitudes al fichero de inicialización y a los segmentos \texttt{m4s}, sin que se haya producido ninguna petición a un servidor de licencias.
 
-Las cabeceras confirmaron además que los objetos locales atravesaban la caché de Varnish: una segunda solicitud al MPD devolvió \texttt{X-Cache: HIT}. El mismo MPD pudo obtenerse directamente desde el origen publicado en \texttt{8081}. Por tanto, el análisis no solo observó que el contenido estaba disponible, sino también que existían dos caminos de distribución: uno a través de la CDN y otro directo hacia el origen.
+Las cabeceras han confirmado, además, que los objetos locales atravesaban la caché de Varnish: una segunda solicitud al MPD ha devuelto \texttt{X-Cache: HIT}. El mismo MPD también se ha podido obtener directamente desde el origen publicado en \texttt{8081}. Por tanto, el análisis no solo ha evidenciado que el contenido estaba disponible, sino también que existían dos caminos de distribución: uno a través de la CDN y otro directo hacia el origen.
 
-No se intentó interpretar el contenido criptográfico de las respuestas Widevine ni recuperar claves desde el tráfico. EME no expone las claves del CDM al código JavaScript de la página, y una captura de red no debe confundirse con una vía de exportación del material protegido \cite{w3ceme2026,patat2022}. Para los resultados de este capítulo fueron suficientes la secuencia de peticiones, los tamaños de respuesta, el estado del reproductor y los logs del servidor.
+No se ha intentado interpretar el contenido criptográfico de las respuestas Widevine ni recuperar claves a partir del tráfico. EME no expone las claves del CDM al código JavaScript de la página, y una captura de red no debe confundirse con una vía de exportación del material protegido \cite{w3ceme2026,patat2022}. Para obtener los resultados de este capítulo han sido suficientes la secuencia de peticiones, los tamaños de respuesta, el estado del reproductor y los logs del servidor.
 
 \subsection{Reproducción de ataques}
 
-Los escenarios se reprodujeron de forma controlada y repetible. Cada prueba comenzó con los siete contenedores de Fase~0 activos y sin reinicios. Se verificó primero el comportamiento legítimo, después el rechazo del usuario sin permisos y, por último, los caminos alternativos disponibles para un cliente externo.
+Los escenarios se han reproducido de forma controlada y repetible. Cada prueba se ha iniciado con los siete contenedores de Fase~0 activos y sin reinicios. En primer lugar, se ha verificado el comportamiento legítimo; a continuación, el rechazo del usuario sin permisos y, por último, los caminos alternativos disponibles para un cliente externo.
 
-La reproducción se limitó a acciones que un usuario podría realizar sobre sus propias comunicaciones: observar URLs, introducirlas en otro reproductor, reutilizar un token emitido por el laboratorio y acceder a puertos publicados localmente. La demostración de clave conocida empleó un KID y una clave generados expresamente para el TFM. No se modificó el CDM, no se instrumentó Widevine L3 y no se recuperaron claves de terceros. Este límite mantiene la prueba alineada con el objetivo del trabajo: auditar la integración OTT y no desarrollar una herramienta de elusión del DRM.
+La reproducción se ha limitado a acciones que un usuario podría realizar sobre sus propias comunicaciones: observar URLs, introducirlas en otro reproductor, reutilizar un token emitido por el laboratorio y acceder a puertos publicados localmente. En la demostración de clave conocida se han empleado un KID y una clave generados expresamente para el TFM. No se ha modificado el CDM, no se ha instrumentado Widevine L3 y no se han recuperado claves de terceros. Este límite mantiene la prueba alineada con el objetivo del trabajo: auditar la integración OTT y no desarrollar una herramienta de elusión del DRM.
 
 \section{Análisis del flujo de licencias}
 
 En el flujo oficial, el usuario inicia sesión mediante \texttt{/auth/login}. El servidor comprueba las credenciales de laboratorio, genera un token aleatorio y devuelve un catálogo en el que cada activo aparece como permitido o denegado. Cuando el usuario autorizado selecciona el activo Widevine, el cliente solicita su configuración mediante \texttt{/playback/config}. Shaka Player descarga después el MPD, crea una sesión EME y envía el \textit{challenge} a \texttt{/platform/license} con el token de acceso y el identificador de activo.
 
-El servidor vuelve a comprobar la identidad y el \textit{entitlement} antes de reenviar el mensaje al servicio Widevine de pruebas. Este camino produjo reproducción real: el elemento de vídeo se mantuvo en ejecución, alcanzó un estado de datos completos y avanzó temporalmente. Por tanto, Fase~0 dispone de un flujo protegido funcional dentro de la interfaz oficial.
+El servidor vuelve a comprobar la identidad y el \textit{entitlement} antes de reenviar el mensaje al servicio Widevine de pruebas. Este camino ha permitido una reproducción real: el elemento de vídeo se ha mantenido en ejecución, ha alcanzado un estado de datos completos y ha avanzado temporalmente. Por tanto, Fase~0 dispone de un flujo protegido funcional dentro de la interfaz oficial.
 
-No obstante, el mismo proxy publica \texttt{/license/no\_auth}. Este endpoint acepta el cuerpo binario generado por el CDM y lo reenvía sin token, usuario o activo. El reproductor externo configuró \texttt{com.widevine.alpha} con esa URL, obtuvo respuestas de licencia válidas y reprodujo el mismo activo sin iniciar sesión. La licencia siguió siendo procesada correctamente por Widevine; el fallo de seguridad consistió en que la aplicación proporcionó acceso al servicio de licencia fuera de su política de negocio.
+No obstante, el mismo proxy publica \texttt{/license/no\_auth}. Este endpoint acepta el cuerpo binario generado por el CDM y lo reenvía sin token, usuario o activo. El reproductor externo se ha configurado para utilizar \texttt{com.widevine.alpha} con esa URL, ha obtenido respuestas de licencia válidas y ha reproducido el mismo activo sin iniciar sesión. La licencia ha seguido siendo procesada correctamente por Widevine; el fallo de seguridad se ha producido porque la aplicación ha proporcionado acceso al servicio de licencia fuera de su política de negocio.
 
 \subsection{Obtención de tokens}
 
@@ -60,11 +60,11 @@ El token de Fase~0 se obtiene tras enviar correo y contraseña a \texttt{/auth/l
 
 El token no incluye fecha de expiración, identificador único verificable fuera del mapa de memoria, audiencia, ámbito ni contexto de reproducción. Tampoco se rota al iniciar una reproducción o al solicitar una licencia. A diferencia de un JWT con \textit{claims} explícitos y tiempo de expiración, el servidor depende exclusivamente de que el UUID continúe presente en su estructura interna \cite{rfc7519}. Reiniciar el proceso invalida todos los tokens, pero mientras el proceso siga activo no existe caducidad automática.
 
-Durante la revisión visual se observó además que la interfaz oficial imprime la respuesta completa de login en el bloque de estado, incluido el token de acceso. Aunque un usuario puede observar su propio token en las herramientas de red, mostrarlo directamente en el DOM incrementa la probabilidad de exposición mediante capturas de pantalla, soporte remoto o registros copiados. El token no se reproduce en esta memoria para evitar convertir la evidencia en una credencial reutilizable.
+Durante la revisión visual se ha observado, además, que la interfaz oficial imprime la respuesta completa de login en el bloque de estado, incluido el token de acceso. Aunque un usuario puede observar su propio token en las herramientas de red, mostrarlo directamente en el DOM incrementa la probabilidad de exposición mediante capturas de pantalla, soporte remoto o registros copiados. El token no se reproduce en esta memoria para evitar convertir la evidencia en una credencial reutilizable.
 
 \subsection{Validaciones existentes}
 
-Fase~0 no carece por completo de controles. La ruta oficial valida credenciales, diferencia dos cuentas y comprueba el \textit{entitlement} antes de devolver la configuración. El usuario autorizado pudo reproducir tanto el activo Widevine como el activo CENC local. El usuario sin permisos pudo autenticarse, pero recibió ambos activos como denegados y los botones de reproducción permanecieron deshabilitados.
+Fase~0 no carece por completo de controles. La ruta oficial valida credenciales, diferencia dos cuentas y comprueba el \textit{entitlement} antes de devolver la configuración. El usuario autorizado ha podido reproducir tanto el activo Widevine como el activo CENC local. El usuario sin permisos ha podido autenticarse, pero ha recibido ambos activos como denegados y los botones de reproducción han permanecido deshabilitados.
 
 El endpoint \texttt{/platform/license} repite la comprobación de autorización en cada \textit{challenge}. Esta segunda validación es positiva porque evita confiar únicamente en la decisión adoptada al mostrar el catálogo. También se impide solicitar una licencia Widevine para un activo declarado como ClearKey.
 
@@ -80,7 +80,7 @@ La configuración usa además HTTP y permite CORS desde cualquier origen. CORS n
 
 \section{Evaluación de vulnerabilidades}
 
-La Tabla~\ref{tab:hallazgos-fase0} resume los principales hallazgos. La severidad se asignó cualitativamente atendiendo al impacto sobre la confidencialidad del contenido, la facilidad de explotación y la necesidad de disponer de credenciales previas.
+La Tabla~\ref{tab:hallazgos-fase0} resume los principales hallazgos. La severidad se ha asignado cualitativamente atendiendo al impacto sobre la confidencialidad del contenido, la facilidad de explotación y la necesidad de disponer de credenciales previas.
 
 \begin{table}[H]
 \centering
@@ -105,7 +105,7 @@ F0-07 & Token mostrado en la interfaz & Aumenta el riesgo de divulgación accide
 
 La CDN permite recuperar el MPD y los segmentos locales sin token. El conocimiento de una ruta como \texttt{/content/dash-known-key/stream.mpd} resulta suficiente para que cualquier cliente alcance el activo. Varnish cachea el objeto y lo sirve con \texttt{Access-Control-Allow-Origin: *}, por lo que la infraestructura puede consumir ancho de banda aunque la solicitud no proceda de la aplicación oficial.
 
-El origen también está publicado en \texttt{8081}. El mismo MPD obtenido mediante la CDN pudo descargarse directamente desde Nginx, evitando las reglas de Varnish. Este resultado reproduce una condición frecuente de \textit{bypass}: proteger únicamente el frontal no es efectivo si permanece disponible una ruta alternativa hacia el origen. Los mecanismos de URLs o cookies firmadas descritos por proveedores de CDN persiguen precisamente que conocer una ruta no sea suficiente para acceder al objeto \cite{googlemediacdn2026,awscloudfront2026}.
+El origen también está publicado en \texttt{8081}. El mismo MPD obtenido mediante la CDN se ha podido descargar directamente desde Nginx, evitando las reglas de Varnish. Este resultado reproduce una condición frecuente de \textit{bypass}: proteger únicamente el frontal no es efectivo si permanece disponible una ruta alternativa hacia el origen. Los mecanismos de URLs o cookies firmadas descritos por proveedores de CDN persiguen precisamente que conocer una ruta no sea suficiente para acceder al objeto \cite{googlemediacdn2026,awscloudfront2026}.
 
 Debe matizarse el alcance del resultado. El activo Widevine de Sintel está alojado por Google y sus segmentos no atraviesan la CDN local. Por tanto, el laboratorio demuestra acceso no autorizado a objetos CENC locales, exposición directa del origen y abuso del proxy de licencias, pero no una cadena completa de \textit{leeching} de segmentos Widevine servidos por la propia CDN. La evaluación de tokens de acceso a CDN sigue siendo relevante para el diseño defensivo, pero esta limitación impide presentar el escenario como una reproducción completa de un proveedor comercial \cite{simon2024cdn,rodrigues2024cdn}.
 
@@ -119,7 +119,7 @@ Si el token se filtra, otro cliente puede presentar el mismo valor y actuar como
 
 La compartición de credenciales es viable porque la cuenta no se vincula a dispositivos y el servidor no conserva información sobre ubicaciones o patrones de acceso. Varias personas pueden utilizar el mismo correo y contraseña y obtener tokens distintos sin que el sistema relacione esas autenticaciones entre sí. El DRM continuará emitiendo licencias válidas porque cada petición llega desde un navegador compatible y el plano de negocio no detecta que la identidad se está compartiendo.
 
-En el laboratorio no se simularon desplazamientos geográficos reales ni poblaciones masivas de clientes. No obstante, la revisión de caja gris confirma que no existe ninguna función capaz de distinguir esos casos. Por ello, el hallazgo se fundamenta en la ausencia verificable del control y no en una inferencia sobre la criptografía. La compartición de cuentas pertenece al plano de política de servicio y requiere señales adicionales de cuenta, dispositivo, red y concurrencia \cite{deloitte2024,adobe2026}.
+En el laboratorio no se han simulado desplazamientos geográficos reales ni poblaciones masivas de clientes. No obstante, la revisión de caja gris confirma que no existe ninguna función capaz de distinguir esos casos. Por ello, el hallazgo se fundamenta en la ausencia verificable del control y no en una inferencia sobre la criptografía. La compartición de cuentas pertenece al plano de política de servicio y requiere señales adicionales de cuenta, dispositivo, red y concurrencia \cite{deloitte2024,adobe2026}.
 
 \subsection{Abuso de concurrencia}
 
@@ -131,17 +131,17 @@ Esta carencia amplifica los efectos de la compartición de credenciales y del ro
 
 La decisión de Fase~0 se reduce a dos condiciones: que el token exista en memoria y que el activo figure en la lista de permisos. No se verifica que la petición conserve la misma IP, dispositivo o agente de usuario que el login. Tampoco se comprueba una sesión de reproducción activa, el ritmo de licencias, la relación entre KID y activo, el estado de riesgo o la concurrencia.
 
-La ruta pública elimina incluso esas dos condiciones. El navegador externo pudo obtener dos respuestas de licencia y comenzar la reproducción sin enviar credenciales. Esta es la evidencia más directa de la hipótesis del TFM: el CDM y Widevine pueden funcionar correctamente y, al mismo tiempo, la plataforma puede autorizar de forma insuficiente el acceso al servicio.
+La ruta pública elimina incluso esas dos condiciones. El navegador externo ha podido obtener dos respuestas de licencia y comenzar la reproducción sin enviar credenciales. Esta es la evidencia más directa de la hipótesis del TFM: el CDM y Widevine pueden funcionar correctamente y, al mismo tiempo, la plataforma puede autorizar de forma insuficiente el acceso al servicio.
 
-La demostración de clave conocida añade un límite diferente. Al introducir manualmente el KID y la clave de laboratorio, Shaka Player reprodujo el activo CENC sin configurar servidor de licencias. Esta prueba no constituye un hallazgo contra Widevine, puesto que la clave no se extrajo del CDM. Ilustra que, una vez comprometido el material de contenido, las validaciones del servidor de licencias dejan de intervenir para ese activo.
+La demostración de clave conocida añade un límite diferente. Al introducir manualmente el KID y la clave de laboratorio, Shaka Player ha reproducido el activo CENC sin configurar un servidor de licencias. Esta prueba no constituye un hallazgo contra Widevine, puesto que la clave no se ha extraído del CDM. Ilustra que, una vez comprometido el material de contenido, las validaciones del servidor de licencias dejan de intervenir para ese activo.
 
 \section{Escenarios de ataque reproducidos}
 
-Los escenarios se diseñaron para responder a preguntas concretas y evitar pruebas ambiguas. Primero se verificó que el sistema pudiera distinguir un usuario permitido de otro sin \textit{entitlement}. Después se comprobó si esa decisión seguía siendo efectiva al abandonar el cliente oficial. Finalmente se evaluaron las rutas directas y el efecto de disponer de una clave conocida.
+Los escenarios se han diseñado para responder a preguntas concretas y evitar pruebas ambiguas. En primer lugar, se ha verificado que el sistema pudiera distinguir un usuario permitido de otro sin \textit{entitlement}. A continuación, se ha comprobado si esa decisión seguía siendo efectiva al abandonar el cliente oficial. Finalmente, se han evaluado las rutas directas y el efecto de disponer de una clave conocida.
 
 \subsection{Procedimiento}
 
-El procedimiento aplicado fue el siguiente:
+El procedimiento seguido ha sido el siguiente:
 
 \begin{enumerate}
     \item Levantar los siete contenedores de Fase~0 y comprobar que cliente, CDN, origen y proxy respondían en sus puertos previstos.
@@ -155,7 +155,7 @@ El procedimiento aplicado fue el siguiente:
     \item Solicitar al laboratorio que intentara mostrar claves Widevine y registrar la imposibilidad de exportarlas mediante EME.
 \end{enumerate}
 
-Cada resultado se contrastó con el estado del elemento de vídeo, la respuesta visible de la aplicación, las cabeceras HTTP y los logs de los contenedores. No se consideró exitoso un escenario basándose únicamente en mensajes generados por la propia interfaz.
+Cada resultado se ha contrastado con el estado del elemento de vídeo, la respuesta visible de la aplicación, las cabeceras HTTP y los logs de los contenedores. No se ha considerado exitoso ningún escenario basándose únicamente en mensajes generados por la propia interfaz.
 
 \subsection{Resultados}
 
@@ -180,13 +180,13 @@ E0-07 & Exportación de claves Widevine & El navegador no expone claves del CDM 
 \end{tabularx}
 \end{table}
 
-El resultado E0-03 es el más relevante. El vídeo externo permaneció sin pausar, alcanzó estado de datos completos y avanzó sobre una duración aproximada de 888 segundos. El laboratorio repitió el comportamiento y registró dos respuestas de licencia. Por tanto, no se trató de una simulación visual, sino de una reproducción Widevine real fuera del cliente oficial.
+El resultado E0-03 es el más relevante. El vídeo externo ha permanecido sin pausar, ha alcanzado un estado de datos completos y ha avanzado sobre una duración aproximada de 888 segundos. El laboratorio ha reproducido el mismo comportamiento y ha registrado dos respuestas de licencia. Por tanto, no se ha tratado de una simulación visual, sino de una reproducción Widevine real fuera del cliente oficial.
 
 E0-01 y E0-02 demuestran que la existencia de la vulnerabilidad no implica que toda la lógica de la plataforma sea inexistente. La autorización por catálogo funciona en el camino previsto. El problema es que puede eludirse seleccionando una ruta alternativa equivalente. Este resultado refuerza la necesidad de aplicar la misma política en todos los caminos capaces de entregar contenido o licencias.
 
 \subsection{Evidencias}
 
-Las evidencias principales obtenidas fueron las siguientes:
+Las principales evidencias obtenidas han sido las siguientes:
 
 \begin{itemize}
     \item Estado \texttt{Reproduciendo: Sintel Widevine publico} en el cliente autorizado y avance real del elemento de vídeo.
@@ -228,13 +228,13 @@ Por último, la Figura~\ref{fig:fase0-clearkey} recoge la prueba ClearKey. El re
     \label{fig:fase0-clearkey}
 \end{figure}
 
-Para asegurar la trazabilidad, las pruebas principales se conservaron en el directorio \texttt{evidencias/fase0}. Este conjunto incluye capturas visuales de los tres escenarios, PCAP independientes para el flujo oficial, el bypass mediante \texttt{/license/no\_auth} y la entrega del activo ClearKey, además de un PCAPNG agregado. Un inventario describe el alcance de cada fichero, los filtros de Wireshark recomendados y las huellas SHA-256 empleadas para verificar su integridad. En particular, la captura oficial registra la secuencia \texttt{/auth/login}, \texttt{/playback/config} y dos peticiones a \texttt{/platform/license}; la captura del bypass contiene dos peticiones de licencia sin las llamadas previas de autenticación y autorización; y la captura ClearKey contiene el MPD, los ficheros de inicialización y los primeros segmentos sin ninguna URI de licencia.
+Para asegurar la trazabilidad, las pruebas principales se han conservado en el directorio \texttt{evidencias/fase0}. Este conjunto incluye capturas visuales de los tres escenarios, PCAP independientes para el flujo oficial, el bypass mediante \texttt{/license/no\_auth} y la entrega del activo ClearKey, además de un PCAPNG agregado. Un inventario describe el alcance de cada fichero, los filtros de Wireshark recomendados y las huellas SHA-256 empleadas para verificar su integridad. En particular, la captura oficial registra la secuencia \texttt{/auth/login}, \texttt{/playback/config} y dos peticiones a \texttt{/platform/license}; la captura del bypass contiene dos peticiones de licencia sin las llamadas previas de autenticación y autorización; y la captura ClearKey contiene el MPD, los ficheros de inicialización y los primeros segmentos sin ninguna URI de licencia.
 
-La evidencia también mostró aspectos secundarios de endurecimiento: uso de HTTP, CORS global, ausencia de cabeceras como CSP y publicación del token en el bloque de estado. Estos elementos no son necesarios para reproducir el bypass principal, pero amplían la superficie de exposición y deben corregirse en una arquitectura destinada a producción.
+La evidencia también ha mostrado aspectos secundarios de endurecimiento: uso de HTTP, CORS global, ausencia de cabeceras como CSP y publicación del token en el bloque de estado. Estos elementos no son necesarios para reproducir el bypass principal, pero amplían la superficie de exposición y deben corregirse en una arquitectura destinada a producción.
 
 \section{Limitaciones del modelo DRM tradicional}
 
-Los resultados confirman que Widevine cumple el cometido evaluado dentro del CDM: el navegador identifica el sistema de claves, genera un \textit{challenge}, procesa una licencia binaria y reproduce el contenido cifrado sin exponer la clave a JavaScript. La auditoría no halló una ruptura criptográfica de Widevine ni un método de extracción de claves. El fracaso se encuentra en la política que decide quién puede alcanzar el servicio de licencia y bajo qué contexto.
+Los resultados confirman que Widevine cumple el cometido evaluado dentro del CDM: el navegador identifica el sistema de claves, genera un \textit{challenge}, procesa una licencia binaria y reproduce el contenido cifrado sin exponer la clave a JavaScript. La auditoría no ha evidenciado una ruptura criptográfica de Widevine ni un método de extracción de claves. La debilidad se encuentra en la política que decide quién puede alcanzar el servicio de licencia y bajo qué contexto.
 
 La ruta \texttt{/license/no\_auth} demuestra que una licencia técnicamente válida puede ser emitida dentro de una reproducción ilegítima para la plataforma. Del mismo modo, el acceso directo al origen muestra que el cifrado no evita el consumo de ancho de banda ni el uso de la infraestructura por terceros. Finalmente, la ausencia de sesiones y concurrencia permite que credenciales válidas se utilicen de una forma incompatible con la política de negocio sin que el DRM perciba ninguna anomalía.
 

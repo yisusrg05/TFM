@@ -2,7 +2,7 @@
 
 \chapter{Arquitectura de defensa en profundidad propuesta}
 
-La auditoría de Fase~0 mostró que el problema principal no se encontraba en el cifrado de Widevine, sino en los caminos que permitían alcanzar el contenido y el servicio de licencia sin conservar el contexto de autorización. A partir de ese resultado se propone una arquitectura incremental: Fase~1 introduce controles preventivos alrededor del DRM y Fase~2 añade persistencia, detección y respuesta. La finalidad no es reemplazar Widevine, sino impedir que una licencia técnicamente válida se obtenga fuera de una reproducción autorizada y aportar capacidad de reacción cuando el uso deja de ser coherente con la política del servicio.
+La auditoría de Fase~0 ha evidenciado que el problema principal no se encuentra en el cifrado de Widevine, sino en los caminos que permiten alcanzar el contenido y el servicio de licencia sin conservar el contexto de autorización. A partir de este resultado se propone una arquitectura incremental: Fase~1 introduce controles preventivos alrededor del DRM y Fase~2 añade persistencia, detección y respuesta. La finalidad no es reemplazar Widevine, sino impedir que una licencia técnicamente válida se obtenga fuera de una reproducción autorizada y aportar capacidad de reacción cuando el uso deja de ser coherente con la política del servicio.
 
 Este capítulo presenta las decisiones de diseño de ambas fases. La implementación concreta se reserva para el capítulo siguiente y la comparación experimental con Fase~0 se realizará en el Capítulo~7. Esta separación evita convertir la descripción arquitectónica en una enumeración de pruebas y permite justificar cada control por la debilidad que pretende corregir.
 
