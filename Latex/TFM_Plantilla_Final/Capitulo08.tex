@@ -31,12 +31,12 @@ El cumplimiento de los objetivos específicos puede resumirse de la siguiente ma
 
     \item \textbf{Auditoría del ecosistema DRM.} Se han estudiado el intercambio de licencias, las rutas oficiales y alternativas y el comportamiento de un cliente externo. La auditoría no ha pretendido romper la criptografía de Widevine, sino comprobar si la plataforma conservaba identidad y autorización en todos los caminos equivalentes. Los PCAP, capturas y JSON del directorio de evidencias permiten reconstruir los escenarios.
 
-    \item \textbf{Autorización dinámica.} Se ha implementado un proxy protegido que valida identidad, \textit{entitlement}, activo, sesión, dispositivo e instancia antes de entregar manifiesto, contenido o licencia. El prototipo utiliza tokens firmados mediante HMAC con un formato simplificado de dos segmentos, por lo que no debe presentarse como una implementación JWT completa. La IP se ha empleado como señal de correlación y no se ha realizado geolocalización. El objetivo se ha alcanzado en su función de autorización contextual, aunque estas dos características concretas han quedado acotadas respecto a la formulación inicial.
+    \item \textbf{Autorización dinámica.} Se ha implementado un proxy protegido que valida identidad, \textit{entitlement}, activo, sesión, dispositivo e instancia antes de entregar manifiesto, contenido o licencia. La IP se ha empleado como señal de correlación y no se ha realizado geolocalización. El objetivo se ha alcanzado en su función de autorización contextual.
 
     \item \textbf{Control de abuso y respuesta.} Se han materializado límites de concurrencia, contadores temporales, detección de patrones, puntuación de riesgo, eventos y bans de cuenta o dispositivo. Se ha descartado el bloqueo automático por IP como respuesta principal, dado que una dirección puede ser compartida o cambiar. La Fase~2 ha demostrado tanto la activación de los bloqueos como su retirada administrativa y la conservación de la trazabilidad.
 \end{enumerate}
 
-La metodología incremental también se ha cumplido. Cada fase ha partido de la anterior, ha introducido controles identificables y ha sido sometida a una regresión. La incidencia encontrada en el binding de sesión de \texttt{/license} durante la campaña ha demostrado la utilidad de este enfoque: la primera ejecución detectó el defecto, se corrigió la validación y se repitieron los 65 casos antes de aceptar el resultado final.
+La metodología incremental también se ha cumplido. Cada fase ha partido de la anterior, ha introducido controles identificables y ha sido sometida a una regresión. Esto ha permitido identificar errores de implementación en la Fase 1, y corregirlos antes de proceder con el desarrollo de la Fase 2.
 
 \section{Limitaciones del trabajo}
 
@@ -44,7 +44,7 @@ La primera limitación deriva del carácter experimental del entorno. Los servic
 
 El activo Widevine y el servicio CWIP proceden de infraestructura pública de pruebas. Sus segmentos no atraviesan el origen privado del laboratorio, por lo que esa parte de la evaluación se ha concentrado en la protección del manifiesto y la licencia. El activo CENC local ha permitido estudiar el acceso a segmentos de manera controlada, pero su duración, volumen y patrón de consumo son menores que los de una emisión en directo real.
 
-Los identificadores de dispositivo e instancia se generan en el cliente y no equivalen a una atestación criptográfica de hardware. Un atacante con control suficiente sobre el cliente podría reproducir esos valores. Tampoco se han evaluado la robustez del CDM, HDCP, la seguridad del sistema operativo, la captura de pantalla o la extracción de la salida ya descifrada. Ningún control de acceso elimina por completo el denominado \textit{analog hole}.
+Los identificadores de dispositivo e instancia se generan en el cliente y no equivalen a una atestación criptográfica de hardware. Un atacante con control suficiente sobre el cliente podría reproducir esos valores. Tampoco se han evaluado la robustez del CDM, la seguridad del sistema operativo, la captura de pantalla o la extracción de la salida ya descifrada. Ningún control de acceso elimina por completo el denominado \textit{analog hole}.
 
 Las reglas de riesgo se han configurado para producir escenarios reproducibles, no a partir de tráfico real de una población de usuarios. No se ha calculado una tasa de falsos positivos ni se han estudiado comportamientos por región, dispositivo, tipo de conexión o perfil de consumo. Redis se ha desplegado sin persistencia ni replicación para poder reiniciar el laboratorio en un estado conocido.
 
