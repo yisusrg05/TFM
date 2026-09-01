@@ -53,7 +53,8 @@ El activo Widevine utiliza el contenido público de demostración de Shaka. El c
 | [`propuesta-seguridad/`](propuesta-seguridad/) | Documento de diseño inicial que recoge brechas y propuestas de endurecimiento. |
 | [`REVISION_FASES_1_2.md`](REVISION_FASES_1_2.md) | Revisión técnica final de las fases endurecidas, correcciones realizadas y limitaciones conocidas. |
 | `Anteproyecto TFM - *` | Anteproyecto original en PDF y RTF. |
-| [`LICENSE`](LICENSE) | Licencia GNU GPL v3 del repositorio. |
+| [`LICENSE`](LICENSE) | Licencia GNU GPL v3 aplicable al código fuente. |
+| [`LICENSE-DOCUMENTATION.md`](LICENSE-DOCUMENTATION.md) | Licencia CC BY 4.0 y delimitación de su alcance sobre la memoria y la documentación. |
 
 Cada fase y la carpeta de evidencias disponen de un README propio con mayor detalle técnico.
 
@@ -169,4 +170,9 @@ La carpeta contiene los ocho capítulos, los resúmenes en español e inglés, l
 
 ## Licencia
 
-El código del repositorio se distribuye bajo la [GNU General Public License v3.0](LICENSE). Los activos, herramientas y servicios de terceros conservan sus licencias y condiciones de uso correspondientes.
+El contenido del repositorio se distribuye bajo dos licencias diferenciadas:
+
+- El **código fuente**, incluidos los scripts, servicios, Dockerfiles y configuraciones, se distribuye bajo la [GNU General Public License v3.0](LICENSE).
+- La **memoria del TFM, los diagramas de elaboración propia y la documentación original del repositorio** se distribuyen bajo [Creative Commons Atribución 4.0 Internacional (CC BY 4.0)](LICENSE-DOCUMENTATION.md).
+
+La licencia Creative Commons no se extiende a logotipos, marcas, contenidos audiovisuales, interfaces, capturas, citas ni otros elementos pertenecientes a terceros. Estos materiales conservan sus derechos y condiciones de uso originales; su aparición en el proyecto no implica que el autor pueda relicenciarlos.
