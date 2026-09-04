@@ -46,7 +46,7 @@ El \textit{CDN leeching} consiste en el uso ilegítimo de la infraestructura de 
 
 \subsubsection{Reutilización de tokens}
 
-La reutilización de tokens es un problema de sesión y de control de acceso, no de descifrado del contenido. Si un token se emite con una validez excesiva, sin vinculación contextual suficiente o sin mecanismos que dificulten su \textit{replay}, un tercero puede reutilizarlo para solicitar manifiestos, segmentos o incluso licencias dentro de una ventana temporal indebida \cite{akamai2026,rfc7519}.
+La reutilización de tokens es un problema de sesión y de control de acceso, no de descifrado del contenido. Si un token se emite con una validez excesiva, sin vinculación contextual suficiente o sin mecanismos que dificulten su \textit{replay}, un tercero puede reutilizarlo para solicitar manifiestos, segmentos o incluso licencias dentro de una ventana temporal indebida \cite{akamai2026}.
 
 \subsubsection{\textit{Credential sharing}}
 
@@ -79,25 +79,36 @@ El objetivo principal de este TFM es diseñar, implementar y auditar un entorno 
     \item Implementar mecanismos adicionales de seguridad que limiten el abuso, como controles de concurrencia y detección de anomalías capaces de bloquear automáticamente sesiones o direcciones IP al detectar patrones compatibles con uso compartido de cuentas, reutilización indebida de sesiones o intentos de acceso masivo.
 \end{enumerate}
 
+\section{Contribuciones del TFM}
+
+Las principales contribuciones de este TFM se concretan en cuatro resultados complementarios:
+
+\begin{enumerate}
+    \item El diseño y despliegue de un laboratorio OTT/DRM reproducible, basado en contenedores y compuesto por los elementos necesarios para representar de extremo a extremo la distribución y reproducción de contenido protegido.
+    \item La caracterización experimental de los límites de una configuración base protegida mediante Widevine, que ha permitido diferenciar la protección criptográfica proporcionada por el DRM de otros riesgos asociados a la autenticación, las sesiones, la concurrencia y el acceso a la CDN.
+    \item El diseño y la implementación incremental de una arquitectura de defensa en profundidad estructurada en dos fases, mediante la incorporación progresiva de autenticación, autorización contextual, control de concurrencia y detección de comportamientos anómalos.
+    \item Una evaluación comparativa de las distintas fases del sistema, acompañada de pruebas automatizadas y de un conjunto organizado de artefactos y evidencias reproducibles, entre los que se incluyen capturas de tráfico, resultados en formato JSON, capturas visuales y scripts de apoyo.
+\end{enumerate}
+
 \section{Metodología}
 
-La metodología del trabajo se plantea como un proceso incremental e iterativo, con una orientación experimental. Esta elección responde a la necesidad de construir primero un entorno base funcional, observar su comportamiento, identificar debilidades verificables y, a partir de ellas, diseñar e implementar contramedidas evaluables.
+La metodología del trabajo se ha desarrollado como un proceso incremental e iterativo, con una orientación experimental. Esta elección ha respondido a la necesidad de construir primero un entorno base funcional, observar su comportamiento, identificar debilidades verificables y, a partir de ellas, diseñar e implementar contramedidas evaluables.
 
 \subsection{Metodología incremental}
 
-En una primera etapa se construirá un entorno OTT mínimo, pero representativo, que permita distribuir contenido cifrado y gestionar licencias Widevine de manera reproducible. Sobre esa base se irán añadiendo progresivamente instrumentación, mecanismos de captura, lógica de autorización y controles defensivos. Cada iteración deberá producir un resultado verificable: primero el funcionamiento del sistema base, después la identificación de amenazas reproducibles y, finalmente, la evaluación comparativa del sistema reforzado.
+En una primera etapa se ha construido un entorno OTT mínimo, pero representativo, que ha permitido distribuir contenido cifrado y gestionar licencias Widevine de manera reproducible. Sobre esa base se han añadido progresivamente instrumentación, mecanismos de captura, lógica de autorización y controles defensivos. Cada iteración ha producido un resultado verificable: primero el funcionamiento del sistema base, después la identificación de amenazas reproducibles y, finalmente, la evaluación comparativa del sistema reforzado.
 
 \subsection{Laboratorio experimental}
 
-El núcleo práctico del TFM será un laboratorio experimental desplegado sobre tecnologías reproducibles y fácilmente instrumentables. Este laboratorio incluirá, al menos, los elementos necesarios para representar la cadena OTT completa: empaquetado del contenido, distribución segmentada, servidor de origen, punto de entrega mediante CDN o componente equivalente, cliente de reproducción y lógica de licencias. Su finalidad no es replicar exhaustivamente una plataforma comercial, sino disponer de un entorno suficientemente realista para observar interacciones, dependencias y puntos de abuso.
+El núcleo práctico del TFM ha sido un laboratorio experimental desplegado sobre tecnologías reproducibles y fácilmente instrumentables. Este laboratorio ha incluido los elementos necesarios para representar la cadena OTT completa: empaquetado del contenido, distribución segmentada, servidor de origen, punto de entrega mediante CDN, cliente de reproducción y lógica de licencias. Su finalidad no ha sido replicar exhaustivamente una plataforma comercial, sino disponer de un entorno suficientemente realista para observar interacciones, dependencias y puntos de abuso.
 
 \subsection{Auditoría técnica}
 
-Sobre el entorno base se llevará a cabo una auditoría técnica con enfoque mixto de caja negra y caja gris. En la dimensión de caja negra se analizará el comportamiento observable del sistema desde la perspectiva de un usuario o atacante con acceso limitado. En la dimensión de caja gris se aprovechará el conocimiento del laboratorio para inspeccionar el flujo de licencias, la gestión de tokens, la relación entre cliente y CDN y las validaciones aplicadas en cada punto del proceso.
+Sobre el entorno base se ha llevado a cabo una auditoría técnica con enfoque mixto de caja negra y caja gris. En la dimensión de caja negra se ha analizado el comportamiento observable del sistema desde la perspectiva de un usuario o atacante con acceso limitado. En la dimensión de caja gris se ha aprovechado el conocimiento del laboratorio para inspeccionar el flujo de licencias, la gestión de tokens, la relación entre cliente y CDN y las validaciones aplicadas en cada punto del proceso.
 
 \subsection{Diseño iterativo de defensas}
 
-A partir de los resultados de la auditoría se definirá una arquitectura de defensa en profundidad orientada a endurecer el control de acceso sin alterar el papel central del DRM. Esta arquitectura se implementará de forma iterativa, introduciendo medidas como validación contextual de tokens, control de sesiones activas, restricciones adicionales de acceso y mecanismos básicos de detección de anomalías. Cada defensa será evaluada tanto por su capacidad de mitigación como por su impacto operativo, ya que en entornos OTT la seguridad no puede desligarse ni del rendimiento ni de la experiencia de usuario.
+A partir de los resultados de la auditoría se ha definido una arquitectura de defensa en profundidad orientada a endurecer el control de acceso sin alterar el papel central del DRM. Esta arquitectura se ha implementado de forma iterativa mediante medidas como la validación contextual de tokens, el control de sesiones activas, restricciones adicionales de acceso y mecanismos básicos de detección de anomalías. Cada defensa se ha evaluado tanto por su capacidad de mitigación como por su impacto operativo, ya que en entornos OTT la seguridad no puede desligarse ni del rendimiento ni de la experiencia de usuario.
 
 \section{Estructura de la memoria}
 

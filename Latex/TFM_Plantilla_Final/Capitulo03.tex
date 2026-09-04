@@ -91,7 +91,7 @@ La contenerización resulta especialmente útil en una evaluación de seguridad 
 
 \subsection{Python}
 
-Python se considera una herramienta auxiliar para el tratamiento posterior de evidencias y métricas. Su biblioteca estándar y su ecosistema facilitan automatizar la lectura de registros estructurados, normalizar marcas temporales, agrupar peticiones por cuenta o sesión y generar tablas de resultados \cite{python-docs2026}. No forma parte del camino crítico de reproducción implementado en los contenedores actuales, que se apoya principalmente en Node.js y JavaScript; su papel previsto es apoyar el análisis reproducible de PCAP, logs y métricas obtenidos durante la evaluación.
+Python se ha utilizado como herramienta auxiliar para el tratamiento de evidencias y métricas. Su biblioteca estándar y su ecosistema han facilitado automatizar la lectura de registros estructurados, normalizar marcas temporales, agrupar peticiones por cuenta o sesión y generar tablas de resultados \cite{python-docs2026}. No ha formado parte del camino crítico de reproducción implementado en los contenedores, que se ha apoyado principalmente en Node.js y JavaScript; su papel ha sido facilitar el análisis reproducible de PCAP, logs y métricas obtenidos durante la evaluación.
 
 \subsection{Widevine}
 
@@ -115,17 +115,17 @@ Linux también aporta un contexto natural para la instrumentación de red y la i
 
 Wireshark se selecciona como herramienta de inspección visual de tráfico para revisar intercambios HTTP, cabeceras, secuencias temporales y posibles rutas alternativas de acceso. Su documentación incluye guías de usuario, filtros de visualización y herramientas de línea de comandos asociadas, lo que lo hace adecuado para documentar capturas de laboratorio \cite{wireshark-docs2026}.
 
-En este TFM, Wireshark se empleará para contrastar el flujo observable desde el cliente oficial con el flujo generado por los clientes externos de Fase~0. El objetivo no es inspeccionar material criptográfico interno del CDM, sino identificar qué URLs, cabeceras, tokens, MPD y endpoints de licencia quedan expuestos para un usuario que observa sus propias comunicaciones.
+En este TFM, Wireshark se ha empleado para contrastar el flujo observable desde el cliente oficial con el generado por los clientes externos de Fase~0. El objetivo no ha sido inspeccionar material criptográfico interno del CDM, sino identificar qué URLs, cabeceras, tokens, MPD y endpoints de licencia han quedado expuestos para un usuario que observa sus propias comunicaciones.
 
 \subsection{\textit{tcpdump}}
 
-\textit{tcpdump} complementa a Wireshark como mecanismo de captura no interactiva. Se utilizará para obtener ficheros PCAP en puntos concretos de la red del laboratorio y conservar evidencia que pueda revisarse posteriormente. La captura se acotará a los puertos y contenedores de interés, evitando recoger tráfico ajeno al experimento.
+\textit{tcpdump} ha complementado a Wireshark como mecanismo de captura no interactiva. Se ha utilizado para obtener ficheros PCAP en puntos concretos de la red del laboratorio y conservar evidencias revisables posteriormente. La captura se ha acotado a los puertos y contenedores de interés, evitando recoger tráfico ajeno al experimento.
 
-La combinación de \textit{tcpdump} para la adquisición y Wireshark para la exploración permite separar el momento de la prueba del análisis posterior. Los PCAP se tratarán como evidencia de los escenarios reproducidos y no como fuente de claves DRM: el contenido de licencia Widevine puede viajar cifrado o en formato propietario y las claves no son exportadas por EME al código de la aplicación.
+La combinación de \textit{tcpdump} para la adquisición y Wireshark para la exploración ha permitido separar el momento de la prueba del análisis posterior. Los PCAP se han tratado como evidencia de los escenarios reproducidos y no como fuente de claves DRM: el contenido de licencia Widevine puede viajar cifrado o en formato propietario y las claves no son exportadas por EME al código de la aplicación.
 
-\subsection{JWT}
+\subsection{Credenciales de acceso y reproducción}
 
-JWT se utiliza como referencia conceptual para los \textit{claims} de acceso y reproducción de las fases endurecidas \cite{rfc7519}. La implementación actual emplea un cuerpo JSON codificado y una firma HMAC en dos segmentos, por lo que no constituye un JWT estándar. Incluye tipo de token, cuenta, dispositivo, activo, identificador de sesión, ámbito y expiración; su estructura es deliberadamente reducida para el laboratorio y no pretende ser un proveedor de identidad completo.
+Las fases endurecidas utilizan credenciales firmadas con atributos de acceso y reproducción. La implementación incluye tipo de credencial, cuenta, dispositivo, activo, identificador de sesión, ámbito y expiración. Se trata de un mecanismo deliberadamente reducido para el laboratorio, cuyo propósito es aportar contexto verificable a las peticiones y no reproducir un proveedor de identidad completo.
 
 La distinción entre \textit{access token} y \textit{playback token} permite reducir el privilegio de cada credencial. El primero autentica al usuario frente al \textit{control-plane}; el segundo queda ligado a una sesión concreta y autoriza el manifiesto, la lectura de contenido, la solicitud de licencia y el envío de \textit{heartbeats}. Este diseño permite estudiar el efecto de la expiración, la revocación y el control de concurrencia sobre una operación especialmente sensible: el acceso a contenido protegido.
 
@@ -180,9 +180,9 @@ La propiedad importante no es solo que el paso quinto ocurra, sino que la decisi
 
 \subsection{PCAP}
 
-La adquisición de tráfico se plantea en dos niveles. El primero consiste en observar la comunicación desde el navegador durante una reproducción oficial y durante una reproducción externa de Fase~0. El segundo consiste en capturar el tráfico asociado a los contenedores o a los puertos publicados, acotando las capturas a HTTP, DASH y licencias. Esta estrategia permite conservar PCAP comparables para cada escenario, con marcas temporales que relacionen solicitud de manifiesto, emisión de licencia y descarga de segmentos.
+La adquisición de tráfico se ha realizado en dos niveles. El primero ha consistido en observar la comunicación desde el navegador durante una reproducción oficial y durante una reproducción externa de Fase~0. El segundo ha consistido en capturar el tráfico asociado a los contenedores o a los puertos publicados, acotando las capturas a HTTP, DASH y licencias. Esta estrategia ha permitido conservar PCAP comparables para cada escenario, con marcas temporales que relacionan la solicitud de manifiesto, la emisión de licencia y la descarga de segmentos.
 
-El análisis de las capturas buscará evidencias de superficie expuesta: URL de MPD, endpoint de licencia, cabeceras de autorización, redirecciones, respuestas de error y secuencia de solicitudes. No se interpretará un PCAP como mecanismo para obtener claves de Widevine, ya que el alcance se limita al comportamiento observable del sistema y a los datos de control transmitidos por la aplicación.
+El análisis de las capturas ha buscado evidencias de superficie expuesta: URL de MPD, endpoint de licencia, cabeceras de autorización, redirecciones, respuestas de error y secuencia de solicitudes. No se ha interpretado ningún PCAP como mecanismo para obtener claves de Widevine, ya que el alcance se ha limitado al comportamiento observable del sistema y a los datos de control transmitidos por la aplicación.
 
 \subsection{\textit{Logging}}
 
@@ -192,8 +192,8 @@ Este esquema proporciona dos clases de evidencia. La primera permite reconstruir
 
 \subsection{Métricas}
 
-Las métricas se seleccionan para responder a la hipótesis del trabajo y para permitir una comparación entre fases. Se registrarán, como mínimo, el resultado de la autorización de licencia, el número de sesiones activas por cuenta, el número de solicitudes de contenido y licencia, el tiempo de respuesta de los endpoints críticos y el número de accesos bloqueados. En Fase~2 se añadirá la evolución de la puntuación de riesgo, las razones que la componen y el número de bloqueos automáticos o manuales.
+Las métricas se han seleccionado para responder a la hipótesis del trabajo y permitir una comparación entre fases. Se han registrado el resultado de la autorización de licencia, el número de sesiones activas por cuenta, el número de solicitudes de contenido y licencia, el tiempo de respuesta de los endpoints críticos y el número de accesos bloqueados. En Fase~2 se ha añadido la evolución de la puntuación de riesgo, las razones que la componen y el número de bloqueos automáticos o manuales.
 
-Además de métricas de seguridad, se observará el impacto operativo de las defensas: latencia adicional de la obtención de licencia, errores de reproducción atribuibles a expiración de token y comportamiento ante una sesión detenida o bloqueada. La evaluación posterior comparará el sistema base, donde un cliente externo puede reutilizar una ruta sin autenticación, con los sistemas endurecidos, donde la licencia queda condicionada al contexto de reproducción. Esta comparativa permitirá distinguir de manera cuantitativa entre disponer de DRM y gobernar efectivamente el acceso al servicio.
+Además de las métricas de seguridad, se ha observado el impacto operativo de las defensas: latencia adicional de la obtención de licencia, errores de reproducción atribuibles a la expiración del token y comportamiento ante una sesión detenida o bloqueada. La evaluación del Capítulo~7 ha comparado el sistema base, donde un cliente externo puede reutilizar una ruta sin autenticación, con los sistemas endurecidos, donde la licencia queda condicionada al contexto de reproducción. Esta comparativa ha permitido distinguir de manera cuantitativa entre disponer de DRM y gobernar efectivamente el acceso al servicio.
 
 Para favorecer la trazabilidad y la reproducción de los experimentos, el código fuente, las configuraciones Docker, los laboratorios, la memoria y las evidencias del proyecto se encuentran disponibles en un repositorio público de GitHub.\footnote{Repositorio público del TFM: \url{https://github.com/yisusrg05/TFM}} El repositorio incluye además documentación específica para desplegar cada fase e interpretar los artefactos obtenidos durante la evaluación.

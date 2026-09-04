@@ -10,7 +10,7 @@ La ejecución final ha comprendido una batería general de 65 comprobaciones fun
 
 La evaluación se ha desarrollado siguiendo siempre el mismo orden. En primer lugar, se ha comprobado la disponibilidad del entorno y el funcionamiento de una reproducción legítima. A continuación, se han introducido credenciales o contextos incorrectos y, por último, se han ejecutado los escenarios con estado: concurrencia, detención de sesión, score y bans. Fase~1 se ha reiniciado antes de cada bloque que requería un estado vacío, mientras que Fase~2 ha partido de una instancia de Redis limpia. Esta separación ha evitado que una sesión anterior o un contador de riesgo contaminase el caso siguiente.
 
-La Tabla~\ref{tab:escenarios-evaluacion} resume la matriz. El símbolo ``---'' indica que el concepto no existe en la fase correspondiente, no que la prueba se haya omitido accidentalmente.
+La Tabla~\ref{tab:escenarios-evaluacion} resume la matriz. El símbolo ``---'' indica que el concepto no aplica en la fase correspondiente.
 
 \begin{table}[H]
 \centering
@@ -236,7 +236,7 @@ La tercera mejora solo se ha observado en Fase~2. Los rechazos repetidos dejan d
 
 \subsection{Limitaciones persistentes}
 
-El laboratorio utiliza HTTP y secretos de demostración incluidos en Docker Compose. Un despliegue real necesitaría TLS extremo a extremo, rotación y custodia externa de claves. El formato de token firmado empleado por el prototipo tiene dos segmentos y no constituye un JWT RFC~7519 completo, tal como se explicó en el capítulo de implementación.
+El laboratorio utiliza HTTP, credenciales firmadas localmente y secretos de demostración incluidos en Docker Compose. Un despliegue real necesitaría TLS extremo a extremo, un proveedor de identidad y mecanismos externos de rotación y custodia de claves.
 
 El activo Widevine, su MPD y el servicio CWIP pertenecen a infraestructura pública de pruebas. Los segmentos Widevine no atraviesan el origen privado del laboratorio. Por ello, esa parte de la campaña demuestra gobierno local del manifest y la licencia, pero no cuantifica una CDN comercial ni una política de licencia de producción. El activo CENC local sí ha permitido comprobar la autorización de inicializaciones y segmentos a través de Varnish, aunque con un volumen y una duración reducidos.
 

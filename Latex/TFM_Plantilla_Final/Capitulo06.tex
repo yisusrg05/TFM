@@ -4,7 +4,7 @@
 
 Este capítulo describe la materialización de la arquitectura propuesta en Fase~1 y Fase~2. Ambas reutilizan el activo Widevine y los servicios de medios del entorno experimental, pero modifican de forma sustancial el camino de acceso: Varnish dirige las operaciones al \textit{control-plane}, el origen y el servidor de licencias dejan de publicarse en el anfitrión y el cliente necesita una sesión activa para cargar el manifiesto, recuperar contenido local o solicitar una licencia.
 
-La exposición se centra en decisiones comprobables en el código y en la configuración desplegada. Los valores indicados corresponden al prototipo ejecutado; no se presentan como parámetros universales para un servicio OTT. Las pruebas comparativas, los códigos observados y el impacto de los controles se desarrollarán en el Capítulo~7.
+La exposición se centra en decisiones comprobables en el código y en la configuración desplegada. Los valores indicados corresponden al prototipo ejecutado; no se presentan como parámetros universales para un servicio OTT. Las pruebas comparativas, los códigos observados y el impacto de los controles se han desarrollado en el Capítulo~7.
 
 \section{Despliegue con Docker}
 
@@ -25,7 +25,7 @@ Fase~1 se despliega mediante siete contenedores: Varnish, \textit{control-plane}
 \texttt{origin} & Publicación interna y de solo lectura del árbol \texttt{origin-content}. & 1 y 2 \\
 \texttt{license-server} & Proxy interno del challenge hacia el servicio Widevine de pruebas. & 1 y 2 \\
 \texttt{ott-client} & Cliente oficial con Shaka Player, watermark y controles de sesión. & 1 y 2 \\
-\texttt{audit-lab} & Reproducción controlada, inspección de claims y escenarios reproducibles. & 1 y 2 \\
+\texttt{audit-lab} & Reproducción controlada, inspección de atributos y escenarios reproducibles. & 1 y 2 \\
 \texttt{key-leak-lab} & Cliente externo controlado para Key Leak, CORS, concurrencia y reutilización contextual. & 1 y 2 \\
 \texttt{redis} & Sesiones, eventos, riesgo, contadores y bans sin persistencia en disco. & 2 \\
 \bottomrule
@@ -110,11 +110,11 @@ Antes de enviar la petición al backend, Varnish comprueba que la ruta pertenezc
 
 \section{Implementación de validaciones}
 
-\subsection{Tokens firmados y \textit{claims}}
+\subsection{Credenciales de acceso y reproducción}
 
-La función de firma serializa un único objeto JSON, lo codifica como Base64URL y calcula un HMAC-SHA256. La verificación vuelve a calcular la firma y utiliza una comparación de tiempo constante antes de interpretar la carga. El formato resultante tiene dos segmentos y, como se ha indicado en el capítulo anterior, no es un JWT RFC~7519 completo.
+Las credenciales se serializan y firman localmente. Antes de interpretar sus atributos, el servidor comprueba su integridad y rechaza cualquier valor alterado.
 
-El token de acceso contiene \texttt{typ}, \texttt{sub}, \texttt{accountId}, \texttt{deviceId}, plan, entitlements, \texttt{jti} y expiración. Fase~2 añade los roles. El token de reproducción sustituye plan y permisos generales por \texttt{assetId}, \texttt{sessionId}, \texttt{clientInstanceId} y los ámbitos \texttt{manifest:read}, \texttt{content:read}, \texttt{license:request} y \texttt{heartbeat:write}. Los secretos de acceso y reproducción son distintos para impedir que una credencial de un tipo pueda validarse con la clave del otro.
+La credencial de acceso identifica la cuenta, el dispositivo y sus permisos; la de reproducción incorpora el activo, la sesión, la instancia de cliente y las operaciones permitidas. Ambas utilizan secretos distintos para impedir que una credencial de acceso pueda aceptarse como autorización de reproducción.
 
 La Tabla~\ref{tab:parametros-sesion} muestra los parámetros comunes configurados en Docker Compose.
 
@@ -183,7 +183,7 @@ Riesgo acumulado & $\geq 100$ puntos & Ban de cuenta de 30~min \\
 
 Los contadores utilizan TTL y se incrementan de forma atómica en Redis. Los bans se guardan como \texttt{ban:account:<id>} o \texttt{ban:device:<id>} e incluyen razón, creador y expiración. La API administrativa permite crear bans con una duración indicada, listar el estado relevante para la cuenta autenticada y retirar un bloqueo.
 
-El panel de Fase~2 representa los eventos mediante nodos de texto, no mediante HTML interpretado. Además, las interfaces muestran identificadores abreviados y claims seleccionados, pero no imprimen \texttt{accessToken} ni \texttt{playbackToken} completos. Estas decisiones evitan que la propia instrumentación exponga credenciales reutilizables.
+El panel de Fase~2 representa los eventos mediante nodos de texto, no mediante HTML interpretado. Además, las interfaces muestran identificadores abreviados y atributos seleccionados, pero no imprimen \texttt{accessToken} ni \texttt{playbackToken} completos. Estas decisiones evitan que la propia instrumentación exponga credenciales reutilizables.
 
 \section{Clientes y laboratorios de auditoría}
 
@@ -198,7 +198,7 @@ El laboratorio de Fase~1 automatiza login, creación de sesión y obtención del
     \label{fig:fase1-cliente-laboratorio}
 \end{figure}
 
-El cliente de Fase~2 añade un panel de observabilidad que consulta \texttt{/admin/overview}. La respuesta integra sesiones, score, razones, bans y los veinte eventos más recientes. Los botones administrativos crean o retiran un ban del dispositivo visible. La Figura~\ref{fig:fase2-cliente-observabilidad} muestra la reproducción legítima y la aparición de eventos de sesión, manifiesto y licencia; su análisis cuantitativo se reserva para la evaluación.
+El cliente de Fase~2 añade un panel de observabilidad que consulta \texttt{/admin/overview}. La respuesta integra sesiones, score, razones, bans y los veinte eventos más recientes. Los botones administrativos crean o retiran un ban del dispositivo visible. La Figura~\ref{fig:fase2-cliente-observabilidad} muestra la reproducción legítima y la aparición de eventos de sesión, manifiesto y licencia; su análisis cuantitativo se presenta en el capítulo de evaluación.
 
 \begin{figure}[htbp]
     \centering
@@ -216,9 +216,9 @@ El laboratorio de Fase~2 conserva las pruebas del manifiesto y añade dos secuen
     \label{fig:fase2-laboratorio-bloqueo}
 \end{figure}
 
-La misma interfaz permite retirar cualquiera de los dos bans con el token administrativo y volver a reproducir. Para ello renueva la credencial mediante heartbeat o crea una nueva sesión si la anterior ha expirado durante el bloqueo. La retirada no reinicia el score, que permanece como rastro del comportamiento observado. Estas secuencias proporcionan mecanismos controlados para el Capítulo~7, pero no sustituyen a las evidencias de red y servidor que se utilizarán allí para contrastar el resultado visible.
+La misma interfaz permite retirar cualquiera de los dos bans con el token administrativo y volver a reproducir. Para ello renueva la credencial mediante heartbeat o crea una nueva sesión si la anterior ha expirado durante el bloqueo. La retirada no reinicia el score, que permanece como rastro del comportamiento observado. Estas secuencias han proporcionado mecanismos controlados para el Capítulo~7, pero no han sustituido a las evidencias de red y servidor utilizadas para contrastar el resultado visible.
 
-Se ha incorporado además un laboratorio específico de CDN leeching, accesible en \texttt{localhost:9302} y \texttt{localhost:9402}. Su backend actúa como un cliente externo no sujeto a CORS: autentica al usuario de prueba, crea una sesión y vuelve a servir al navegador el manifiesto y los segmentos obtenidos con la clave CENC conocida. La interfaz permite contrastar la ausencia de token, el origen web no permitido, una única reproducción válida, una segunda sesión, la copia del token desde otra instancia, el cruce de activo y el uso posterior a la parada. En Fase~2 muestra también el score y la razón generada al consumir contenido sin que se haya observado una solicitud de licencia. Las capturas y el análisis se reservan para el capítulo de evaluación.
+Se ha incorporado además un laboratorio específico de CDN leeching, accesible en \texttt{localhost:9302} y \texttt{localhost:9402}. Su backend actúa como un cliente externo no sujeto a CORS: autentica al usuario de prueba, crea una sesión y vuelve a servir al navegador el manifiesto y los segmentos obtenidos con la clave CENC conocida. La interfaz permite contrastar la ausencia de token, el origen web no permitido, una única reproducción válida, una segunda sesión, la copia del token desde otra instancia, el cruce de activo y el uso posterior a la parada. En Fase~2 muestra también el score y la razón generada al consumir contenido sin que se haya observado una solicitud de licencia. Las capturas y el análisis se presentan en el capítulo de evaluación.
 
 \section{Integración completa del entorno}
 
@@ -226,4 +226,4 @@ El flujo integrado comienza en uno de los frontales web y converge en Varnish. T
 
 En Fase~2, cada paso relevante produce además un evento y puede modificar el riesgo. La respuesta activa se aplica antes de alcanzar manifiesto, contenido, heartbeat o licencia. El plano administrativo permanece disponible para observar y revertir el estado. Redis se configura sin RDB ni AOF para que reiniciar el contenedor deje el laboratorio en un estado conocido; la persistencia duradera y la alta disponibilidad no forman parte de esta implementación.
 
-Con esta integración quedan implementadas las dos etapas de mejora: Fase~1 corrige los caminos de acceso y crea una sesión verificable; Fase~2 añade memoria del comportamiento y capacidad de bloqueo. El capítulo siguiente evaluará si estos mecanismos producen las respuestas esperadas frente a los escenarios de Fase~0, qué evidencias dejan y qué coste funcional introducen.
+Con esta integración han quedado implementadas las dos etapas de mejora: Fase~1 corrige los caminos de acceso y crea una sesión verificable; Fase~2 añade memoria del comportamiento y capacidad de bloqueo. En el Capítulo~7 se ha evaluado si estos mecanismos producen las respuestas esperadas frente a los escenarios de Fase~0, qué evidencias dejan y qué coste funcional introducen.

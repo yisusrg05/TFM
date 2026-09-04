@@ -4,11 +4,11 @@
 
 La auditoría de Fase~0 ha evidenciado que el problema principal no se encuentra en el cifrado de Widevine, sino en los caminos que permiten alcanzar el contenido y el servicio de licencia sin conservar el contexto de autorización. A partir de este resultado se propone una arquitectura incremental: Fase~1 introduce controles preventivos alrededor del DRM y Fase~2 añade persistencia, detección y respuesta. La finalidad no es reemplazar Widevine, sino impedir que una licencia técnicamente válida se obtenga fuera de una reproducción autorizada y aportar capacidad de reacción cuando el uso deja de ser coherente con la política del servicio.
 
-Este capítulo presenta las decisiones de diseño de ambas fases. La implementación concreta se reserva para el capítulo siguiente y la comparación experimental con Fase~0 se realizará en el Capítulo~7. Esta separación evita convertir la descripción arquitectónica en una enumeración de pruebas y permite justificar cada control por la debilidad que pretende corregir.
+Este capítulo presenta las decisiones de diseño de ambas fases. La implementación concreta se describe en el capítulo siguiente y la comparación experimental con Fase~0 se ha realizado en el Capítulo~7. Esta separación evita convertir la descripción arquitectónica en una enumeración de pruebas y permite justificar cada control por la debilidad que pretende corregir.
 
 \section{Objetivos de la arquitectura defensiva}
 
-La propuesta parte de cinco requisitos derivados directamente de los hallazgos F0-01 a F0-07. En primer lugar, todo camino capaz de entregar el manifiesto, el contenido local o una licencia debe exigir autorización; eliminar la ruta \texttt{/license/no\_auth} no sería suficiente si permaneciera otro acceso equivalente. En segundo lugar, el origen y el servidor de licencias no deben estar publicados directamente en el anfitrión. En tercer lugar, la identidad autenticada debe transformarse en una sesión de reproducción específica y efímera. En cuarto lugar, las peticiones deben vincularse a cuenta, dispositivo, instancia de cliente, activo y sesión, de modo que una credencial válida para un contexto no pueda trasladarse sin más a otro. Finalmente, el sistema debe conservar señales suficientes para detectar patrones anómalos y revocar el acceso.
+La propuesta parte de cinco requisitos derivados directamente de los hallazgos F0-01 a F0-05. En primer lugar, todo camino capaz de entregar el manifiesto, el contenido local o una licencia debe exigir autorización; eliminar la ruta \texttt{/license/no\_auth} no sería suficiente si permaneciera otro acceso equivalente. En segundo lugar, el origen y el servidor de licencias no deben estar publicados directamente en el anfitrión. En tercer lugar, la identidad autenticada debe transformarse en una sesión de reproducción específica y efímera. En cuarto lugar, las peticiones deben vincularse a cuenta, dispositivo, instancia de cliente, activo y sesión, de modo que una credencial válida para un contexto no pueda trasladarse sin más a otro. Finalmente, el sistema debe conservar señales suficientes para detectar patrones anómalos y revocar el acceso.
 
 Estos requisitos se traducen en tres propiedades verificables. La primera es \emph{consistencia}: manifiesto, contenido, heartbeat y licencia deben referirse a la misma sesión. La segunda es \emph{temporalidad}: el permiso de reproducción debe caducar si el cliente deja de mantener la sesión. La tercera es \emph{capacidad de respuesta}: una cuenta o dispositivo bloqueado no debe poder continuar utilizando una credencial emitida con anterioridad.
 
@@ -37,13 +37,11 @@ La Tabla~\ref{tab:trazabilidad-controles} relaciona los problemas principales de
 \toprule
 \textbf{Hallazgo} & \textbf{Control principal} & \textbf{Fase} \\
 \midrule
-Licencia pública & Único endpoint público de licencia, protegido por sesión y token de reproducción. & Fase~1 \\
-Origen expuesto & Servicios de origen y licencia accesibles solo desde la red Docker. & Fase~1 \\
-Token sin contexto & Separación entre token de acceso y token efímero de reproducción. & Fase~1 \\
-Sin concurrencia & Sesión explícita y límite de una reproducción activa por cuenta. & Fase~1 \\
-Contenido sin autorización & Binding entre activo, ruta, instancia de cliente y sesión. & Fase~1 \\
-Sin detección & Eventos, contadores temporales y puntuación de riesgo. & Fase~2 \\
-Sin revocación & Bans temporales de cuenta o dispositivo y parada de sesión. & Fase~2 \\
+Licencia pública & Único endpoint público de licencia, protegido por una sesión de reproducción. & Fase~1 \\
+Origen y contenido expuestos & Servicios internos y autorización sobre manifiesto, segmentos y licencia. & Fase~1 \\
+Sesión sin caducidad ni contexto & Credencial efímera ligada a cuenta, dispositivo, activo e instancia. & Fase~1 \\
+Sin control de concurrencia & Límite preventivo y registro de rechazos reiterados. & Fases~1 y 2 \\
+CORS y HTTP permisivos & Orígenes web restringidos; TLS reservado al despliegue de producción. & Fase~1 / producción \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -79,7 +77,7 @@ La validación se repite en cada punto sensible; no se asume que una decisión a
 
 La política distingue autenticación, autorización y reproducción. Un usuario puede presentar credenciales correctas y, aun así, carecer del \textit{entitlement} del activo. En ese caso obtiene identidad, pero la creación de la sesión se rechaza. Del mismo modo, disponer de un token de acceso no permite solicitar directamente manifiesto o licencia porque ambos endpoints exigen una credencial de tipo reproducción.
 
-Las decisiones principales producen respuestas diferenciadas: ausencia o alteración de token implica rechazo de autenticación; un activo distinto al autorizado produce un error de autorización; una cabecera de sesión incoherente se trata como conflicto de contexto; y una segunda reproducción simultánea supera el límite de concurrencia. La codificación exacta de estas respuestas se describe en el capítulo de implementación y se evaluará posteriormente.
+Las decisiones principales producen respuestas diferenciadas: ausencia o alteración de token implica rechazo de autenticación; un activo distinto al autorizado produce un error de autorización; una cabecera de sesión incoherente se trata como conflicto de contexto; y una segunda reproducción simultánea supera el límite de concurrencia. La codificación exacta de estas respuestas se describe en el capítulo de implementación y su comportamiento se ha evaluado en el Capítulo~7.
 
 \subsection{CDN leeching y clave conocida}
 
@@ -91,11 +89,11 @@ Existe además un caso límite deliberadamente aceptado. Una única sesión leg�
 
 \section{Sistema de autenticación y autorización}
 
-\subsection{Tokens firmados y \textit{claims}}
+\subsection{Credenciales de acceso y reproducción}
 
 La arquitectura utiliza dos clases de credencial. El token de acceso representa la autenticación de la cuenta e incluye dispositivo, plan, permisos y, en Fase~2, roles. El token de reproducción representa una única sesión e incorpora cuenta, dispositivo, activo, \texttt{sessionId}, \texttt{clientInstanceId} y ámbitos para manifiesto, contenido, licencia y heartbeat.
 
-Los campos siguen el modelo de \textit{claims} y expiración descrito para JWT \cite{rfc7519}, pero el prototipo no implementa un JWT estándar: emplea un cuerpo JSON en Base64URL y una firma HMAC, formando dos segmentos en lugar de la estructura completa de tres segmentos. Esta simplificación es suficiente para separar tipos de credencial en el laboratorio, pero no debe presentarse como sustituto de una biblioteca JWT o de un proveedor de identidad de producción.
+Ambas credenciales se firman y disponen de expiración. El formato se ha simplificado para el laboratorio porque el aspecto evaluado no es un estándar concreto de identidad, sino la separación de privilegios, la vinculación con el contexto de reproducción y la posibilidad de revocar el acceso.
 
 \subsection{Expiración y renovación}
 

@@ -83,11 +83,10 @@ La Tabla~\ref{tab:hallazgos-fase0} resume los principales hallazgos. La severida
 \textbf{ID} & \textbf{Hallazgo} & \textbf{Impacto principal} & \textbf{Severidad} \\
 \midrule
 F0-01 & Licencia pública sin autenticación & Reproducción Widevine fuera de la plataforma sin identidad ni permiso. & Crítica \\
-F0-02 & Exposición directa de origen y licencias & Elusión del frontal CDN y ampliación de la superficie accesible. & Alta \\
-F0-03 & Token sin expiración ni contexto & Reutilización durante toda la vida del proceso ante una filtración. & Alta \\
+F0-02 & Exposición de origen y contenido & Elusión del frontal CDN y descarga de MPD y segmentos sin autorización. & Alta \\
+F0-03 & Sesión sin expiración ni contexto & Reutilización de credenciales durante toda la vida del proceso. & Alta \\
 F0-04 & Ausencia de control de concurrencia & Uso simultáneo y compartición de cuenta sin detección. & Alta \\
-F0-05 & Contenido local sin autorización & Descarga de MPD y segmentos con solo conocer sus rutas. & Alta \\
-F0-06 & CORS y transporte permisivos & Facilita integración desde terceros y expone datos de control en HTTP. & Media \\
+F0-05 & CORS y transporte permisivos & Facilita integración desde terceros y expone datos de control en HTTP. & Media \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -103,7 +102,7 @@ El origen también está publicado en \texttt{8081}. El mismo MPD obtenido media
 
 Fase~0 no crea una sesión de reproducción diferenciada. El token de login es la única referencia de estado y puede reutilizarse para pedir configuraciones y licencias oficiales mientras permanezca en memoria. No existe \textit{logout}, lista de revocación, expiración temporal, nonce de un solo uso ni asociación entre token y una reproducción concreta.
 
-Si el token se filtra, otro cliente puede presentar el mismo valor y actuar como el usuario hasta que el proceso se reinicie. El servidor tampoco registra un cambio de IP o dispositivo que permita detectar el traslado de la credencial. Este comportamiento no rompe la firma de un token ni el protocolo Widevine; explota la ausencia de ciclo de vida y contexto alrededor de la credencial. Los mecanismos propuestos para las fases endurecidas deberán separar el token de autenticación del token de reproducción y reducir la ventana de reutilización.
+Si el token se filtra, otro cliente puede presentar el mismo valor y actuar como el usuario hasta que el proceso se reinicie. El servidor tampoco registra un cambio de IP o dispositivo que permita detectar el traslado de la credencial. Este comportamiento no rompe la firma de un token ni el protocolo Widevine; explota la ausencia de ciclo de vida y contexto alrededor de la credencial. Los mecanismos implementados en las fases endurecidas han separado el token de autenticación del token de reproducción y han reducido la ventana de reutilización.
 
 \subsection{\textit{Credential sharing}}
 
