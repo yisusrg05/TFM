@@ -1,4 +1,74 @@
-% !TEX root = A0.MiTFG.tex
+% !TEX root = A0.MiTFM.tex
 
-% Acrónimos opcionales.
+\chapter*{Glosario de términos y acrónimos}
+\addcontentsline{toc}{chapter}{Glosario de términos y acrónimos}
+\markboth{Glosario de términos y acrónimos}{Glosario de términos y acrónimos}
+
+\small
+\setlength{\LTpre}{0pt}
+\setlength{\LTpost}{0pt}
+\renewcommand{\arraystretch}{1.18}
+
+\begin{longtable}{@{}>{\raggedright\arraybackslash\bfseries}p{0.31\textwidth}>{\raggedright\arraybackslash}p{0.65\textwidth}@{}}
+\toprule
+\textbf{Término} & \textbf{Definición adaptada al TFM} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Término} & \textbf{Definición adaptada al TFM} \\
+\midrule
+\endhead
+\bottomrule
+\endlastfoot
+
+OTT -- \textit{Over-The-Top} & Distribución de contenido audiovisual por Internet mediante un servicio independiente del operador de acceso. \\
+\textit{Streaming} & Reproducción de contenido audiovisual mientras se recibe, sin esperar a descargarlo completamente. \\
+VOD -- \textit{Video on Demand} & Vídeo bajo demanda: contenido previamente disponible que el usuario puede reproducir cuando lo solicita. \\
+CDN -- \textit{Content Delivery Network} & Red de distribución que acerca el contenido a los usuarios y reduce la carga del servidor de origen. \\
+DRM -- \textit{Digital Rights Management} & Conjunto de tecnologías para proteger contenido digital y controlar sus condiciones de uso. \\
+Widevine & Sistema DRM de Google utilizado para proteger la distribución y reproducción de contenido audiovisual. \\
+EME -- \textit{Encrypted Media Extensions} & API del navegador que permite a una aplicación interactuar con sistemas de protección de contenido. \\
+CDM -- \textit{Content Decryption Module} & Componente del cliente que procesa licencias, gestiona claves y participa en el descifrado del contenido. \\
+TEE -- \textit{Trusted Execution Environment} & Entorno de ejecución aislado, normalmente respaldado por hardware, que protege código y datos sensibles frente al sistema operativo y otras aplicaciones del dispositivo. \\
+Widevine L1 & Nivel de seguridad en el que las operaciones criptográficas y el procesamiento del contenido protegido se realizan dentro de un TEE. Ofrece el mayor nivel de protección de Widevine y suele exigirse para contenidos de alta resolución. \\
+Widevine L3 & Nivel de seguridad basado en software, sin que el procesamiento del contenido protegido permanezca íntegramente dentro de un TEE. Presenta una superficie de exposición mayor y suele asociarse a restricciones de calidad. \\
+CENC -- \textit{Common Encryption} & Estándar de cifrado común que permite utilizar medios cifrados con diferentes sistemas DRM, según su compatibilidad. \\
+ClearKey & Sistema de claves de EME que permite proporcionar claves de contenido sin la protección propia de un DRM comercial. \\
+KID -- \textit{Key Identifier} & Identificador de una clave de contenido; no contiene por sí mismo la clave de descifrado. \\
+PSSH -- \textit{Protection System Specific Header} & Caja de metadatos que contiene información de inicialización asociada a un sistema de protección. \\
+MPEG-DASH & Estándar de distribución adaptativa de contenido audiovisual segmentado sobre HTTP. \\
+MPD -- \textit{Media Presentation Description} & Manifiesto de MPEG-DASH que describe las representaciones y la localización de los segmentos. \\
+HLS -- \textit{HTTP Live Streaming} & Protocolo de distribución audiovisual sobre HTTP basado en listas de reproducción y segmentos. \\
+Segmento & Fragmento de contenido audiovisual que el reproductor solicita como parte de una presentación. \\
+\textit{Packaging} -- Empaquetado & Preparación del contenido codificado para su distribución, incluyendo segmentación, manifiestos y, cuando corresponda, cifrado. \\
+Servidor de origen -- \textit{Origin server} & Servicio que almacena o publica los objetos multimedia que recupera la capa de distribución. \\
+Servidor de licencias & Servicio que genera o entrega licencias con claves y condiciones de uso para un sistema DRM. \\
+\textit{Challenge} DRM & Mensaje generado por el CDM y enviado al servicio de licencias como parte del intercambio DRM. \\
+Plano de control -- \textit{Control plane} & Componentes que gestionan identidad, permisos, sesiones y decisiones de acceso. \\
+Plano de medios & Componentes y rutas encargados de entregar manifiestos, inicializaciones y segmentos audiovisuales. \\
+\textit{Entitlement} & Permiso de una cuenta para acceder a un contenido o servicio determinado. \\
+Token de acceso -- \textit{Access token} & Credencial utilizada para autorizar operaciones de una identidad autenticada. \\
+Token de reproducción -- \textit{Playback token} & Credencial temporal que autoriza operaciones asociadas a una sesión de reproducción. \\
+\textit{Bearer token} & Credencial cuyo uso depende de su posesión, sin exigir por sí misma una prueba criptográfica adicional del emisor de la petición. \\
+\textit{Binding} -- Vinculación contextual & Asociación de una credencial con atributos como cuenta, dispositivo, activo, instancia y sesión. \\
+\textit{Heartbeat} & Mensaje periódico que mantiene o actualiza el estado de una sesión activa. \\
+TTL -- \textit{Time To Live} & Tiempo durante el cual un dato o registro conserva su validez antes de caducar. \\
+Concurrencia & Existencia de varias sesiones activas simultáneamente para una misma cuenta. \\
+Revocación & Retirada de una autorización antes de su expiración prevista. \\
+\textit{Rate limiting} & Limitación del número de solicitudes admitidas durante una ventana temporal. \\
+CORS -- \textit{Cross-Origin Resource Sharing} & Mecanismo del navegador que regula el acceso de una página a respuestas procedentes de otro origen web. \\
+\textit{Key leak} & Filtración de una clave de contenido fuera del entorno en el que debería permanecer protegida. \\
+CDN \textit{leeching} & Uso no autorizado de la infraestructura de distribución de un proveedor para obtener o servir contenido. \\
+\textit{Restreaming} & Redistribución de un flujo audiovisual obtenido previamente de otra fuente. \\
+\textit{Replay} & Reutilización de mensajes o credenciales válidos para repetir una operación fuera del contexto previsto. \\
+\textit{Credential sharing} & Uso compartido de las credenciales de una cuenta entre varias personas. \\
+\textit{Session hijacking} & Apropiación de una sesión ajena mediante el compromiso de sus credenciales o mecanismos de identificación. \\
+\textit{Watermarking} -- Marca de agua & Incorporación de información identificativa al contenido audiovisual para facilitar su atribución o seguimiento. \\
+\textit{Analog hole} -- Agujero analógico & Posibilidad de volver a registrar imágenes y sonido una vez representados físicamente para su consumo. \\
+PCAP / PCAPNG & Formatos de archivo utilizados para conservar capturas de tráfico de red. \\
+
+\end{longtable}
+
+\normalsize
+\chapterend
 
