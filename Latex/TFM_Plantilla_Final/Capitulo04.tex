@@ -16,7 +16,7 @@ La matriz experimental se ha iniciado estableciendo el comportamiento legítimo 
 
 \subsection{Caja negra}
 
-El análisis de caja negra ha partido de las interfaces expuestas en el equipo anfitrión. El cliente oficial se ha publicado en el puerto \texttt{3000}; el reproductor externo, el laboratorio DRM y la demostración de clave conocida se han publicado, respectivamente, en los puertos \texttt{3001}, \texttt{3002} y \texttt{3003}. Varnish ha actuado como CDN en el puerto \texttt{8080}, mientras que el origen y el servicio de licencias también han permanecido accesibles directamente en \texttt{8081} y \texttt{8082}.
+El análisis de caja negra ha partido de las interfaces expuestas en el equipo anfitrión. El cliente oficial se ha publicado en el puerto \nolinkurl{3000}; el reproductor externo, el laboratorio DRM y la demostración de clave conocida se han publicado, respectivamente, en los puertos \nolinkurl{3001}, \nolinkurl{3002} y \nolinkurl{3003}. Varnish ha actuado como CDN en el puerto \nolinkurl{8080}, mientras que el origen y el servicio de licencias también han permanecido accesibles directamente en \nolinkurl{8081} y \nolinkurl{8082}.
 
 Desde esta perspectiva se han planteado tres perfiles. El primero ha correspondido a un usuario autenticado y autorizado, utilizado para establecer el comportamiento legítimo. El segundo ha sido un usuario autenticado sin \textit{entitlement}, con el que se ha comprobado si la plataforma impedía obtener la configuración del activo. El tercero ha correspondido a un cliente externo sin sesión en la plataforma, que únicamente disponía de la URL del MPD y de una dirección de licencia observables.
 
@@ -26,7 +26,7 @@ Las pruebas han permitido verificar los códigos HTTP, los estados visibles del 
 
 El análisis de caja gris ha incluido la revisión de la configuración de los contenedores, las reglas de Varnish y la lógica del servidor de Fase~0. En particular, se ha examinado qué servicios se publicaban en el anfitrión, qué rutas se enviaban al origen o al proxy de licencias, cómo se generaban los tokens de acceso y qué validaciones se ejecutaban antes de reenviar un \textit{challenge} Widevine.
 
-Esta revisión ha evidenciado que la plataforma mantiene dos caminos de licencia. El camino oficial, \texttt{/platform/license}, exige un token de acceso y comprueba que el usuario disponga del activo indicado. El camino alternativo, \texttt{/license/no\_auth}, reenvía el mismo tipo de mensaje binario sin exigir identidad ni autorización. La coexistencia de ambos caminos es intencionada en Fase~0 y permite demostrar que un control correcto en la aplicación pierde eficacia si permanece disponible una ruta equivalente que no aplica la misma política.
+Esta revisión ha evidenciado que la plataforma mantiene dos caminos de licencia. El camino oficial, \nolinkurl{/platform/license}, exige un token de acceso y comprueba que el usuario disponga del activo indicado. El camino alternativo, \nolinkurl{/license/no_auth}, reenvía el mismo tipo de mensaje binario sin exigir identidad ni autorización. La coexistencia de ambos caminos es intencionada en Fase~0 y permite demostrar que un control correcto en la aplicación pierde eficacia si permanece disponible una ruta equivalente que no aplica la misma política.
 
 La revisión de caja gris también ha permitido comprobar que los tokens de acceso son identificadores UUID almacenados en memoria. No contienen expiración, ámbito, activo, dispositivo o identificador de sesión, y permanecen aceptados hasta que el proceso se reinicia. Asimismo, el origen y el servidor de licencias se publican directamente en el anfitrión, de modo que el paso por Varnish no es obligatorio.
 
@@ -34,9 +34,9 @@ La revisión de caja gris también ha permitido comprobar que los tokens de acce
 
 El tráfico se ha observado en tres niveles complementarios. En el navegador se han registrado las peticiones de manifiesto y licencia generadas por Shaka Player. En la capa HTTP se han inspeccionado los códigos de estado y las cabeceras de respuesta. Finalmente, los registros de los contenedores han permitido confirmar las solicitudes recibidas por Nginx durante la descarga del MPD, la inicialización y los segmentos locales.
 
-En el flujo externo Widevine se ha registrado una solicitud al MPD público, dos solicitudes al endpoint \texttt{/license/no\_auth} y dos respuestas binarias de licencia de 714 y 1229 bytes. A continuación, el laboratorio ha registrado el evento \texttt{PLAYBACK\_STARTED} y el elemento de vídeo ha alcanzado el estado de reproducción con datos suficientes. En el activo CENC local, los logs del origen han mostrado solicitudes al fichero de inicialización y a los segmentos \texttt{m4s}, sin que se haya producido ninguna petición a un servidor de licencias.
+En el flujo externo Widevine se ha registrado una solicitud al MPD público, dos solicitudes al endpoint \nolinkurl{/license/no_auth} y dos respuestas binarias de licencia de 714 y 1229 bytes. A continuación, el laboratorio ha registrado el evento \nolinkurl{PLAYBACK_STARTED} y el elemento de vídeo ha alcanzado el estado de reproducción con datos suficientes. En el activo CENC local, los logs del origen han mostrado solicitudes al fichero de inicialización y a los segmentos \nolinkurl{m4s}, sin que se haya producido ninguna petición a un servidor de licencias.
 
-Las cabeceras han confirmado, además, que los objetos locales atravesaban la caché de Varnish: una segunda solicitud al MPD ha devuelto \texttt{X-Cache: HIT}. El mismo MPD también se ha podido obtener directamente desde el origen publicado en \texttt{8081}. Por tanto, el análisis no solo ha evidenciado que el contenido estaba disponible, sino también que existían dos caminos de distribución: uno a través de la CDN y otro directo hacia el origen.
+Las cabeceras han confirmado, además, que los objetos locales atravesaban la caché de Varnish: una segunda solicitud al MPD ha devuelto \nolinkurl{X-Cache: HIT}. El mismo MPD también se ha podido obtener directamente desde el origen publicado en \nolinkurl{8081}. Por tanto, el análisis no solo ha evidenciado que el contenido estaba disponible, sino también que existían dos caminos de distribución: uno a través de la CDN y otro directo hacia el origen.
 
 No se ha intentado interpretar el contenido criptográfico de las respuestas Widevine ni recuperar claves a partir del tráfico. EME no expone las claves del CDM al código JavaScript de la página, y una captura de red no debe confundirse con una vía de exportación del material protegido \cite{w3ceme2026,patat2022}. Para obtener los resultados de este capítulo han sido suficientes la secuencia de peticiones, los tamaños de respuesta, el estado del reproductor y los logs del servidor.
 
@@ -48,19 +48,19 @@ La reproducción se ha limitado a acciones que un usuario podría realizar sobre
 
 \section{Análisis del flujo de licencias}
 
-En el flujo oficial, el usuario inicia sesión mediante \texttt{/auth/login}. El servidor comprueba las credenciales de laboratorio, genera un token aleatorio y devuelve un catálogo en el que cada activo aparece como permitido o denegado. Cuando el usuario autorizado selecciona el activo Widevine, el cliente solicita su configuración mediante \texttt{/playback/config}. Shaka Player descarga después el MPD, crea una sesión EME y envía el \textit{challenge} a \texttt{/platform/license} con el token de acceso y el identificador de activo.
+En el flujo oficial, el usuario inicia sesión mediante \nolinkurl{/auth/login}. El servidor comprueba las credenciales de laboratorio, genera un token aleatorio y devuelve un catálogo en el que cada activo aparece como permitido o denegado. Cuando el usuario autorizado selecciona el activo Widevine, el cliente solicita su configuración mediante \nolinkurl{/playback/config}. Shaka Player descarga después el MPD, crea una sesión EME y envía el \textit{challenge} a \nolinkurl{/platform/license} con el token de acceso y el identificador de activo.
 
 El servidor vuelve a comprobar la identidad y el \textit{entitlement} antes de reenviar el mensaje al servicio Widevine de pruebas. Este camino ha permitido una reproducción real: el elemento de vídeo se ha mantenido en ejecución, ha alcanzado un estado de datos completos y ha avanzado temporalmente. Por tanto, Fase~0 dispone de un flujo protegido funcional dentro de la interfaz oficial.
 
-No obstante, el mismo proxy publica \texttt{/license/no\_auth}. Este endpoint acepta el cuerpo binario generado por el CDM y lo reenvía sin token, usuario o activo. El reproductor externo se ha configurado para utilizar \texttt{com.widevine.alpha} con esa URL, ha obtenido respuestas de licencia válidas y ha reproducido el mismo activo sin iniciar sesión. La licencia ha seguido siendo procesada correctamente por Widevine; el fallo de seguridad se ha producido porque la aplicación ha proporcionado acceso al servicio de licencia fuera de su política de negocio.
+No obstante, el mismo proxy publica \nolinkurl{/license/no_auth}. Este endpoint acepta el cuerpo binario generado por el CDM y lo reenvía sin token, usuario o activo. El reproductor externo se ha configurado para utilizar \nolinkurl{com.widevine.alpha} con esa URL, ha obtenido respuestas de licencia válidas y ha reproducido el mismo activo sin iniciar sesión. La licencia ha seguido siendo procesada correctamente por Widevine; el fallo de seguridad se ha producido porque la aplicación ha proporcionado acceso al servicio de licencia fuera de su política de negocio.
 
 \subsection{Validaciones existentes}
 
 Fase~0 no carece por completo de controles. La ruta oficial valida credenciales, diferencia dos cuentas y comprueba el \textit{entitlement} antes de devolver la configuración. El usuario autorizado ha podido reproducir tanto el activo Widevine como el activo CENC local. El usuario sin permisos ha podido autenticarse, pero ha recibido ambos activos como denegados y los botones de reproducción han permanecido deshabilitados.
 
-El endpoint \texttt{/platform/license} repite la comprobación de autorización en cada \textit{challenge}. Esta segunda validación es positiva porque evita confiar únicamente en la decisión adoptada al mostrar el catálogo. También se impide solicitar una licencia Widevine para un activo declarado como ClearKey.
+El endpoint \nolinkurl{/platform/license} repite la comprobación de autorización en cada \textit{challenge}. Esta segunda validación es positiva porque evita confiar únicamente en la decisión adoptada al mostrar el catálogo. También se impide solicitar una licencia Widevine para un activo declarado como ClearKey.
 
-Sin embargo, estas validaciones se aplican solo al camino oficial. La ruta \texttt{/license/no\_auth} no exige token, y las rutas de contenido local tampoco requieren autorización. El identificador de activo se recibe en una cabecera controlada por el cliente y no se contrasta con el KID o el PSSH contenido en el mensaje Widevine. Además, no se valida dispositivo, IP, agente de usuario, sesión de reproducción, número de accesos simultáneos ni ritmo de peticiones. En consecuencia, la autorización existente es puntual y no representa una política extremo a extremo.
+Sin embargo, estas validaciones se aplican solo al camino oficial. La ruta \nolinkurl{/license/no_auth} no exige token, y las rutas de contenido local tampoco requieren autorización. El identificador de activo se recibe en una cabecera controlada por el cliente y no se contrasta con el KID o el PSSH contenido en el mensaje Widevine. Además, no se valida dispositivo, IP, agente de usuario, sesión de reproducción, número de accesos simultáneos ni ritmo de peticiones. En consecuencia, la autorización existente es puntual y no representa una política extremo a extremo.
 
 \subsection{Dependencias de confianza}
 
@@ -93,9 +93,9 @@ F0-05 & CORS y transporte permisivos & Facilita integración desde terceros y ex
 
 \subsection{CDN \textit{leeching}}
 
-La CDN permite recuperar el MPD y los segmentos locales sin token. El conocimiento de una ruta como \texttt{/content/dash-known-key/stream.mpd} resulta suficiente para que cualquier cliente alcance el activo. Varnish cachea el objeto y lo sirve con \texttt{Access-Control-Allow-Origin: *}, por lo que la infraestructura puede consumir ancho de banda aunque la solicitud no proceda de la aplicación oficial.
+La CDN permite recuperar el MPD y los segmentos locales sin token. El conocimiento de una ruta como \nolinkurl{/content/dash-known-key/stream.mpd} resulta suficiente para que cualquier cliente alcance el activo. Varnish cachea el objeto y lo sirve con \nolinkurl{Access-Control-Allow-Origin: *}, por lo que la infraestructura puede consumir ancho de banda aunque la solicitud no proceda de la aplicación oficial.
 
-El origen también está publicado en \texttt{8081}. El mismo MPD obtenido mediante la CDN se ha podido descargar directamente desde Nginx, evitando las reglas de Varnish. Este resultado reproduce una condición frecuente de \textit{bypass}: proteger únicamente el frontal no es efectivo si permanece disponible una ruta alternativa hacia el origen. Los mecanismos de URLs o cookies firmadas descritos por proveedores de CDN persiguen precisamente que conocer una ruta no sea suficiente para acceder al objeto \cite{googlemediacdn2026,awscloudfront2026}.
+El origen también está publicado en \nolinkurl{8081}. El mismo MPD obtenido mediante la CDN se ha podido descargar directamente desde Nginx, evitando las reglas de Varnish. Este resultado reproduce una condición frecuente de \textit{bypass}: proteger únicamente el frontal no es efectivo si permanece disponible una ruta alternativa hacia el origen. Los mecanismos de URLs o cookies firmadas descritos por proveedores de CDN persiguen precisamente que conocer una ruta no sea suficiente para acceder al objeto \cite{googlemediacdn2026,awscloudfront2026}.
 
 
 \subsection{Reutilización de sesiones}
@@ -134,12 +134,12 @@ El procedimiento seguido ha sido el siguiente:
 
 \begin{enumerate}
     \item Levantar los siete contenedores de Fase~0 y comprobar que cliente, CDN, origen y proxy respondían en sus puertos previstos.
-    \item Iniciar sesión con el usuario autorizado, obtener el catálogo y reproducir el activo Widevine mediante \texttt{/platform/license}.
+    \item Iniciar sesión con el usuario autorizado, obtener el catálogo y reproducir el activo Widevine mediante \nolinkurl{/platform/license}.
     \item Reproducir desde la misma plataforma el activo CENC local configurado con ClearKey.
     \item Iniciar sesión con el usuario sin permisos y comprobar el estado de ambos controles de reproducción.
-    \item Abrir el reproductor externo sin iniciar sesión, mantener el MPD público y configurar \texttt{/license/no\_auth} como servidor Widevine.
+    \item Abrir el reproductor externo sin iniciar sesión, mantener el MPD público y configurar \nolinkurl{/license/no_auth} como servidor Widevine.
     \item Repetir el escenario en el laboratorio DRM, registrar soporte EME, peticiones y tamaños de las respuestas de licencia.
-    \item Solicitar el MPD local tanto a través de Varnish como directamente al origen publicado en \texttt{8081}.
+    \item Solicitar el MPD local tanto a través de Varnish como directamente al origen publicado en \nolinkurl{8081}.
     \item Introducir el KID y la clave de laboratorio en la demostración ClearKey y reproducir sin servidor de licencias.
     \item Solicitar al laboratorio que intentara mostrar claves Widevine y registrar la imposibilidad de exportarlas mediante EME.
 \end{enumerate}
@@ -160,9 +160,9 @@ La Tabla~\ref{tab:resultados-fase0} recoge el resultado observado de cada escena
 \midrule
 E0-01 & Reproducción oficial autorizada & Widevine y ClearKey reproducen después de validar identidad y activo. & Control válido \\
 E0-02 & Usuario sin \textit{entitlement} & Login correcto, catálogo denegado y botones deshabilitados. & Control válido \\
-E0-03 & Reproductor Widevine externo & Reproducción iniciada con MPD y \texttt{no\_auth}, sin login. & Vulnerable \\
-E0-04 & Acceso directo al origen & El MPD local responde por \texttt{8081} sin pasar por la CDN. & Vulnerable \\
-E0-05 & Contenido local por CDN & MPD y segmentos accesibles sin token; la caché devuelve \texttt{HIT}. & Vulnerable \\
+E0-03 & Reproductor Widevine externo & Reproducción iniciada con MPD y \nolinkurl{no_auth}, sin login. & Vulnerable \\
+E0-04 & Acceso directo al origen & El MPD local responde por \nolinkurl{8081} sin pasar por la CDN. & Vulnerable \\
+E0-05 & Contenido local por CDN & MPD y segmentos accesibles sin token; la caché devuelve \nolinkurl{HIT}. & Vulnerable \\
 E0-06 & Reproducción con clave conocida & El activo CENC reproduce sin ninguna solicitud de licencia. & Impacto confirmado \\
 E0-07 & Exportación de claves Widevine & El navegador no expone claves del CDM mediante EME. & No reproducido \\
 \bottomrule
@@ -178,30 +178,30 @@ E0-01 y E0-02 demuestran que la existencia de la vulnerabilidad no implica que t
 Las principales evidencias obtenidas han sido las siguientes:
 
 \begin{itemize}
-    \item Estado \texttt{Reproduciendo: Sintel Widevine publico} en el cliente autorizado y avance real del elemento de vídeo.
+    \item Estado \nolinkurl{Reproduciendo: Sintel Widevine publico} en el cliente autorizado y avance real del elemento de vídeo.
     \item Dos botones deshabilitados y activos marcados como denegados para el usuario sin permisos.
-    \item Evento \texttt{LICENSE\_REQUEST} dirigido a \texttt{/license/no\_auth} desde un cliente sin sesión.
-    \item Respuestas binarias de licencia de 714 y 1229 bytes, seguidas de \texttt{PLAYBACK\_STARTED}.
-    \item Elemento de vídeo externo sin pausar, con \texttt{readyState} completo y tiempo de reproducción creciente.
-    \item Respuestas HTTP \texttt{200} para el MPD local tanto mediante \texttt{8080} como mediante \texttt{8081}.
-    \item Cabecera \texttt{X-Cache: HIT} en la entrega del MPD a través de Varnish.
-    \item Solicitudes registradas por Nginx para \texttt{video\_init.mp4} y segmentos \texttt{video\_N.m4s} durante la prueba ClearKey.
-    \item Evento \texttt{PLAYBACK\_STARTED\_WITH\_KNOWN\_KEY} sin endpoint de licencias configurado.
-    \item Evento \texttt{KEY\_EXTRACTION\_BLOCKED}, coherente con la imposibilidad de exportar claves Widevine mediante EME.
+    \item Evento \nolinkurl{LICENSE_REQUEST} dirigido a \nolinkurl{/license/no_auth} desde un cliente sin sesión.
+    \item Respuestas binarias de licencia de 714 y 1229 bytes, seguidas de \nolinkurl{PLAYBACK_STARTED}.
+    \item Elemento de vídeo externo sin pausar, con \nolinkurl{readyState} completo y tiempo de reproducción creciente.
+    \item Respuestas HTTP \nolinkurl{200} para el MPD local tanto mediante \nolinkurl{8080} como mediante \nolinkurl{8081}.
+    \item Cabecera \nolinkurl{X-Cache: HIT} en la entrega del MPD a través de Varnish.
+    \item Solicitudes registradas por Nginx para \nolinkurl{video_init.mp4} y segmentos \nolinkurl{video_N.m4s} durante la prueba ClearKey.
+    \item Evento \nolinkurl{PLAYBACK_STARTED_WITH_KNOWN_KEY} sin endpoint de licencias configurado.
+    \item Evento \nolinkurl{KEY_EXTRACTION_BLOCKED}, coherente con la imposibilidad de exportar claves Widevine mediante EME.
 \end{itemize}
 
 La Figura~\ref{fig:fase0-flujo-oficial} documenta el comportamiento de referencia del sistema. El usuario autorizado aparece identificado en el cliente oficial, los dos activos figuran como permitidos y el reproductor muestra el contenido Widevine en curso. Esta prueba establece la línea base frente a la que se compara el acceso no autorizado.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.96\textwidth]{figuras/fase0-flujo-oficial-widevine.png}
     \caption{Reproducción del activo Widevine desde el cliente oficial con un usuario autorizado.}
     \label{fig:fase0-flujo-oficial}
 \end{figure}
 
-La evidencia central de la auditoría se muestra en la Figura~\ref{fig:fase0-bypass-no-auth}. El laboratorio externo utiliza directamente el endpoint \texttt{/license/no\_auth}, obtiene dos respuestas binarias de licencia y alcanza el evento \texttt{PLAYBACK\_STARTED} sin que exista una sesión de usuario. La imagen conserva simultáneamente la reproducción y el registro de eventos, por lo que permite relacionar el resultado visible con la ruta empleada.
+La evidencia central de la auditoría se muestra en la Figura~\ref{fig:fase0-bypass-no-auth}. El laboratorio externo utiliza directamente el endpoint \nolinkurl{/license/no_auth}, obtiene dos respuestas binarias de licencia y alcanza el evento \nolinkurl{PLAYBACK_STARTED} sin que exista una sesión de usuario. La imagen conserva simultáneamente la reproducción y el registro de eventos, por lo que permite relacionar el resultado visible con la ruta empleada.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.82\textwidth]{figuras/fase0-bypass-widevine-no-auth.png}
     \caption{Reproducción Widevine desde el laboratorio externo mediante el endpoint de licencia sin autenticación.}
@@ -210,7 +210,7 @@ La evidencia central de la auditoría se muestra en la Figura~\ref{fig:fase0-byp
 
 Por último, la Figura~\ref{fig:fase0-clearkey} recoge la prueba ClearKey. El reproductor utiliza el MPD, el KID y una clave generada exclusivamente para el laboratorio, e inicia el vídeo sin configurar un servidor de licencias. Esta demostración no representa una extracción de claves Widevine; ilustra el impacto que tendría una clave ya conocida fuera del perímetro del DRM.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.90\textwidth]{figuras/fase0-clearkey-sin-licencia.png}
     \caption{Reproducción del activo CENC local con una clave ClearKey conocida y sin servidor de licencias.}
@@ -223,7 +223,7 @@ Para asegurar la trazabilidad, las pruebas principales se han conservado en el r
 
 Los resultados confirman que Widevine cumple el cometido evaluado dentro del CDM: el navegador identifica el sistema de claves, genera un \textit{challenge}, procesa una licencia binaria y reproduce el contenido cifrado sin exponer la clave a JavaScript. La auditoría no ha evidenciado una ruptura criptográfica de Widevine ni un método de extracción de claves. La debilidad se encuentra en la política que decide quién puede alcanzar el servicio de licencia y bajo qué contexto.
 
-La ruta \texttt{/license/no\_auth} demuestra que una licencia técnicamente válida puede ser emitida dentro de una reproducción ilegítima para la plataforma. Del mismo modo, el acceso directo al origen muestra que el cifrado no evita el consumo de ancho de banda ni el uso de la infraestructura por terceros. Finalmente, la ausencia de sesiones y concurrencia permite que credenciales válidas se utilicen de una forma incompatible con la política de negocio sin que el DRM perciba ninguna anomalía.
+La ruta \nolinkurl{/license/no_auth} demuestra que una licencia técnicamente válida puede ser emitida dentro de una reproducción ilegítima para la plataforma. Del mismo modo, el acceso directo al origen muestra que el cifrado no evita el consumo de ancho de banda ni el uso de la infraestructura por terceros. Finalmente, la ausencia de sesiones y concurrencia permite que credenciales válidas se utilicen de una forma incompatible con la política de negocio sin que el DRM perciba ninguna anomalía.
 
 La demostración ClearKey establece otro límite: ningún servidor de licencias puede revocar una clave que ya se encuentra fuera de su perímetro de control. En un sistema real, la robustez del CDM, la rotación de claves, las políticas de licencia y mecanismos complementarios como \textit{watermarking} ayudan a reducir el impacto, pero no convierten al cliente en una frontera absoluta. La literatura sobre Widevine L3 confirma además que el nivel de seguridad del dispositivo condiciona fuertemente la resistencia del extremo cliente \cite{patat2022,rafi2023mobiledrm}.
 

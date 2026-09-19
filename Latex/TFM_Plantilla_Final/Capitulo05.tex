@@ -8,7 +8,7 @@ Este capítulo presenta las decisiones de diseño de ambas fases. La implementac
 
 \section{Objetivos de la arquitectura defensiva}
 
-La propuesta parte de cinco requisitos derivados directamente de los hallazgos F0-01 a F0-05. En primer lugar, todo camino capaz de entregar el manifiesto, el contenido local o una licencia debe exigir autorización; eliminar la ruta \texttt{/license/no\_auth} no sería suficiente si permaneciera otro acceso equivalente. En segundo lugar, el origen y el servidor de licencias no deben estar publicados directamente en el anfitrión. En tercer lugar, la identidad autenticada debe transformarse en una sesión de reproducción específica y efímera. En cuarto lugar, las peticiones deben vincularse a cuenta, dispositivo, instancia de cliente, activo y sesión, de modo que una credencial válida para un contexto no pueda trasladarse sin más a otro. Finalmente, el sistema debe conservar señales suficientes para detectar patrones anómalos y revocar el acceso.
+La propuesta parte de cinco requisitos derivados directamente de los hallazgos F0-01 a F0-05. En primer lugar, todo camino capaz de entregar el manifiesto, el contenido local o una licencia debe exigir autorización; eliminar la ruta \nolinkurl{/license/no_auth} no sería suficiente si permaneciera otro acceso equivalente. En segundo lugar, el origen y el servidor de licencias no deben estar publicados directamente en el anfitrión. En tercer lugar, la identidad autenticada debe transformarse en una sesión de reproducción específica y efímera. En cuarto lugar, las peticiones deben vincularse a cuenta, dispositivo, instancia de cliente, activo y sesión, de modo que una credencial válida para un contexto no pueda trasladarse sin más a otro. Finalmente, el sistema debe conservar señales suficientes para detectar patrones anómalos y revocar el acceso.
 
 Estos requisitos se traducen en tres propiedades verificables. La primera es \emph{consistencia}: manifiesto, contenido, heartbeat y licencia deben referirse a la misma sesión. La segunda es \emph{temporalidad}: el permiso de reproducción debe caducar si el cliente deja de mantener la sesión. La tercera es \emph{capacidad de respuesta}: una cuenta o dispositivo bloqueado no debe poder continuar utilizando una credencial emitida con anterioridad.
 
@@ -20,7 +20,7 @@ La defensa en profundidad se aplica como una composición de capas con responsab
 
 La Figura~\ref{fig:arquitectura-defensa-capas} resume esta distribución. Fase~1 concentra la prevención: elimina el bypass, protege manifiesto, contenido local y licencia, y limita la concurrencia. Fase~2 incorpora memoria y respuesta: registra eventos, mantiene contadores, calcula riesgo y aplica bloqueos. Widevine continúa ocupándose del procesamiento de la licencia y de la protección de las claves dentro del CDM; las capas anteriores determinan si el flujo que llega hasta él es legítimo.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.98\textwidth]{figuras/arquitectura-defensa-capas.png}
     \caption{Capas de la arquitectura defensiva y responsabilidades de Fase~1 y Fase~2.}
@@ -48,13 +48,13 @@ CORS y HTTP permisivos & Orígenes web restringidos; TLS reservado al despliegue
 
 \section{Diseño del acceso protegido a manifiestos y licencias}
 
-La Fase~0 permitía obtener el MPD y alcanzar el proxy Widevine mediante caminos que no compartían una política común. La propuesta unifica ambos recursos sensibles detrás del \textit{control-plane}. El cliente ya no recibe directamente el manifiesto público como configuración de reproducción, sino una URL local de la forma \texttt{/manifest/:assetId}. De igual modo, el único endpoint de licencia expuesto es \texttt{/license}; la ruta \texttt{no\_auth} desaparece del perímetro.
+La Fase~0 permitía obtener el MPD y alcanzar el proxy Widevine mediante caminos que no compartían una política común. La propuesta unifica ambos recursos sensibles detrás del \textit{control-plane}. El cliente ya no recibe directamente el manifiesto público como configuración de reproducción, sino una URL local de la forma \nolinkurl{/manifest/:assetId}. De igual modo, el único endpoint de licencia expuesto es \nolinkurl{/license}; la ruta \nolinkurl{no_auth} desaparece del perímetro.
 
-Esta decisión no convierte el MPD en una credencial secreta. Su función es asegurar que la plataforma compruebe el contexto antes de entregar la descripción de la presentación y de iniciar el flujo EME. En el activo Widevine público, los segmentos continúan alojados en la infraestructura de demostración de Shaka. Para los activos locales, la ruta \texttt{/content/*} aplica además una relación entre el activo del token y el prefijo permitido del origen.
+Esta decisión no convierte el MPD en una credencial secreta. Su función es asegurar que la plataforma compruebe el contexto antes de entregar la descripción de la presentación y de iniciar el flujo EME. En el activo Widevine público, los segmentos continúan alojados en la infraestructura de demostración de Shaka. Para los activos locales, la ruta \nolinkurl{/content/*} aplica además una relación entre el activo del token y el prefijo permitido del origen.
 
 \subsection{Interceptación}
 
-Varnish constituye el único punto de entrada hacia el plano de control. Rechaza rutas no contempladas por la fase, exige la cabecera \texttt{Authorization} en manifiesto, contenido, licencia, heartbeat y parada de sesión, y genera un identificador de petición. Además, sustituye cualquier \texttt{X-Forwarded-For} aportado por el cliente por la dirección observada en la conexión. Con ello se evita que una señal de red utilizada para correlación pueda ser elegida libremente desde el navegador.
+Varnish constituye el único punto de entrada hacia el plano de control. Rechaza rutas no contempladas por la fase, exige la cabecera \nolinkurl{Authorization} en manifiesto, contenido, licencia, heartbeat y parada de sesión, y genera un identificador de petición. Además, sustituye cualquier \nolinkurl{X-Forwarded-For} aportado por el cliente por la dirección observada en la conexión. Con ello se evita que una señal de red utilizada para correlación pueda ser elegida libremente desde el navegador.
 
 La interceptación también se produce en Shaka Player. El cliente añade el token de reproducción y las cabeceras de sesión, dispositivo e instancia a las solicitudes protegidas de manifiesto, contenido local y licencia. Se mantiene así una política común sobre recursos que Fase~0 trataba de manera independiente.
 
@@ -64,7 +64,7 @@ El \textit{control-plane} valida primero la firma y expiración de la credencial
 
 La Figura~\ref{fig:flujo-reproduccion-protegida} representa el flujo completo. La autenticación genera una credencial de acceso; esta permite crear una sesión y obtener una credencial de reproducción de corta duración. Solo la segunda se utiliza para solicitar el MPD y la licencia. El heartbeat renueva el permiso mientras la sesión permanece activa.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.98\textwidth]{figuras/flujo-reproduccion-protegida.png}
     \caption{Secuencia de autenticación, sesión, manifiesto y licencia en las fases endurecidas.}
@@ -83,7 +83,7 @@ Las decisiones principales producen respuestas diferenciadas: ausencia o alterac
 
 La protección del servidor de licencias no basta cuando una clave ya ha salido del entorno previsto. En ese escenario, un tercero puede intentar obtener el MPD y los segmentos cifrados para reproducirlos en otro cliente o utilizarlos como fuente de un servicio de \textit{restreaming}. Por este motivo, el activo CENC local se publica en las fases endurecidas mediante el mismo plano autorizado: tanto el manifiesto como cada objeto de contenido exigen token, sesión, activo e instancia coherentes.
 
-CORS se conserva como una limitación adicional para navegadores con un origen no permitido, pero no se considera un mecanismo de autenticación. Un cliente nativo o un backend IPTV no está obligado a aplicar la política del navegador y, si dispone de una sesión válida, puede realizar las solicitudes directamente. El control efectivo reside, por tanto, en la validación de servidor y no en la cabecera \texttt{Origin}.
+CORS se conserva como una limitación adicional para navegadores con un origen no permitido, pero no se considera un mecanismo de autenticación. Un cliente nativo o un backend IPTV no está obligado a aplicar la política del navegador y, si dispone de una sesión válida, puede realizar las solicitudes directamente. El control efectivo reside, por tanto, en la validación de servidor y no en la cabecera \nolinkurl{Origin}.
 
 Existe además un caso límite deliberadamente aceptado. Una única sesión legítima que presente un token vigente y la clave conocida puede descargar y reproducir un canal sin solicitar una nueva licencia. Bloquearla de forma inmediata produciría falsos positivos ante licencias ya disponibles en el dispositivo. Fase~2 trata la combinación de manifiesto y tres objetos de contenido sin petición de licencia como una señal heurística: añade 20 puntos una sola vez por sesión, pero no genera por sí sola un ban. La concurrencia, el cruce de activo, la copia desde otra instancia y el uso posterior a la parada continúan siendo rechazados de forma independiente.
 
@@ -91,7 +91,7 @@ Existe además un caso límite deliberadamente aceptado. Una única sesión leg�
 
 \subsection{Credenciales de acceso y reproducción}
 
-La arquitectura utiliza dos clases de credencial. El token de acceso representa la autenticación de la cuenta e incluye dispositivo, plan, permisos y, en Fase~2, roles. El token de reproducción representa una única sesión e incorpora cuenta, dispositivo, activo, \texttt{sessionId}, \texttt{clientInstanceId} y ámbitos para manifiesto, contenido, licencia y heartbeat.
+La arquitectura utiliza dos clases de credencial. El token de acceso representa la autenticación de la cuenta e incluye dispositivo, plan, permisos y, en Fase~2, roles. El token de reproducción representa una única sesión e incorpora cuenta, dispositivo, activo, \nolinkurl{sessionId}, \nolinkurl{clientInstanceId} y ámbitos para manifiesto, contenido, licencia y heartbeat.
 
 Ambas credenciales se firman y disponen de expiración. El formato se ha simplificado para el laboratorio porque el aspecto evaluado no es un estándar concreto de identidad, sino la separación de privilegios, la vinculación con el contexto de reproducción y la posibilidad de revocar el acceso.
 
@@ -119,11 +119,11 @@ Fase~1 mantiene este estado en memoria. Fase~2 lo conserva en Redis, lo que perm
 
 La dirección observada por Varnish se asocia a los eventos de autenticación y creación de sesión. Fase~2 mantiene durante diez minutos el conjunto de IP recientes por cuenta y lo utiliza como una señal de riesgo. El dispositivo y la instancia permanecen en el token y en la sesión, por lo que trasladar únicamente la credencial y modificar una cabecera no produce un contexto coherente.
 
-Esta correlación no equivale a afirmar que cada IP identifica una persona ni que el \texttt{deviceId} sea imposible de copiar. La defensa surge de combinar señales y de repetir la validación, no de confiar de manera absoluta en un único atributo controlado parcialmente por el cliente.
+Esta correlación no equivale a afirmar que cada IP identifica una persona ni que el \nolinkurl{deviceId} sea imposible de copiar. La defensa surge de combinar señales y de repetir la validación, no de confiar de manera absoluta en un único atributo controlado parcialmente por el cliente.
 
 \subsection{Expiración y finalización}
 
-La sesión puede terminar de tres maneras. La aplicación puede detenerla explícitamente mediante \texttt{/playback/stop}; puede expirar al superar la gracia sin heartbeat; o puede quedar inutilizable al aparecer un ban aplicable. La separación entre estado de sesión y token permite que conservar una credencial no sea suficiente para restaurar ninguna de estas situaciones.
+La sesión puede terminar de tres maneras. La aplicación puede detenerla explícitamente mediante \nolinkurl{/playback/stop}; puede expirar al superar la gracia sin heartbeat; o puede quedar inutilizable al aparecer un ban aplicable. La separación entre estado de sesión y token permite que conservar una credencial no sea suficiente para restaurar ninguna de estas situaciones.
 
 \section{Detección de anomalías}
 
@@ -145,7 +145,7 @@ La correlación se realiza por cuenta, dispositivo, sesión e IP observada. Cada
 
 La Figura~\ref{fig:flujo-deteccion-respuesta} resume el recorrido desde la señal hasta la respuesta. Redis mantiene el estado intermedio y el plano administrativo permanece separado del plano de reproducción, de modo que un operador pueda inspeccionar o retirar un bloqueo sin depender de que el dispositivo bloqueado siga autorizado.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.98\textwidth]{figuras/flujo-deteccion-respuesta.png}
     \caption{Flujo de eventos, riesgo y respuesta activa en Fase~2.}
@@ -162,7 +162,7 @@ Los bans son temporales y contienen motivo, creador, instante de creación y exp
 
 \subsection{Revocación y recuperación}
 
-El sistema diferencia el plano de reproducción del plano administrativo. Los endpoints de observabilidad y gestión requieren un token de acceso con rol \texttt{admin}, pero no dependen de que el dispositivo mantenga permiso para reproducir. Así se evita que aplicar un ban deje al operador sin capacidad para observarlo o retirarlo.
+El sistema diferencia el plano de reproducción del plano administrativo. Los endpoints de observabilidad y gestión requieren un token de acceso con rol \nolinkurl{admin}, pero no dependen de que el dispositivo mantenga permiso para reproducir. Así se evita que aplicar un ban deje al operador sin capacidad para observarlo o retirarlo.
 
 La revocación no borra la evidencia: la creación y la retirada producen eventos separados. Una vez eliminado el ban, el cliente debe volver a superar la validación y renovar el token de reproducción antes de continuar. Esta recuperación explícita permite demostrar que el bloqueo no consiste únicamente en deshabilitar un botón de la interfaz.
 

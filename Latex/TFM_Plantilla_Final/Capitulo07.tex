@@ -4,7 +4,7 @@
 
 En este capítulo se ha llevado a cabo una evaluación comparativa de la línea base y de las dos etapas de mejora. La pregunta experimental no se ha limitado a comprobar si Widevine permite la reproducción, sino que ha tratado de determinar qué ocurre cuando una petición abandona el flujo legítimo, si la decisión queda asociada a una sesión y qué respuesta ofrece el sistema cuando el comportamiento se repite. Para evitar que la descripción de la implementación sustituya a la evidencia, los resultados se han obtenido mediante una batería automatizada, reproducciones reales en el navegador, capturas PCAP y exportaciones del estado de Redis.
 
-La ejecución final ha comprendido una batería general de 65 comprobaciones funcionales: 12 sobre Fase~0, 21 sobre Fase~1 y 32 sobre Fase~2. Todas han producido el resultado esperado. Posteriormente se ha ejecutado una batería complementaria de 27 comprobaciones, centrada en Key Leak y CDN leeching, con 3 casos en Fase~0, 11 en Fase~1 y 13 en Fase~2. El resultado agregado ha sido de 92 casos superados sobre 92. Las 240 observaciones temporales originales, con 20 repeticiones por combinación de fase y operación, se han mantenido sin cambios porque los nuevos escenarios evalúan controles distintos y no alteran esa comparación. Los datos originales se han conservado en \texttt{evidencias}, junto con los scripts de repetición, las capturas, los logs, los resúmenes HTTP sin tokens y las huellas SHA-256.
+La ejecución final ha comprendido una batería general de 65 comprobaciones funcionales: 12 sobre Fase~0, 21 sobre Fase~1 y 32 sobre Fase~2. Todas han producido el resultado esperado. Posteriormente se ha ejecutado una batería complementaria de 27 comprobaciones, centrada en Key Leak y CDN leeching, con 3 casos en Fase~0, 11 en Fase~1 y 13 en Fase~2. El resultado agregado ha sido de 92 casos superados sobre 92. Las 240 observaciones temporales originales, con 20 repeticiones por combinación de fase y operación, se han mantenido sin cambios porque los nuevos escenarios evalúan controles distintos y no alteran esa comparación. Los datos originales se han conservado en \nolinkurl{evidencias}, junto con los scripts de repetición, las capturas, los logs, los resúmenes HTTP sin tokens y las huellas SHA-256.
 
 \section{Escenarios de evaluación}
 
@@ -22,7 +22,7 @@ La Tabla~\ref{tab:escenarios-evaluacion} resume la matriz. El símbolo ``---'' i
 \midrule
 Usuario autorizado & Reproducción permitida & Reproducción permitida & Reproducción permitida \\
 Usuario sin \textit{entitlement} & Configuración 403 & Sesión 403 & Sesión 403 \\
-Ruta \texttt{license/no\_auth} & Disponible & 401/404 & 401/404 \\
+Ruta \nolinkurl{license/no_auth} & Disponible & 401/404 & 401/404 \\
 Origen y licencia internos & Puertos publicados & Sin publicación & Sin publicación \\
 Token ausente o alterado & Solo controla ruta oficial & 401 & 401 \\
 Activo o sesión distintos & Sin sesión de playback & 403/409 & 403/409 \\
@@ -37,11 +37,11 @@ Recuperación administrativa & --- & --- & Retirada de ban \\
 \end{tabularx}
 \end{table}
 
-Se emplearon dos cuentas: una con acceso a \texttt{sintel-widevine} y \texttt{local-cenc-clearkey}, y otra sin activos permitidos. En las fases endurecidas cada login incluyó un \texttt{deviceId} y cada sesión un \texttt{clientInstanceId}; la sesión resultante se utilizó para manifest, heartbeat, contenido y licencia. Las pruebas negativas alteraron una sola condición cada vez: credencial, activo, identificador de sesión, instancia o estado de la reproducción.
+Se emplearon dos cuentas: una con acceso a \nolinkurl{sintel-widevine} y \nolinkurl{local-cenc-clearkey}, y otra sin activos permitidos. En las fases endurecidas cada login incluyó un \nolinkurl{deviceId} y cada sesión un \nolinkurl{clientInstanceId}; la sesión resultante se utilizó para manifest, heartbeat, contenido y licencia. Las pruebas negativas alteraron una sola condición cada vez: credencial, activo, identificador de sesión, instancia o estado de la reproducción.
 
-La evidencia de red se ha obtenido dentro del espacio de red del contenedor CDN. En la batería general de Fase~1 se han conservado 62 paquetes que contienen 17 solicitudes y 17 respuestas HTTP. En Fase~2 se han generado dos PCAP: 111 paquetes para concurrencia y 83 para fallos de autenticación. El archivo PCAPNG resultante de su agregación contiene 194 paquetes. La ampliación de CDN leeching se ha capturado de forma independiente: 174 paquetes con 14 solicitudes y 14 respuestas en Fase~1, y 220 paquetes con 18 solicitudes y 18 respuestas en Fase~2. Los resúmenes JSON se han generado con TShark sin exportar \texttt{Authorization}; los PCAP brutos sí pueden contener tokens efímeros del laboratorio. Al igual que en el Capítulo~4, no se ha intentado interpretar una licencia Widevine ni obtener claves a partir de la captura.
+La evidencia de red se ha obtenido dentro del espacio de red del contenedor CDN. En la batería general de Fase~1 se han conservado 62 paquetes que contienen 17 solicitudes y 17 respuestas HTTP. En Fase~2 se han generado dos PCAP: 111 paquetes para concurrencia y 83 para fallos de autenticación. El archivo PCAPNG resultante de su agregación contiene 194 paquetes. La ampliación de CDN leeching se ha capturado de forma independiente: 174 paquetes con 14 solicitudes y 14 respuestas en Fase~1, y 220 paquetes con 18 solicitudes y 18 respuestas en Fase~2. Los resúmenes JSON se han generado con TShark sin exportar \nolinkurl{Authorization}; los PCAP brutos sí pueden contener tokens efímeros del laboratorio. Al igual que en el Capítulo~4, no se ha intentado interpretar una licencia Widevine ni obtener claves a partir de la captura.
 
-Durante la primera ejecución se ha detectado una desviación relevante. Se ha comprobado que Fase~2 no contrastaba la cabecera \texttt{X-Playback-Session-Id} en \texttt{/license}; en una prueba con una sesión distinta, la petición ha alcanzado el proxy interno y ha finalizado con un HTTP~500. La suite inicial ha superado 64 de los 65 casos. A partir de este resultado, se ha añadido la comprobación antes del reenvío y se ha repetido la batería completa: la misma solicitud ha pasado a devolver \texttt{409 SESSION\_MISMATCH} y el resultado final ha sido de 65 casos superados sobre 65. La incidencia y ambas observaciones se conservan en \texttt{evidencias/resultados/incidencia\_binding\_licencia\_fase2.json}.
+Durante la primera ejecución se ha detectado una desviación relevante. Se ha comprobado que Fase~2 no contrastaba la cabecera \nolinkurl{X-Playback-Session-Id} en \nolinkurl{/license}; en una prueba con una sesión distinta, la petición ha alcanzado el proxy interno y ha finalizado con un HTTP~500. La suite inicial ha superado 64 de los 65 casos. A partir de este resultado, se ha añadido la comprobación antes del reenvío y se ha repetido la batería completa: la misma solicitud ha pasado a devolver \nolinkurl{409 SESSION_MISMATCH} y el resultado final ha sido de 65 casos superados sobre 65. La incidencia y ambas observaciones se conservan en \nolinkurl{evidencias/resultados/incidencia_binding_licencia_fase2.json}.
 
 \section{Métricas utilizadas}
 
@@ -51,7 +51,7 @@ La duración HTTP se ha medido desde el inicio de la solicitud hasta la lectura 
 
 \subsection{Tiempo de respuesta}
 
-La Tabla~\ref{tab:latencias-evaluacion} presenta mediana y percentil 95. En Fase~0, ``autorizar reproducción'' corresponde a \texttt{/playback/config}; en las fases restantes corresponde a crear \texttt{/playback/session}. Manifest, heartbeat y parada no tienen equivalente en la línea base porque Fase~0 no mantiene una sesión de reproducción diferenciada.
+La Tabla~\ref{tab:latencias-evaluacion} presenta mediana y percentil 95. En Fase~0, ``autorizar reproducción'' corresponde a \nolinkurl{/playback/config}; en las fases restantes corresponde a crear \nolinkurl{/playback/session}. Manifest, heartbeat y parada no tienen equivalente en la línea base porque Fase~0 no mantiene una sesión de reproducción diferenciada.
 
 \begin{table}[H]
 \centering
@@ -85,19 +85,19 @@ El manifest ha presentado una variabilidad mayor. En Fase~2 se ha obtenido una m
 
 \subsection{Número de accesos bloqueados}
 
-Se han contabilizado únicamente las respuestas 4xx esperadas; un error 5xx se consideraría un fallo de la prueba. En Fase~0 se han registrado tres rechazos válidos en su camino oficial: credenciales incorrectas, usuario sin permiso y licencia oficial sin token. Sin embargo, el origen y la ruta alternativa de licencia se han mantenido accesibles. El PCAP del bypass conserva dos \texttt{POST /license/no\_auth} con HTTP~200 sin login ni configuración previa.
+Se han contabilizado únicamente las respuestas 4xx esperadas; un error 5xx se consideraría un fallo de la prueba. En Fase~0 se han registrado tres rechazos válidos en su camino oficial: credenciales incorrectas, usuario sin permiso y licencia oficial sin token. Sin embargo, el origen y la ruta alternativa de licencia se han mantenido accesibles. El PCAP del bypass conserva dos \nolinkurl{POST /license/no_auth} con HTTP~200 sin login ni configuración previa.
 
 En Fase~1 se han registrado 14 rechazos esperados y en Fase~2, 17. La cifra mayor no significa por sí sola que Fase~2 sea ``un 21\% más segura'', pues contiene tres escenarios adicionales. Su significado es funcional: todas las variantes negativas de las fases endurecidas han finalizado con 401, 403, 404 o 409, sin errores 5xx en la regresión final de ambas fases. Entre ellas se encuentran el token alterado, el activo distinto, la sesión distinta, el contenido no asociado, la ruta heredada y el token posterior a la parada.
 
 \subsection{Detección de abuso}
 
-El rechazo de concurrencia permite distinguir entre prevención y detección. En Fase~1 se ha obtenido un 409 ante una segunda sesión, pero no se ha conservado ninguna puntuación. En Fase~2 se ha mantenido una sesión válida y se han enviado cinco solicitudes adicionales. Las cinco han devuelto \texttt{CONCURRENCY\_LIMIT}; el score observado después de cada una ha sido 0, 25, 50, 75 y 100. El primer rechazo únicamente ha iniciado el contador y los cuatro siguientes han añadido 25 puntos. Al alcanzar los 100 puntos, se ha creado un ban de cuenta de 30 minutos con la razón \texttt{AUTO\_BAN:REPEATED\_CONCURRENCY\_VIOLATION}.
+El rechazo de concurrencia permite distinguir entre prevención y detección. En Fase~1 se ha obtenido un 409 ante una segunda sesión, pero no se ha conservado ninguna puntuación. En Fase~2 se ha mantenido una sesión válida y se han enviado cinco solicitudes adicionales. Las cinco han devuelto \nolinkurl{CONCURRENCY_LIMIT}; el score observado después de cada una ha sido 0, 25, 50, 75 y 100. El primer rechazo únicamente ha iniciado el contador y los cuatro siguientes han añadido 25 puntos. Al alcanzar los 100 puntos, se ha creado un ban de cuenta de 30 minutos con la razón \nolinkurl{AUTO_BAN:REPEATED_CONCURRENCY_VIOLATION}.
 
-La exportación de Redis conserva cinco eventos \texttt{playback.concurrency\_rejected}, cuatro \texttt{risk.incremented}, un \texttt{ban.created}, un \texttt{ban.cleared} y la parada final. Mientras el ban se ha mantenido activo, el manifest ha respondido con un 401. La Figura~\ref{fig:fase2-laboratorio-bloqueo}, incluida en el capítulo anterior, muestra este estado; el PCAP registra seis \texttt{POST /playback/session}: una creación 201 y cinco conflictos 409.
+La exportación de Redis conserva cinco eventos \nolinkurl{playback.concurrency_rejected}, cuatro \nolinkurl{risk.incremented}, un \nolinkurl{ban.created}, un \nolinkurl{ban.cleared} y la parada final. Mientras el ban se ha mantenido activo, el manifest ha respondido con un 401. La Figura~\ref{fig:fase2-laboratorio-bloqueo}, incluida en el capítulo anterior, muestra este estado; el PCAP registra seis \nolinkurl{POST /playback/session}: una creación 201 y cinco conflictos 409.
 
-En el segundo escenario se han enviado ocho contraseñas incorrectas desde el mismo dispositivo. Todas han recibido un 401, tras lo cual se ha creado un ban \texttt{AUTH\_FAILURE\_BURST} de 15 minutos y el manifest posterior ha quedado rechazado. Al tratarse de una respuesta directa sobre el dispositivo, el score de la cuenta se ha mantenido en cero. La Figura~\ref{fig:evaluacion-ban-dispositivo} muestra el resultado visible y la secuencia registrada.
+En el segundo escenario se han enviado ocho contraseñas incorrectas desde el mismo dispositivo. Todas han recibido un 401, tras lo cual se ha creado un ban \nolinkurl{AUTH_FAILURE_BURST} de 15 minutos y el manifest posterior ha quedado rechazado. Al tratarse de una respuesta directa sobre el dispositivo, el score de la cuenta se ha mantenido en cero. La Figura~\ref{fig:evaluacion-ban-dispositivo} muestra el resultado visible y la secuencia registrada.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.98\textwidth]{figuras/evaluacion-fase2-ban-dispositivo.png}
     \caption{Evaluación de Fase~2 tras ocho fallos de autenticación y activación del ban de dispositivo.}
@@ -116,7 +116,7 @@ El coste funcional se ha mantenido reducido en términos absolutos: ninguna medi
 
 Fase~0 ha superado sus comprobaciones legítimas. El usuario autorizado ha reproducido correctamente el contenido Widevine y el activo CENC local, mientras que el usuario sin \textit{entitlement} ha recibido un 403 al solicitar la configuración. La ruta oficial de licencia ha devuelto un 401 en ausencia de token. Por tanto, la línea base no es un sistema sin controles, sino un sistema cuyos controles no cubren todos los caminos equivalentes.
 
-La principal diferencia se ha evidenciado al abandonar el cliente oficial. El origen ha respondido con un HTTP~200 en \texttt{localhost:8081} y el servidor de licencias ha publicado su health en \texttt{localhost:8082}. Una solicitud binaria artificial a \texttt{/license/no\_auth} ha alcanzado la lógica de proxy sin recibir un 401, 403 o 404; el challenge inválido ha finalizado con un 500 y la respuesta ha conservado \texttt{X-Phase0-Weakness}. Más relevante aún, el PCAP de reproducción real ya analizado en el Capítulo~4 contiene una preflight y dos \texttt{POST /license/no\_auth} con respuesta 200, sin login ni \texttt{/playback/config}. Esta combinación permite evitar la confusión entre una ``ruta alcanzable'' y un ``challenge Widevine válido''.
+La principal diferencia se ha evidenciado al abandonar el cliente oficial. El origen ha respondido con un HTTP~200 en \nolinkurl{localhost:8081} y el servidor de licencias ha publicado su health en \nolinkurl{localhost:8082}. Una solicitud binaria artificial a \nolinkurl{/license/no_auth} ha alcanzado la lógica de proxy sin recibir un 401, 403 o 404; el challenge inválido ha finalizado con un 500 y la respuesta ha conservado \nolinkurl{X-Phase0-Weakness}. Más relevante aún, el PCAP de reproducción real ya analizado en el Capítulo~4 contiene una preflight y dos \nolinkurl{POST /license/no_auth} con respuesta 200, sin login ni \nolinkurl{/playback/config}. Esta combinación permite evitar la confusión entre una ``ruta alcanzable'' y un ``challenge Widevine válido''.
 
 La demostración ClearKey también ha confirmado que el MPD, las inicializaciones y los primeros segmentos podían recuperarse sin URI de licencia cuando la clave de laboratorio era conocida. Este resultado no rompe Widevine; muestra que cifrar el activo no compensa la exposición simultánea del contenido y del material necesario para descifrar otro activo CENC controlado.
 
@@ -126,18 +126,18 @@ En conjunto, Fase~0 ha bloqueado el uso no permitido dentro de la interfaz ofici
 
 Fase~1 ha mantenido la reproducción Widevine real y ha eliminado los caminos alternativos. El PCAP de evaluación contiene el login, la creación de la sesión, el manifest, dos solicitudes de licencia y la parada. Los cuatro casos negativos del laboratorio han producido 401, 401, 409 y 403, como recoge la Figura~\ref{fig:evaluacion-fase1-negativas}. La distribución completa del PCAP ha sido de seis respuestas 200, una 201, seis preflight 204, dos 401, una 403 y una 409.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.98\textwidth]{figuras/evaluacion-fase1-pruebas-negativas.png}
     \caption{Pruebas negativas de Fase~1 con reproducción legítima activa y binding de token, activo y sesión.}
     \label{fig:evaluacion-fase1-negativas}
 \end{figure}
 
-La revisión de la topología ha confirmado que el origen, el servidor de licencias y el plano de control no tienen bindings en el anfitrión. \texttt{/license/no\_auth} ha devuelto un 401 sin credencial y un 404 con un token válido, lo que demuestra que la ruta no se limita a permanecer oculta tras la autenticación, sino que ha desaparecido del backend. Después de detener la sesión, el mismo token de reproducción ha devuelto un 401 al solicitar el manifest.
+La revisión de la topología ha confirmado que el origen, el servidor de licencias y el plano de control no tienen bindings en el anfitrión. \nolinkurl{/license/no_auth} ha devuelto un 401 sin credencial y un 404 con un token válido, lo que demuestra que la ruta no se limita a permanecer oculta tras la autenticación, sino que ha desaparecido del backend. Después de detener la sesión, el mismo token de reproducción ha devuelto un 401 al solicitar el manifest.
 
-Fase~2 ha conservado estos 14 comportamientos preventivos y ha añadido capacidades de administración, detección y recuperación. La cuenta sin \textit{entitlement} tampoco ha podido consultar \texttt{/admin/overview}. Los dos escenarios de abuso han generado los bans esperados y el plano administrativo ha permitido retirarlos sin perder observabilidad. El PCAP de concurrencia ha registrado 35 solicitudes y respuestas HTTP, mientras que el de autenticación ha registrado 25. Los estados JSON contienen, respectivamente, 19 y 18 eventos de servidor.
+Fase~2 ha conservado estos 14 comportamientos preventivos y ha añadido capacidades de administración, detección y recuperación. La cuenta sin \textit{entitlement} tampoco ha podido consultar \nolinkurl{/admin/overview}. Los dos escenarios de abuso han generado los bans esperados y el plano administrativo ha permitido retirarlos sin perder observabilidad. El PCAP de concurrencia ha registrado 35 solicitudes y respuestas HTTP, mientras que el de autenticación ha registrado 25. Los estados JSON contienen, respectivamente, 19 y 18 eventos de servidor.
 
-La corrección de \texttt{/license} durante la campaña refuerza una conclusión metodológica: compartir arquitectura no garantiza que dos fases apliquen exactamente las mismas validaciones. La regresión automatizada descubrió una diferencia que no era visible en la reproducción legítima. Tras la corrección, manifest, contenido y licencia contrastan de forma coherente la sesión indicada por el cliente.
+La corrección de \nolinkurl{/license} durante la campaña refuerza una conclusión metodológica: compartir arquitectura no garantiza que dos fases apliquen exactamente las mismas validaciones. La regresión automatizada descubrió una diferencia que no era visible en la reproducción legítima. Tras la corrección, manifest, contenido y licencia contrastan de forma coherente la sesión indicada por el cliente.
 
 \section{Evaluación de Key Leak y CDN leeching}
 
@@ -145,22 +145,22 @@ La batería complementaria ha separado tres conceptos relacionados, pero no equi
 
 En Fase~0 se ha repetido el acceso al activo CENC utilizado en el Capítulo~4. El manifiesto, la inicialización y un segmento han respondido con HTTP~200 sin token, dejando 138.757 bytes accesibles en la muestra. La captura ya incluida en dicho capítulo demuestra que la clave conocida permite reproducir el activo desde la herramienta externa; esta evidencia se ha reutilizado para no duplicar figuras.
 
-En Fase~1 y Fase~2, la petición del manifiesto y el acceso directo a un segmento sin token han devuelto 401. Cuando la prueba se ha ejecutado desde un origen web no permitido, el servidor ha respondido con HTTP~200 pero ha conservado como \texttt{Access-Control-Allow-Origin} el cliente oficial. El navegador ha bloqueado la lectura por CORS. Este resultado se ha interpretado como contención del navegador, no como autorización: el backend del laboratorio, que simula un cliente IPTV no sujeto a CORS, ha podido completar las mismas solicitudes al aportar un token válido.
+En Fase~1 y Fase~2, la petición del manifiesto y el acceso directo a un segmento sin token han devuelto 401. Cuando la prueba se ha ejecutado desde un origen web no permitido, el servidor ha respondido con HTTP~200 pero ha conservado como \nolinkurl{Access-Control-Allow-Origin} el cliente oficial. El navegador ha bloqueado la lectura por CORS. Este resultado se ha interpretado como contención del navegador, no como autorización: el backend del laboratorio, que simula un cliente IPTV no sujeto a CORS, ha podido completar las mismas solicitudes al aportar un token válido.
 
-El caso positivo ha utilizado una única sesión, una instancia coherente y la clave CENC conocida. En ambas fases endurecidas se han recuperado tres objetos de contenido con HTTP~200, 253.023 bytes en total y ninguna solicitud al endpoint de licencia. El navegador ha reproducido el vídeo. En Fase~1 esta secuencia no ha generado una señal adicional. En Fase~2, después del manifest y del tercer objeto, se ha creado un único evento \texttt{key\_leak.pattern\_detected} y se han añadido 20 puntos con la razón \texttt{POSSIBLE\_KEY\_LEAK\_LICENSE\_BYPASS}. Una cuarta solicitud no ha vuelto a puntuar la misma sesión.
+El caso positivo ha utilizado una única sesión, una instancia coherente y la clave CENC conocida. En ambas fases endurecidas se han recuperado tres objetos de contenido con HTTP~200, 253.023 bytes en total y ninguna solicitud al endpoint de licencia. El navegador ha reproducido el vídeo. En Fase~1 esta secuencia no ha generado una señal adicional. En Fase~2, después del manifest y del tercer objeto, se ha creado un único evento \nolinkurl{key_leak.pattern_detected} y se han añadido 20 puntos con la razón \nolinkurl{POSSIBLE_KEY_LEAK_LICENSE_BYPASS}. Una cuarta solicitud no ha vuelto a puntuar la misma sesión.
 
 La Figura~\ref{fig:fase2-cdn-leeching-positivo} recoge este caso límite. Su aceptación no constituye un defecto accidental del laboratorio: con un token válido y una sola reproducción, el servidor observa un acceso autorizado. La ausencia de licencia resulta sospechosa, pero también podría deberse a una licencia disponible previamente; por ello se ha tratado como señal y no como ban inmediato.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.98\textwidth]{figuras/fase2-cdn-leeching-caso-positivo.png}
     \caption{Reproducción externa en Fase~2 con sesión única, token válido y clave conocida; se han servido segmentos sin licencia y el riesgo ha aumentado en 20 puntos.}
     \label{fig:fase2-cdn-leeching-positivo}
 \end{figure}
 
-Las pruebas de contexto han acotado este resultado. Una segunda sesión de la misma cuenta ha recibido 409; el mismo token presentado con otro \texttt{clientInstanceId}, 401; su aplicación al activo Widevine, 403; y la recuperación de contenido después de detener la sesión, 401. La Figura~\ref{fig:fase2-cdn-leeching-controles} muestra estas respuestas y el bloqueo de CORS observado desde el navegador. La distribución del PCAP de Fase~1 ha sido de siete respuestas 200, una 201, cuatro 401, una 403 y una 409. En Fase~2 se han obtenido once respuestas 200, una 201, cuatro 401, una 403 y una 409; las respuestas 200 adicionales corresponden a la consulta del estado y los eventos de riesgo.
+Las pruebas de contexto han acotado este resultado. Una segunda sesión de la misma cuenta ha recibido 409; el mismo token presentado con otro \nolinkurl{clientInstanceId}, 401; su aplicación al activo Widevine, 403; y la recuperación de contenido después de detener la sesión, 401. La Figura~\ref{fig:fase2-cdn-leeching-controles} muestra estas respuestas y el bloqueo de CORS observado desde el navegador. La distribución del PCAP de Fase~1 ha sido de siete respuestas 200, una 201, cuatro 401, una 403 y una 409. En Fase~2 se han obtenido once respuestas 200, una 201, cuatro 401, una 403 y una 409; las respuestas 200 adicionales corresponden a la consulta del estado y los eventos de riesgo.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.98\textwidth]{figuras/fase2-cdn-leeching-controles.png}
     \caption{Controles de Fase~2 frente a origen web externo, concurrencia, copia entre instancias, cruce de activo y ausencia de token.}
@@ -232,7 +232,7 @@ La primera mejora es la eliminación del bypass. En la línea base, una decisió
 
 La segunda es la reducción de la ventana y el contexto de reutilización. El token de reproducción expira en 90 segundos, se liga a una sesión y a una instancia de cliente, y se renueva mediante heartbeat. Detener la sesión invalida su uso aunque el token todavía sea criptográficamente válido. Activo, cuenta, dispositivo, instancia y sesión se contrastan antes de servir recursos sensibles.
 
-La tercera mejora solo se ha observado en Fase~2. Los rechazos repetidos dejan de ser respuestas independientes y pasan a formar una señal acumulada. Los eventos de Redis han permitido reconstruir la secuencia desde el login hasta \texttt{ban.created}, el rechazo posterior, \texttt{ban.cleared} y \texttt{playback.stopped}. También se ha conservado el consumo de contenido sin licencia como una señal de riesgo única por sesión. Esta trazabilidad constituye la base para la operación y el análisis posterior.
+La tercera mejora solo se ha observado en Fase~2. Los rechazos repetidos dejan de ser respuestas independientes y pasan a formar una señal acumulada. Los eventos de Redis han permitido reconstruir la secuencia desde el login hasta \nolinkurl{ban.created}, el rechazo posterior, \nolinkurl{ban.cleared} y \nolinkurl{playback.stopped}. También se ha conservado el consumo de contenido sin licencia como una señal de riesgo única por sesión. Esta trazabilidad constituye la base para la operación y el análisis posterior.
 
 \subsection{Limitaciones persistentes}
 
@@ -242,7 +242,7 @@ El activo Widevine, su MPD y el servicio CWIP pertenecen a infraestructura públ
 
 Los umbrales de Fase~2 son ilustrativos. No se han calibrado con una población real, falsos positivos conocidos, diversidad geográfica o dispositivos heterogéneos. Redis funciona sin persistencia, replicación ni alta disponibilidad para facilitar el reinicio. Las medidas temporales proceden de un solo equipo, tráfico secuencial y 20 muestras; sirven para comparar este prototipo, no para dimensionar producción.
 
-El \texttt{deviceId} lo genera JavaScript y no constituye una prueba fuerte de identidad de hardware. El watermark es visible, pero no forense. Tampoco se evalúan HDCP, robustez del CDM, seguridad del sistema operativo, captura de pantalla ni compromiso del dispositivo final.
+El \nolinkurl{deviceId} lo genera JavaScript y no constituye una prueba fuerte de identidad de hardware. El watermark es visible, pero no forense. Tampoco se evalúan HDCP, robustez del CDM, seguridad del sistema operativo, captura de pantalla ni compromiso del dispositivo final.
 
 \subsection{Ataques que seguirían siendo posibles}
 
